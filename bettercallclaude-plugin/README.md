@@ -18,7 +18,7 @@ Register the marketplace and install the plugin from within Cowork or Claude Cod
 
 ```
 /plugin marketplace add fedec65/BetterCallClaude_Marketplace
-/plugin install bettercallclaude@fedec65-bettercallclaude-marketplace
+/plugin install bettercallclaude@bettercallclaude-marketplace
 ```
 
 ### Official Marketplace (Coming Soon)

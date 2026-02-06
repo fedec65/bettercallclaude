@@ -14,7 +14,7 @@ From within Cowork or Claude Code, run:
 
 ```
 /plugin marketplace add fedec65/BetterCallClaude_Marketplace
-/plugin install bettercallclaude@fedec65-bettercallclaude-marketplace
+/plugin install bettercallclaude@bettercallclaude-marketplace
 ```
 
 Or clone and install manually:

@@ -1,6 +1,11 @@
 {
-  "name": "BetterCallClaude Marketplace",
-  "description": "Self-hosted marketplace for the BetterCallClaude Swiss Legal Intelligence plugin",
+  "name": "bettercallclaude-marketplace",
+  "owner": {
+    "name": "Federico Cesconi"
+  },
+  "metadata": {
+    "description": "Self-hosted marketplace for the BetterCallClaude Swiss Legal Intelligence plugin"
+  },
   "plugins": [
     {
       "name": "bettercallclaude",
