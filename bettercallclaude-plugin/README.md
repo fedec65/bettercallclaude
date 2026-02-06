@@ -12,25 +12,30 @@ The plugin covers the full spectrum of Swiss legal work: BGE/ATF/DTF precedent r
 
 BetterCallClaude can be installed through three channels.
 
-### Marketplace (when available)
+### From GitHub (Available Now)
 
-```bash
-claude plugin add bettercallclaude
+Register the marketplace and install the plugin from within Claude Code:
+
+```
+/plugin marketplace add fedec65/BetterCallClaude_Marketplace
+/plugin install bettercallclaude@fedec65-bettercallclaude-marketplace
 ```
 
-### Direct from GitHub
+### Official Marketplace (Coming Soon)
 
-```bash
-claude plugin add --from-github fedec65/BetterCallClaude
+Once accepted into the Anthropic official plugin catalog:
+
+```
+/plugin install bettercallclaude@claude-plugins-official
 ```
 
-### Manual installation
+### Manual Installation
 
 Clone the repository and point Claude Code to the plugin directory:
 
 ```bash
-git clone https://github.com/fedec65/BetterCallClaude.git
-cd BetterCallClaude
+git clone https://github.com/fedec65/BetterCallClaude_Marketplace.git
+cd BetterCallClaude_Marketplace
 claude --plugin-dir ./bettercallclaude-plugin
 ```
 
@@ -267,7 +272,7 @@ The privacy system supports three modes:
 
 Federico Cesconi
 
-GitHub: [fedec65/BetterCallClaude](https://github.com/fedec65/BetterCallClaude)
+GitHub: [fedec65/BetterCallClaude_Marketplace](https://github.com/fedec65/BetterCallClaude_Marketplace)
 
 ---
 
