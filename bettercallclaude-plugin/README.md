@@ -1,6 +1,6 @@
-# BetterCallClaude -- Swiss Legal Intelligence Plugin for Claude Code
+# BetterCallClaude -- Swiss Legal Intelligence Plugin for Cowork and Claude Code
 
-BetterCallClaude is a Claude Code plugin that transforms legal research, case strategy, and document drafting for Swiss lawyers. It provides deep integration with Swiss legal databases, multi-lingual analysis across German, French, Italian, and English, and built-in privacy protection for attorney-client privilege.
+BetterCallClaude is a plugin for legal professionals working in Cowork or Claude Code. It transforms legal research, case strategy, and document drafting for Swiss lawyers by providing deep integration with Swiss legal databases, multi-lingual analysis across German, French, Italian, and English, and built-in privacy protection for attorney-client privilege.
 
 The plugin covers the full spectrum of Swiss legal work: BGE/ATF/DTF precedent research, case strategy development with risk assessment, adversarial legal analysis, compliance and data protection advisory, fiscal and corporate law expertise, real estate law, legal drafting with jurisdiction-aware templates, legal translation, and citation verification across all 26 Swiss cantons. Privacy compliance with Anwaltsgeheimnis (Art. 321 StGB) is enforced automatically through a pre-tool-use hook that detects privileged content before it leaves the local environment.
 
@@ -14,7 +14,7 @@ BetterCallClaude can be installed through three channels.
 
 ### From GitHub (Available Now)
 
-Register the marketplace and install the plugin from within Claude Code:
+Register the marketplace and install the plugin from within Cowork or Claude Code:
 
 ```
 /plugin marketplace add fedec65/BetterCallClaude_Marketplace
@@ -263,7 +263,7 @@ The privacy system supports three modes:
 
 ## Requirements
 
-- Claude Code (latest version)
+- Cowork or Claude Code (latest version)
 - Node.js >= 18 (for MCP servers)
 
 ---

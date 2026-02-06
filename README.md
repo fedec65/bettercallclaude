@@ -1,8 +1,8 @@
 # BetterCallClaude Marketplace
 
-**Swiss Legal Intelligence Plugin for Claude Code**
+**Swiss Legal Intelligence Plugin for Cowork and Claude Code**
 
-BetterCallClaude transforms legal research, case strategy, and document drafting for Swiss lawyers. It provides multi-lingual analysis across German, French, Italian, and English, direct integration with Swiss legal databases, and built-in Anwaltsgeheimnis (attorney-client privilege) compliance.
+BetterCallClaude is a plugin built for legal professionals. It transforms legal research, case strategy, and document drafting for Swiss lawyers working in Cowork or Claude Code. The plugin provides multi-lingual analysis across German, French, Italian, and English, direct integration with Swiss legal databases, and built-in Anwaltsgeheimnis (attorney-client privilege) compliance.
 
 **v2.0.0** -- 17 agents, 15 commands, 9 skills, 5 MCP servers.
 
@@ -10,7 +10,7 @@ BetterCallClaude transforms legal research, case strategy, and document drafting
 
 ## Quick Install
 
-From within Claude Code, run:
+From within Cowork or Claude Code, run:
 
 ```
 /plugin marketplace add fedec65/BetterCallClaude_Marketplace
@@ -97,16 +97,25 @@ BetterCallClaude_Marketplace/
 
 ---
 
-## Requirements
+## Compatibility
 
-- Claude Code (latest version)
+| Platform | Support |
+|---|---|
+| **Cowork** | Full support. Designed for legal professionals using Cowork as their daily workspace. |
+| **Claude Code** | Full support. Same plugin format, same commands, same agents. |
+
+The plugin uses Anthropic's shared plugin format and works identically in both environments. No configuration changes needed.
+
+### Requirements
+
+- Cowork or Claude Code (latest version)
 - Node.js >= 18 (for MCP servers)
 
 ---
 
 ## Related
 
-- [BetterCallClaude Framework](https://github.com/fedec65/BetterCallClaude) -- The original Claude Code configuration framework this plugin is based on.
+- [BetterCallClaude Framework](https://github.com/fedec65/BetterCallClaude) -- The original configuration framework this plugin is based on.
 
 ---
 
