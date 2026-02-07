@@ -15528,13 +15528,12 @@ function safeParse2(schema, data) {
   return result;
 }
 function getObjectShape(schema) {
-  var _a, _b;
   if (!schema)
     return void 0;
   let rawShape;
   if (isZ4Schema(schema)) {
     const v4Schema = schema;
-    rawShape = (_b = (_a = v4Schema._zod) === null || _a === void 0 ? void 0 : _a.def) === null || _b === void 0 ? void 0 : _b.shape;
+    rawShape = v4Schema._zod?.def?.shape;
   } else {
     const v3Schema = schema;
     rawShape = v3Schema.shape;
@@ -15544,17 +15543,16 @@ function getObjectShape(schema) {
   if (typeof rawShape === "function") {
     try {
       return rawShape();
-    } catch (_c) {
+    } catch {
       return void 0;
     }
   }
   return rawShape;
 }
 function getLiteralValue(schema) {
-  var _a;
   if (isZ4Schema(schema)) {
     const v4Schema = schema;
-    const def2 = (_a = v4Schema._zod) === null || _a === void 0 ? void 0 : _a.def;
+    const def2 = v4Schema._zod?.def;
     if (def2) {
       if (def2.value !== void 0)
         return def2.value;
@@ -16292,7 +16290,10 @@ var TaskCreationParamsSchema = looseObject({
    */
   pollInterval: number2().optional()
 });
-var RelatedTaskMetadataSchema = looseObject({
+var TaskMetadataSchema = object2({
+  ttl: number2().optional()
+});
+var RelatedTaskMetadataSchema = object2({
   taskId: string2()
 });
 var RequestMetaSchema = looseObject({
@@ -16305,48 +16306,45 @@ var RequestMetaSchema = looseObject({
    */
   [RELATED_TASK_META_KEY]: RelatedTaskMetadataSchema.optional()
 });
-var BaseRequestParamsSchema = looseObject({
-  /**
-   * If specified, the caller is requesting that the receiver create a task to represent the request.
-   * Task creation parameters are now at the top level instead of in _meta.
-   */
-  task: TaskCreationParamsSchema.optional(),
+var BaseRequestParamsSchema = object2({
   /**
    * See [General fields: `_meta`](/specification/draft/basic/index#meta) for notes on `_meta` usage.
    */
   _meta: RequestMetaSchema.optional()
 });
+var TaskAugmentedRequestParamsSchema = BaseRequestParamsSchema.extend({
+  /**
+   * If specified, the caller is requesting task-augmented execution for this request.
+   * The request will return a CreateTaskResult immediately, and the actual result can be
+   * retrieved later via tasks/result.
+   *
+   * Task augmentation is subject to capability negotiation - receivers MUST declare support
+   * for task augmentation of specific request types in their capabilities.
+   */
+  task: TaskMetadataSchema.optional()
+});
+var isTaskAugmentedRequestParams = (value) => TaskAugmentedRequestParamsSchema.safeParse(value).success;
 var RequestSchema = object2({
   method: string2(),
-  params: BaseRequestParamsSchema.optional()
+  params: BaseRequestParamsSchema.loose().optional()
 });
-var NotificationsParamsSchema = looseObject({
+var NotificationsParamsSchema = object2({
   /**
    * See [MCP specification](https://github.com/modelcontextprotocol/modelcontextprotocol/blob/47339c03c143bb4ec01a26e721a1b8fe66634ebe/docs/specification/draft/basic/index.mdx#general-fields)
    * for notes on _meta usage.
    */
-  _meta: object2({
-    /**
-     * If specified, this notification is related to the provided task.
-     */
-    [RELATED_TASK_META_KEY]: optional(RelatedTaskMetadataSchema)
-  }).passthrough().optional()
+  _meta: RequestMetaSchema.optional()
 });
 var NotificationSchema = object2({
   method: string2(),
-  params: NotificationsParamsSchema.optional()
+  params: NotificationsParamsSchema.loose().optional()
 });
 var ResultSchema = looseObject({
   /**
    * See [MCP specification](https://github.com/modelcontextprotocol/modelcontextprotocol/blob/47339c03c143bb4ec01a26e721a1b8fe66634ebe/docs/specification/draft/basic/index.mdx#general-fields)
    * for notes on _meta usage.
    */
-  _meta: looseObject({
-    /**
-     * If specified, this result is related to the provided task.
-     */
-    [RELATED_TASK_META_KEY]: RelatedTaskMetadataSchema.optional()
-  }).optional()
+  _meta: RequestMetaSchema.optional()
 });
 var RequestIdSchema = union([string2(), number2().int()]);
 var JSONRPCRequestSchema = object2({
@@ -16360,12 +16358,12 @@ var JSONRPCNotificationSchema = object2({
   ...NotificationSchema.shape
 }).strict();
 var isJSONRPCNotification = (value) => JSONRPCNotificationSchema.safeParse(value).success;
-var JSONRPCResponseSchema = object2({
+var JSONRPCResultResponseSchema = object2({
   jsonrpc: literal(JSONRPC_VERSION),
   id: RequestIdSchema,
   result: ResultSchema
 }).strict();
-var isJSONRPCResponse = (value) => JSONRPCResponseSchema.safeParse(value).success;
+var isJSONRPCResultResponse = (value) => JSONRPCResultResponseSchema.safeParse(value).success;
 var ErrorCode;
 (function(ErrorCode2) {
   ErrorCode2[ErrorCode2["ConnectionClosed"] = -32e3] = "ConnectionClosed";
@@ -16377,9 +16375,9 @@ var ErrorCode;
   ErrorCode2[ErrorCode2["InternalError"] = -32603] = "InternalError";
   ErrorCode2[ErrorCode2["UrlElicitationRequired"] = -32042] = "UrlElicitationRequired";
 })(ErrorCode || (ErrorCode = {}));
-var JSONRPCErrorSchema = object2({
+var JSONRPCErrorResponseSchema = object2({
   jsonrpc: literal(JSONRPC_VERSION),
-  id: RequestIdSchema,
+  id: RequestIdSchema.optional(),
   error: object2({
     /**
      * The error type that occurred.
@@ -16392,11 +16390,17 @@ var JSONRPCErrorSchema = object2({
     /**
      * Additional information about the error. The value of this member is defined by the sender (e.g. detailed error information, nested errors etc.).
      */
-    data: optional(unknown())
+    data: unknown().optional()
   })
 }).strict();
-var isJSONRPCError = (value) => JSONRPCErrorSchema.safeParse(value).success;
-var JSONRPCMessageSchema = union([JSONRPCRequestSchema, JSONRPCNotificationSchema, JSONRPCResponseSchema, JSONRPCErrorSchema]);
+var isJSONRPCErrorResponse = (value) => JSONRPCErrorResponseSchema.safeParse(value).success;
+var JSONRPCMessageSchema = union([
+  JSONRPCRequestSchema,
+  JSONRPCNotificationSchema,
+  JSONRPCResultResponseSchema,
+  JSONRPCErrorResponseSchema
+]);
+var JSONRPCResponseSchema = union([JSONRPCResultResponseSchema, JSONRPCErrorResponseSchema]);
 var EmptyResultSchema = ResultSchema.strict();
 var CancelledNotificationParamsSchema = NotificationsParamsSchema.extend({
   /**
@@ -16404,7 +16408,7 @@ var CancelledNotificationParamsSchema = NotificationsParamsSchema.extend({
    *
    * This MUST correspond to the ID of a request previously issued in the same direction.
    */
-  requestId: RequestIdSchema,
+  requestId: RequestIdSchema.optional(),
   /**
    * An optional string describing the reason for the cancellation. This MAY be logged or presented to the user.
    */
@@ -16429,7 +16433,15 @@ var IconSchema = object2({
    *
    * If not provided, the client should assume that the icon can be used at any size.
    */
-  sizes: array(string2()).optional()
+  sizes: array(string2()).optional(),
+  /**
+   * Optional specifier for the theme this icon is designed for. `light` indicates
+   * the icon is designed to be used with a light background, and `dark` indicates
+   * the icon is designed to be used with a dark background.
+   *
+   * If not provided, the client should assume the icon can be used with any theme.
+   */
+  theme: _enum(["light", "dark"]).optional()
 });
 var IconsSchema = object2({
   /**
@@ -16465,7 +16477,15 @@ var ImplementationSchema = BaseMetadataSchema.extend({
   /**
    * An optional URL of the website for this implementation.
    */
-  websiteUrl: string2().optional()
+  websiteUrl: string2().optional(),
+  /**
+   * An optional human-readable description of what this implementation does.
+   *
+   * This can be used by clients or servers to provide context about their purpose
+   * and capabilities. For example, a server might describe the types of resources
+   * or tools it provides, while a client might describe its intended use case.
+   */
+  description: string2().optional()
 });
 var FormElicitationCapabilitySchema = intersection(object2({
   applyDefaults: boolean2().optional()
@@ -16481,54 +16501,54 @@ var ElicitationCapabilitySchema = preprocess((value) => {
   form: FormElicitationCapabilitySchema.optional(),
   url: AssertObjectSchema.optional()
 }), record(string2(), unknown()).optional()));
-var ClientTasksCapabilitySchema = object2({
+var ClientTasksCapabilitySchema = looseObject({
   /**
    * Present if the client supports listing tasks.
    */
-  list: optional(object2({}).passthrough()),
+  list: AssertObjectSchema.optional(),
   /**
    * Present if the client supports cancelling tasks.
    */
-  cancel: optional(object2({}).passthrough()),
+  cancel: AssertObjectSchema.optional(),
   /**
    * Capabilities for task creation on specific request types.
    */
-  requests: optional(object2({
+  requests: looseObject({
     /**
      * Task support for sampling requests.
      */
-    sampling: optional(object2({
-      createMessage: optional(object2({}).passthrough())
-    }).passthrough()),
+    sampling: looseObject({
+      createMessage: AssertObjectSchema.optional()
+    }).optional(),
     /**
      * Task support for elicitation requests.
      */
-    elicitation: optional(object2({
-      create: optional(object2({}).passthrough())
-    }).passthrough())
-  }).passthrough())
-}).passthrough();
-var ServerTasksCapabilitySchema = object2({
+    elicitation: looseObject({
+      create: AssertObjectSchema.optional()
+    }).optional()
+  }).optional()
+});
+var ServerTasksCapabilitySchema = looseObject({
   /**
    * Present if the server supports listing tasks.
    */
-  list: optional(object2({}).passthrough()),
+  list: AssertObjectSchema.optional(),
   /**
    * Present if the server supports cancelling tasks.
    */
-  cancel: optional(object2({}).passthrough()),
+  cancel: AssertObjectSchema.optional(),
   /**
    * Capabilities for task creation on specific request types.
    */
-  requests: optional(object2({
+  requests: looseObject({
     /**
      * Task support for tool requests.
      */
-    tools: optional(object2({
-      call: optional(object2({}).passthrough())
-    }).passthrough())
-  }).passthrough())
-}).passthrough();
+    tools: looseObject({
+      call: AssertObjectSchema.optional()
+    }).optional()
+  }).optional()
+});
 var ClientCapabilitiesSchema = object2({
   /**
    * Experimental, non-standard capabilities that the client supports.
@@ -16564,7 +16584,7 @@ var ClientCapabilitiesSchema = object2({
   /**
    * Present if the client supports task creation.
    */
-  tasks: optional(ClientTasksCapabilitySchema)
+  tasks: ClientTasksCapabilitySchema.optional()
 });
 var InitializeRequestParamsSchema = BaseRequestParamsSchema.extend({
   /**
@@ -16594,12 +16614,12 @@ var ServerCapabilitiesSchema = object2({
   /**
    * Present if the server offers any prompt templates.
    */
-  prompts: optional(object2({
+  prompts: object2({
     /**
      * Whether this server supports issuing notifications for changes to the prompt list.
      */
-    listChanged: optional(boolean2())
-  })),
+    listChanged: boolean2().optional()
+  }).optional(),
   /**
    * Present if the server offers any resources to read.
    */
@@ -16625,8 +16645,8 @@ var ServerCapabilitiesSchema = object2({
   /**
    * Present if the server supports task creation.
    */
-  tasks: optional(ServerTasksCapabilitySchema)
-}).passthrough();
+  tasks: ServerTasksCapabilitySchema.optional()
+});
 var InitializeResultSchema = ResultSchema.extend({
   /**
    * The version of the Model Context Protocol that the server wants to use. This may not match the version that the client requested. If the client cannot support this version, it MUST disconnect.
@@ -16642,10 +16662,12 @@ var InitializeResultSchema = ResultSchema.extend({
   instructions: string2().optional()
 });
 var InitializedNotificationSchema = NotificationSchema.extend({
-  method: literal("notifications/initialized")
+  method: literal("notifications/initialized"),
+  params: NotificationsParamsSchema.optional()
 });
 var PingRequestSchema = RequestSchema.extend({
-  method: literal("ping")
+  method: literal("ping"),
+  params: BaseRequestParamsSchema.optional()
 });
 var ProgressSchema = object2({
   /**
@@ -16688,11 +16710,12 @@ var PaginatedResultSchema = ResultSchema.extend({
    * An opaque token representing the pagination position after the last returned result.
    * If present, there may be more results available.
    */
-  nextCursor: optional(CursorSchema)
+  nextCursor: CursorSchema.optional()
 });
+var TaskStatusSchema = _enum(["working", "input_required", "completed", "failed", "cancelled"]);
 var TaskSchema = object2({
   taskId: string2(),
-  status: _enum(["working", "input_required", "completed", "failed", "cancelled"]),
+  status: TaskStatusSchema,
   /**
    * Time in milliseconds to keep task results available after completion.
    * If null, the task has unlimited lifetime until manually cleaned up.
@@ -16733,6 +16756,7 @@ var GetTaskPayloadRequestSchema = RequestSchema.extend({
     taskId: string2()
   })
 });
+var GetTaskPayloadResultSchema = ResultSchema.loose();
 var ListTasksRequestSchema = PaginatedRequestSchema.extend({
   method: literal("tasks/list")
 });
@@ -16771,7 +16795,7 @@ var Base64Schema = string2().refine((val) => {
   try {
     atob(val);
     return true;
-  } catch (_a) {
+  } catch {
     return false;
   }
 }, { message: "Invalid Base64 string" });
@@ -16781,11 +16805,12 @@ var BlobResourceContentsSchema = ResourceContentsSchema.extend({
    */
   blob: Base64Schema
 });
+var RoleSchema = _enum(["user", "assistant"]);
 var AnnotationsSchema = object2({
   /**
    * Intended audience(s) for the resource.
    */
-  audience: array(_enum(["user", "assistant"])).optional(),
+  audience: array(RoleSchema).optional(),
   /**
    * Importance hint for the resource, from 0 (least) to 1 (most).
    */
@@ -16878,7 +16903,8 @@ var ReadResourceResultSchema = ResultSchema.extend({
   contents: array(union([TextResourceContentsSchema, BlobResourceContentsSchema]))
 });
 var ResourceListChangedNotificationSchema = NotificationSchema.extend({
-  method: literal("notifications/resources/list_changed")
+  method: literal("notifications/resources/list_changed"),
+  params: NotificationsParamsSchema.optional()
 });
 var SubscribeRequestParamsSchema = ResourceRequestParamsSchema;
 var SubscribeRequestSchema = RequestSchema.extend({
@@ -17023,13 +17049,13 @@ var ToolUseContentSchema = object2({
    * Arguments to pass to the tool.
    * Must conform to the tool's inputSchema.
    */
-  input: object2({}).passthrough(),
+  input: record(string2(), unknown()),
   /**
    * See [MCP specification](https://github.com/modelcontextprotocol/modelcontextprotocol/blob/47339c03c143bb4ec01a26e721a1b8fe66634ebe/docs/specification/draft/basic/index.mdx#general-fields)
    * for notes on _meta usage.
    */
-  _meta: optional(object2({}).passthrough())
-}).passthrough();
+  _meta: record(string2(), unknown()).optional()
+});
 var EmbeddedResourceSchema = object2({
   type: literal("resource"),
   resource: union([TextResourceContentsSchema, BlobResourceContentsSchema]),
@@ -17054,18 +17080,19 @@ var ContentBlockSchema = union([
   EmbeddedResourceSchema
 ]);
 var PromptMessageSchema = object2({
-  role: _enum(["user", "assistant"]),
+  role: RoleSchema,
   content: ContentBlockSchema
 });
 var GetPromptResultSchema = ResultSchema.extend({
   /**
    * An optional description for the prompt.
    */
-  description: optional(string2()),
+  description: string2().optional(),
   messages: array(PromptMessageSchema)
 });
 var PromptListChangedNotificationSchema = NotificationSchema.extend({
-  method: literal("notifications/prompts/list_changed")
+  method: literal("notifications/prompts/list_changed"),
+  params: NotificationsParamsSchema.optional()
 });
 var ToolAnnotationsSchema = object2({
   /**
@@ -17146,11 +17173,11 @@ var ToolSchema = object2({
   /**
    * Optional additional tool information.
    */
-  annotations: optional(ToolAnnotationsSchema),
+  annotations: ToolAnnotationsSchema.optional(),
   /**
    * Execution-related properties for this tool.
    */
-  execution: optional(ToolExecutionSchema),
+  execution: ToolExecutionSchema.optional(),
   /**
    * See [MCP specification](https://github.com/modelcontextprotocol/modelcontextprotocol/blob/47339c03c143bb4ec01a26e721a1b8fe66634ebe/docs/specification/draft/basic/index.mdx#general-fields)
    * for notes on _meta usage.
@@ -17191,12 +17218,12 @@ var CallToolResultSchema = ResultSchema.extend({
    * server does not support tool calls, or any other exceptional conditions,
    * should be reported as an MCP error response.
    */
-  isError: optional(boolean2())
+  isError: boolean2().optional()
 });
 var CompatibilityCallToolResultSchema = CallToolResultSchema.or(ResultSchema.extend({
   toolResult: unknown()
 }));
-var CallToolRequestParamsSchema = BaseRequestParamsSchema.extend({
+var CallToolRequestParamsSchema = TaskAugmentedRequestParamsSchema.extend({
   /**
    * The name of the tool to call.
    */
@@ -17204,14 +17231,35 @@ var CallToolRequestParamsSchema = BaseRequestParamsSchema.extend({
   /**
    * Arguments to pass to the tool.
    */
-  arguments: optional(record(string2(), unknown()))
+  arguments: record(string2(), unknown()).optional()
 });
 var CallToolRequestSchema = RequestSchema.extend({
   method: literal("tools/call"),
   params: CallToolRequestParamsSchema
 });
 var ToolListChangedNotificationSchema = NotificationSchema.extend({
-  method: literal("notifications/tools/list_changed")
+  method: literal("notifications/tools/list_changed"),
+  params: NotificationsParamsSchema.optional()
+});
+var ListChangedOptionsBaseSchema = object2({
+  /**
+   * If true, the list will be refreshed automatically when a list changed notification is received.
+   * The callback will be called with the updated list.
+   *
+   * If false, the callback will be called with null items, allowing manual refresh.
+   *
+   * @default true
+   */
+  autoRefresh: boolean2().default(true),
+  /**
+   * Debounce time in milliseconds for list changed notification processing.
+   *
+   * Multiple notifications received within this timeframe will only trigger one refresh.
+   * Set to 0 to disable debouncing.
+   *
+   * @default 300
+   */
+  debounceMs: number2().int().nonnegative().default(300)
 });
 var LoggingLevelSchema = _enum(["debug", "info", "notice", "warning", "error", "critical", "alert", "emergency"]);
 var SetLevelRequestParamsSchema = BaseRequestParamsSchema.extend({
@@ -17252,19 +17300,19 @@ var ModelPreferencesSchema = object2({
   /**
    * Optional hints to use for model selection.
    */
-  hints: optional(array(ModelHintSchema)),
+  hints: array(ModelHintSchema).optional(),
   /**
    * How much to prioritize cost when selecting a model.
    */
-  costPriority: optional(number2().min(0).max(1)),
+  costPriority: number2().min(0).max(1).optional(),
   /**
    * How much to prioritize sampling speed (latency) when selecting a model.
    */
-  speedPriority: optional(number2().min(0).max(1)),
+  speedPriority: number2().min(0).max(1).optional(),
   /**
    * How much to prioritize intelligence and capabilities when selecting a model.
    */
-  intelligencePriority: optional(number2().min(0).max(1))
+  intelligencePriority: number2().min(0).max(1).optional()
 });
 var ToolChoiceSchema = object2({
   /**
@@ -17273,20 +17321,20 @@ var ToolChoiceSchema = object2({
    * - "required": Model MUST use at least one tool before completing
    * - "none": Model MUST NOT use any tools
    */
-  mode: optional(_enum(["auto", "required", "none"]))
+  mode: _enum(["auto", "required", "none"]).optional()
 });
 var ToolResultContentSchema = object2({
   type: literal("tool_result"),
   toolUseId: string2().describe("The unique identifier for the corresponding tool call."),
   content: array(ContentBlockSchema).default([]),
-  structuredContent: object2({}).passthrough().optional(),
-  isError: optional(boolean2()),
+  structuredContent: object2({}).loose().optional(),
+  isError: boolean2().optional(),
   /**
    * See [MCP specification](https://github.com/modelcontextprotocol/modelcontextprotocol/blob/47339c03c143bb4ec01a26e721a1b8fe66634ebe/docs/specification/draft/basic/index.mdx#general-fields)
    * for notes on _meta usage.
    */
-  _meta: optional(object2({}).passthrough())
-}).passthrough();
+  _meta: record(string2(), unknown()).optional()
+});
 var SamplingContentSchema = discriminatedUnion("type", [TextContentSchema, ImageContentSchema, AudioContentSchema]);
 var SamplingMessageContentBlockSchema = discriminatedUnion("type", [
   TextContentSchema,
@@ -17296,15 +17344,15 @@ var SamplingMessageContentBlockSchema = discriminatedUnion("type", [
   ToolResultContentSchema
 ]);
 var SamplingMessageSchema = object2({
-  role: _enum(["user", "assistant"]),
+  role: RoleSchema,
   content: union([SamplingMessageContentBlockSchema, array(SamplingMessageContentBlockSchema)]),
   /**
    * See [MCP specification](https://github.com/modelcontextprotocol/modelcontextprotocol/blob/47339c03c143bb4ec01a26e721a1b8fe66634ebe/docs/specification/draft/basic/index.mdx#general-fields)
    * for notes on _meta usage.
    */
-  _meta: optional(object2({}).passthrough())
-}).passthrough();
-var CreateMessageRequestParamsSchema = BaseRequestParamsSchema.extend({
+  _meta: record(string2(), unknown()).optional()
+});
+var CreateMessageRequestParamsSchema = TaskAugmentedRequestParamsSchema.extend({
   messages: array(SamplingMessageSchema),
   /**
    * The server's preferences for which model to select. The client MAY modify or omit this request.
@@ -17338,13 +17386,13 @@ var CreateMessageRequestParamsSchema = BaseRequestParamsSchema.extend({
    * Tools that the model may use during generation.
    * The client MUST return an error if this field is provided but ClientCapabilities.sampling.tools is not declared.
    */
-  tools: optional(array(ToolSchema)),
+  tools: array(ToolSchema).optional(),
   /**
    * Controls how the model uses tools.
    * The client MUST return an error if this field is provided but ClientCapabilities.sampling.tools is not declared.
    * Default is `{ mode: "auto" }`.
    */
-  toolChoice: optional(ToolChoiceSchema)
+  toolChoice: ToolChoiceSchema.optional()
 });
 var CreateMessageRequestSchema = RequestSchema.extend({
   method: literal("sampling/createMessage"),
@@ -17366,7 +17414,7 @@ var CreateMessageResultSchema = ResultSchema.extend({
    * This field is an open string to allow for provider-specific stop reasons.
    */
   stopReason: optional(_enum(["endTurn", "stopSequence", "maxTokens"]).or(string2())),
-  role: _enum(["user", "assistant"]),
+  role: RoleSchema,
   /**
    * Response content. Single content block (text, image, or audio).
    */
@@ -17389,7 +17437,7 @@ var CreateMessageResultWithToolsSchema = ResultSchema.extend({
    * This field is an open string to allow for provider-specific stop reasons.
    */
   stopReason: optional(_enum(["endTurn", "stopSequence", "maxTokens", "toolUse"]).or(string2())),
-  role: _enum(["user", "assistant"]),
+  role: RoleSchema,
   /**
    * Response content. May be a single block or array. May include ToolUseContent if stopReason is "toolUse".
    */
@@ -17473,7 +17521,7 @@ var TitledMultiSelectEnumSchemaSchema = object2({
 var MultiSelectEnumSchemaSchema = union([UntitledMultiSelectEnumSchemaSchema, TitledMultiSelectEnumSchemaSchema]);
 var EnumSchemaSchema = union([LegacyTitledEnumSchemaSchema, SingleSelectEnumSchemaSchema, MultiSelectEnumSchemaSchema]);
 var PrimitiveSchemaDefinitionSchema = union([EnumSchemaSchema, BooleanSchemaSchema, StringSchemaSchema, NumberSchemaSchema]);
-var ElicitRequestFormParamsSchema = BaseRequestParamsSchema.extend({
+var ElicitRequestFormParamsSchema = TaskAugmentedRequestParamsSchema.extend({
   /**
    * The elicitation mode.
    *
@@ -17494,7 +17542,7 @@ var ElicitRequestFormParamsSchema = BaseRequestParamsSchema.extend({
     required: array(string2()).optional()
   })
 });
-var ElicitRequestURLParamsSchema = BaseRequestParamsSchema.extend({
+var ElicitRequestURLParamsSchema = TaskAugmentedRequestParamsSchema.extend({
   /**
    * The elicitation mode.
    */
@@ -17616,13 +17664,15 @@ var RootSchema = object2({
   _meta: record(string2(), unknown()).optional()
 });
 var ListRootsRequestSchema = RequestSchema.extend({
-  method: literal("roots/list")
+  method: literal("roots/list"),
+  params: BaseRequestParamsSchema.optional()
 });
 var ListRootsResultSchema = ResultSchema.extend({
   roots: array(RootSchema)
 });
 var RootsListChangedNotificationSchema = NotificationSchema.extend({
-  method: literal("notifications/roots/list_changed")
+  method: literal("notifications/roots/list_changed"),
+  params: NotificationsParamsSchema.optional()
 });
 var ClientRequestSchema = union([
   PingRequestSchema,
@@ -17640,7 +17690,8 @@ var ClientRequestSchema = union([
   ListToolsRequestSchema,
   GetTaskRequestSchema,
   GetTaskPayloadRequestSchema,
-  ListTasksRequestSchema
+  ListTasksRequestSchema,
+  CancelTaskRequestSchema
 ]);
 var ClientNotificationSchema = union([
   CancelledNotificationSchema,
@@ -17666,7 +17717,8 @@ var ServerRequestSchema = union([
   ListRootsRequestSchema,
   GetTaskRequestSchema,
   GetTaskPayloadRequestSchema,
-  ListTasksRequestSchema
+  ListTasksRequestSchema,
+  CancelTaskRequestSchema
 ]);
 var ServerNotificationSchema = union([
   CancelledNotificationSchema,
@@ -17721,8 +17773,7 @@ var UrlElicitationRequiredError = class extends McpError {
     });
   }
   get elicitations() {
-    var _a, _b;
-    return (_b = (_a = this.data) === null || _a === void 0 ? void 0 : _a.elicitations) !== null && _b !== void 0 ? _b : [];
+    return this.data?.elicitations ?? [];
   }
 };
 
@@ -17740,7 +17791,7 @@ var ALPHA_NUMERIC = new Set("ABCDEFGHIJKLMNOPQRSTUVXYZabcdefghijklmnopqrstuvxyz0
 // node_modules/@modelcontextprotocol/sdk/dist/esm/server/zod-json-schema-compat.js
 function getMethodLiteral(schema) {
   const shape = getObjectShape(schema);
-  const methodSchema = shape === null || shape === void 0 ? void 0 : shape.method;
+  const methodSchema = shape?.method;
   if (!methodSchema) {
     throw new Error("Schema is missing a method literal");
   }
@@ -17784,8 +17835,8 @@ var Protocol = class {
       // Automatic pong by default.
       (_request) => ({})
     );
-    this._taskStore = _options === null || _options === void 0 ? void 0 : _options.taskStore;
-    this._taskMessageQueue = _options === null || _options === void 0 ? void 0 : _options.taskMessageQueue;
+    this._taskStore = _options?.taskStore;
+    this._taskMessageQueue = _options?.taskMessageQueue;
     if (this._taskStore) {
       this.setRequestHandler(GetTaskRequestSchema, async (request, extra) => {
         const task = await this._taskStore.getTask(request.params.taskId, extra.sessionId);
@@ -17798,7 +17849,6 @@ var Protocol = class {
       });
       this.setRequestHandler(GetTaskPayloadRequestSchema, async (request, extra) => {
         const handleTaskResult = async () => {
-          var _a;
           const taskId = request.params.taskId;
           if (this._taskMessageQueue) {
             let queuedMessage;
@@ -17822,7 +17872,7 @@ var Protocol = class {
                 }
                 continue;
               }
-              await ((_a = this._transport) === null || _a === void 0 ? void 0 : _a.send(queuedMessage.message, { relatedRequestId: extra.requestId }));
+              await this._transport?.send(queuedMessage.message, { relatedRequestId: extra.requestId });
             }
           }
           const task = await this._taskStore.getTask(taskId, extra.sessionId);
@@ -17851,9 +17901,8 @@ var Protocol = class {
         return await handleTaskResult();
       });
       this.setRequestHandler(ListTasksRequestSchema, async (request, extra) => {
-        var _a;
         try {
-          const { tasks, nextCursor } = await this._taskStore.listTasks((_a = request.params) === null || _a === void 0 ? void 0 : _a.cursor, extra.sessionId);
+          const { tasks, nextCursor } = await this._taskStore.listTasks(request.params?.cursor, extra.sessionId);
           return {
             tasks,
             nextCursor,
@@ -17892,8 +17941,11 @@ var Protocol = class {
     }
   }
   async _oncancel(notification) {
+    if (!notification.params.requestId) {
+      return;
+    }
     const controller = this._requestHandlerAbortControllers.get(notification.params.requestId);
-    controller === null || controller === void 0 ? void 0 : controller.abort(notification.params.reason);
+    controller?.abort(notification.params.reason);
   }
   _setupTimeout(messageId, timeout, maxTotalTimeout, onTimeout, resetTimeoutOnProgress = false) {
     this._timeoutInfo.set(messageId, {
@@ -17934,22 +17986,21 @@ var Protocol = class {
    * The Protocol object assumes ownership of the Transport, replacing any callbacks that have already been set, and expects that it is the only user of the Transport instance going forward.
    */
   async connect(transport) {
-    var _a, _b, _c;
     this._transport = transport;
-    const _onclose = (_a = this.transport) === null || _a === void 0 ? void 0 : _a.onclose;
+    const _onclose = this.transport?.onclose;
     this._transport.onclose = () => {
-      _onclose === null || _onclose === void 0 ? void 0 : _onclose();
+      _onclose?.();
       this._onclose();
     };
-    const _onerror = (_b = this.transport) === null || _b === void 0 ? void 0 : _b.onerror;
+    const _onerror = this.transport?.onerror;
     this._transport.onerror = (error2) => {
-      _onerror === null || _onerror === void 0 ? void 0 : _onerror(error2);
+      _onerror?.(error2);
       this._onerror(error2);
     };
-    const _onmessage = (_c = this._transport) === null || _c === void 0 ? void 0 : _c.onmessage;
+    const _onmessage = this._transport?.onmessage;
     this._transport.onmessage = (message, extra) => {
-      _onmessage === null || _onmessage === void 0 ? void 0 : _onmessage(message, extra);
-      if (isJSONRPCResponse(message) || isJSONRPCError(message)) {
+      _onmessage?.(message, extra);
+      if (isJSONRPCResultResponse(message) || isJSONRPCErrorResponse(message)) {
         this._onresponse(message);
       } else if (isJSONRPCRequest(message)) {
         this._onrequest(message, extra);
@@ -17962,7 +18013,6 @@ var Protocol = class {
     await this._transport.start();
   }
   _onclose() {
-    var _a;
     const responseHandlers = this._responseHandlers;
     this._responseHandlers = /* @__PURE__ */ new Map();
     this._progressHandlers.clear();
@@ -17970,28 +18020,25 @@ var Protocol = class {
     this._pendingDebouncedNotifications.clear();
     const error2 = McpError.fromError(ErrorCode.ConnectionClosed, "Connection closed");
     this._transport = void 0;
-    (_a = this.onclose) === null || _a === void 0 ? void 0 : _a.call(this);
+    this.onclose?.();
     for (const handler of responseHandlers.values()) {
       handler(error2);
     }
   }
   _onerror(error2) {
-    var _a;
-    (_a = this.onerror) === null || _a === void 0 ? void 0 : _a.call(this, error2);
+    this.onerror?.(error2);
   }
   _onnotification(notification) {
-    var _a;
-    const handler = (_a = this._notificationHandlers.get(notification.method)) !== null && _a !== void 0 ? _a : this.fallbackNotificationHandler;
+    const handler = this._notificationHandlers.get(notification.method) ?? this.fallbackNotificationHandler;
     if (handler === void 0) {
       return;
     }
     Promise.resolve().then(() => handler(notification)).catch((error2) => this._onerror(new Error(`Uncaught error in notification handler: ${error2}`)));
   }
   _onrequest(request, extra) {
-    var _a, _b, _c, _d, _e, _f;
-    const handler = (_a = this._requestHandlers.get(request.method)) !== null && _a !== void 0 ? _a : this.fallbackRequestHandler;
+    const handler = this._requestHandlers.get(request.method) ?? this.fallbackRequestHandler;
     const capturedTransport = this._transport;
-    const relatedTaskId = (_d = (_c = (_b = request.params) === null || _b === void 0 ? void 0 : _b._meta) === null || _c === void 0 ? void 0 : _c[RELATED_TASK_META_KEY]) === null || _d === void 0 ? void 0 : _d.taskId;
+    const relatedTaskId = request.params?._meta?.[RELATED_TASK_META_KEY]?.taskId;
     if (handler === void 0) {
       const errorResponse = {
         jsonrpc: "2.0",
@@ -18006,20 +18053,20 @@ var Protocol = class {
           type: "error",
           message: errorResponse,
           timestamp: Date.now()
-        }, capturedTransport === null || capturedTransport === void 0 ? void 0 : capturedTransport.sessionId).catch((error2) => this._onerror(new Error(`Failed to enqueue error response: ${error2}`)));
+        }, capturedTransport?.sessionId).catch((error2) => this._onerror(new Error(`Failed to enqueue error response: ${error2}`)));
       } else {
-        capturedTransport === null || capturedTransport === void 0 ? void 0 : capturedTransport.send(errorResponse).catch((error2) => this._onerror(new Error(`Failed to send an error response: ${error2}`)));
+        capturedTransport?.send(errorResponse).catch((error2) => this._onerror(new Error(`Failed to send an error response: ${error2}`)));
       }
       return;
     }
     const abortController = new AbortController();
     this._requestHandlerAbortControllers.set(request.id, abortController);
-    const taskCreationParams = (_e = request.params) === null || _e === void 0 ? void 0 : _e.task;
-    const taskStore = this._taskStore ? this.requestTaskStore(request, capturedTransport === null || capturedTransport === void 0 ? void 0 : capturedTransport.sessionId) : void 0;
+    const taskCreationParams = isTaskAugmentedRequestParams(request.params) ? request.params.task : void 0;
+    const taskStore = this._taskStore ? this.requestTaskStore(request, capturedTransport?.sessionId) : void 0;
     const fullExtra = {
       signal: abortController.signal,
-      sessionId: capturedTransport === null || capturedTransport === void 0 ? void 0 : capturedTransport.sessionId,
-      _meta: (_f = request.params) === null || _f === void 0 ? void 0 : _f._meta,
+      sessionId: capturedTransport?.sessionId,
+      _meta: request.params?._meta,
       sendNotification: async (notification) => {
         const notificationOptions = { relatedRequestId: request.id };
         if (relatedTaskId) {
@@ -18028,25 +18075,24 @@ var Protocol = class {
         await this.notification(notification, notificationOptions);
       },
       sendRequest: async (r, resultSchema, options) => {
-        var _a2, _b2;
         const requestOptions = { ...options, relatedRequestId: request.id };
         if (relatedTaskId && !requestOptions.relatedTask) {
           requestOptions.relatedTask = { taskId: relatedTaskId };
         }
-        const effectiveTaskId = (_b2 = (_a2 = requestOptions.relatedTask) === null || _a2 === void 0 ? void 0 : _a2.taskId) !== null && _b2 !== void 0 ? _b2 : relatedTaskId;
+        const effectiveTaskId = requestOptions.relatedTask?.taskId ?? relatedTaskId;
         if (effectiveTaskId && taskStore) {
           await taskStore.updateTaskStatus(effectiveTaskId, "input_required");
         }
         return await this.request(r, resultSchema, requestOptions);
       },
-      authInfo: extra === null || extra === void 0 ? void 0 : extra.authInfo,
+      authInfo: extra?.authInfo,
       requestId: request.id,
-      requestInfo: extra === null || extra === void 0 ? void 0 : extra.requestInfo,
+      requestInfo: extra?.requestInfo,
       taskId: relatedTaskId,
       taskStore,
-      taskRequestedTtl: taskCreationParams === null || taskCreationParams === void 0 ? void 0 : taskCreationParams.ttl,
-      closeSSEStream: extra === null || extra === void 0 ? void 0 : extra.closeSSEStream,
-      closeStandaloneSSEStream: extra === null || extra === void 0 ? void 0 : extra.closeStandaloneSSEStream
+      taskRequestedTtl: taskCreationParams?.ttl,
+      closeSSEStream: extra?.closeSSEStream,
+      closeStandaloneSSEStream: extra?.closeStandaloneSSEStream
     };
     Promise.resolve().then(() => {
       if (taskCreationParams) {
@@ -18066,12 +18112,11 @@ var Protocol = class {
           type: "response",
           message: response,
           timestamp: Date.now()
-        }, capturedTransport === null || capturedTransport === void 0 ? void 0 : capturedTransport.sessionId);
+        }, capturedTransport?.sessionId);
       } else {
-        await (capturedTransport === null || capturedTransport === void 0 ? void 0 : capturedTransport.send(response));
+        await capturedTransport?.send(response);
       }
     }, async (error2) => {
-      var _a2;
       if (abortController.signal.aborted) {
         return;
       }
@@ -18080,7 +18125,7 @@ var Protocol = class {
         id: request.id,
         error: {
           code: Number.isSafeInteger(error2["code"]) ? error2["code"] : ErrorCode.InternalError,
-          message: (_a2 = error2.message) !== null && _a2 !== void 0 ? _a2 : "Internal error",
+          message: error2.message ?? "Internal error",
           ...error2["data"] !== void 0 && { data: error2["data"] }
         }
       };
@@ -18089,9 +18134,9 @@ var Protocol = class {
           type: "error",
           message: errorResponse,
           timestamp: Date.now()
-        }, capturedTransport === null || capturedTransport === void 0 ? void 0 : capturedTransport.sessionId);
+        }, capturedTransport?.sessionId);
       } else {
-        await (capturedTransport === null || capturedTransport === void 0 ? void 0 : capturedTransport.send(errorResponse));
+        await capturedTransport?.send(errorResponse);
       }
     }).catch((error2) => this._onerror(new Error(`Failed to send response: ${error2}`))).finally(() => {
       this._requestHandlerAbortControllers.delete(request.id);
@@ -18125,7 +18170,7 @@ var Protocol = class {
     const resolver = this._requestResolvers.get(messageId);
     if (resolver) {
       this._requestResolvers.delete(messageId);
-      if (isJSONRPCResponse(response)) {
+      if (isJSONRPCResultResponse(response)) {
         resolver(response);
       } else {
         const error2 = new McpError(response.error.code, response.error.message, response.error.data);
@@ -18141,7 +18186,7 @@ var Protocol = class {
     this._responseHandlers.delete(messageId);
     this._cleanupTimeout(messageId);
     let isTaskResponse = false;
-    if (isJSONRPCResponse(response) && response.result && typeof response.result === "object") {
+    if (isJSONRPCResultResponse(response) && response.result && typeof response.result === "object") {
       const result = response.result;
       if (result.task && typeof result.task === "object") {
         const task = result.task;
@@ -18154,7 +18199,7 @@ var Protocol = class {
     if (!isTaskResponse) {
       this._progressHandlers.delete(messageId);
     }
-    if (isJSONRPCResponse(response)) {
+    if (isJSONRPCResultResponse(response)) {
       handler(response);
     } else {
       const error2 = McpError.fromError(response.error.code, response.error.message, response.error.data);
@@ -18168,8 +18213,7 @@ var Protocol = class {
    * Closes the connection.
    */
   async close() {
-    var _a;
-    await ((_a = this._transport) === null || _a === void 0 ? void 0 : _a.close());
+    await this._transport?.close();
   }
   /**
    * Sends a request and returns an AsyncGenerator that yields response messages.
@@ -18199,8 +18243,7 @@ var Protocol = class {
    * @experimental Use `client.experimental.tasks.requestStream()` to access this method.
    */
   async *requestStream(request, resultSchema, options) {
-    var _a, _b, _c, _d;
-    const { task } = options !== null && options !== void 0 ? options : {};
+    const { task } = options ?? {};
     if (!task) {
       try {
         const result = await this.request(request, resultSchema, options);
@@ -18247,9 +18290,9 @@ var Protocol = class {
           yield { type: "result", result };
           return;
         }
-        const pollInterval = (_c = (_a = task2.pollInterval) !== null && _a !== void 0 ? _a : (_b = this._options) === null || _b === void 0 ? void 0 : _b.defaultTaskPollInterval) !== null && _c !== void 0 ? _c : 1e3;
+        const pollInterval = task2.pollInterval ?? this._options?.defaultTaskPollInterval ?? 1e3;
         await new Promise((resolve) => setTimeout(resolve, pollInterval));
-        (_d = options === null || options === void 0 ? void 0 : options.signal) === null || _d === void 0 ? void 0 : _d.throwIfAborted();
+        options?.signal?.throwIfAborted();
       }
     } catch (error2) {
       yield {
@@ -18264,9 +18307,8 @@ var Protocol = class {
    * Do not use this method to emit notifications! Use notification() instead.
    */
   request(request, resultSchema, options) {
-    const { relatedRequestId, resumptionToken, onresumptiontoken, task, relatedTask } = options !== null && options !== void 0 ? options : {};
+    const { relatedRequestId, resumptionToken, onresumptiontoken, task, relatedTask } = options ?? {};
     return new Promise((resolve, reject) => {
-      var _a, _b, _c, _d, _e, _f, _g;
       const earlyReject = (error2) => {
         reject(error2);
       };
@@ -18274,7 +18316,7 @@ var Protocol = class {
         earlyReject(new Error("Not connected"));
         return;
       }
-      if (((_a = this._options) === null || _a === void 0 ? void 0 : _a.enforceStrictCapabilities) === true) {
+      if (this._options?.enforceStrictCapabilities === true) {
         try {
           this.assertCapabilityForMethod(request.method);
           if (task) {
@@ -18285,19 +18327,19 @@ var Protocol = class {
           return;
         }
       }
-      (_b = options === null || options === void 0 ? void 0 : options.signal) === null || _b === void 0 ? void 0 : _b.throwIfAborted();
+      options?.signal?.throwIfAborted();
       const messageId = this._requestMessageId++;
       const jsonrpcRequest = {
         ...request,
         jsonrpc: "2.0",
         id: messageId
       };
-      if (options === null || options === void 0 ? void 0 : options.onprogress) {
+      if (options?.onprogress) {
         this._progressHandlers.set(messageId, options.onprogress);
         jsonrpcRequest.params = {
           ...request.params,
           _meta: {
-            ...((_c = request.params) === null || _c === void 0 ? void 0 : _c._meta) || {},
+            ...request.params?._meta || {},
             progressToken: messageId
           }
         };
@@ -18312,17 +18354,16 @@ var Protocol = class {
         jsonrpcRequest.params = {
           ...jsonrpcRequest.params,
           _meta: {
-            ...((_d = jsonrpcRequest.params) === null || _d === void 0 ? void 0 : _d._meta) || {},
+            ...jsonrpcRequest.params?._meta || {},
             [RELATED_TASK_META_KEY]: relatedTask
           }
         };
       }
       const cancel = (reason) => {
-        var _a2;
         this._responseHandlers.delete(messageId);
         this._progressHandlers.delete(messageId);
         this._cleanupTimeout(messageId);
-        (_a2 = this._transport) === null || _a2 === void 0 ? void 0 : _a2.send({
+        this._transport?.send({
           jsonrpc: "2.0",
           method: "notifications/cancelled",
           params: {
@@ -18334,8 +18375,7 @@ var Protocol = class {
         reject(error2);
       };
       this._responseHandlers.set(messageId, (response) => {
-        var _a2;
-        if ((_a2 = options === null || options === void 0 ? void 0 : options.signal) === null || _a2 === void 0 ? void 0 : _a2.aborted) {
+        if (options?.signal?.aborted) {
           return;
         }
         if (response instanceof Error) {
@@ -18352,14 +18392,13 @@ var Protocol = class {
           reject(error2);
         }
       });
-      (_e = options === null || options === void 0 ? void 0 : options.signal) === null || _e === void 0 ? void 0 : _e.addEventListener("abort", () => {
-        var _a2;
-        cancel((_a2 = options === null || options === void 0 ? void 0 : options.signal) === null || _a2 === void 0 ? void 0 : _a2.reason);
+      options?.signal?.addEventListener("abort", () => {
+        cancel(options?.signal?.reason);
       });
-      const timeout = (_f = options === null || options === void 0 ? void 0 : options.timeout) !== null && _f !== void 0 ? _f : DEFAULT_REQUEST_TIMEOUT_MSEC;
+      const timeout = options?.timeout ?? DEFAULT_REQUEST_TIMEOUT_MSEC;
       const timeoutHandler = () => cancel(McpError.fromError(ErrorCode.RequestTimeout, "Request timed out", { timeout }));
-      this._setupTimeout(messageId, timeout, options === null || options === void 0 ? void 0 : options.maxTotalTimeout, timeoutHandler, (_g = options === null || options === void 0 ? void 0 : options.resetTimeoutOnProgress) !== null && _g !== void 0 ? _g : false);
-      const relatedTaskId = relatedTask === null || relatedTask === void 0 ? void 0 : relatedTask.taskId;
+      this._setupTimeout(messageId, timeout, options?.maxTotalTimeout, timeoutHandler, options?.resetTimeoutOnProgress ?? false);
+      const relatedTaskId = relatedTask?.taskId;
       if (relatedTaskId) {
         const responseResolver = (response) => {
           const handler = this._responseHandlers.get(messageId);
@@ -18422,12 +18461,11 @@ var Protocol = class {
    * Emits a notification, which is a one-way message that does not expect a response.
    */
   async notification(notification, options) {
-    var _a, _b, _c, _d, _e;
     if (!this._transport) {
       throw new Error("Not connected");
     }
     this.assertNotificationCapability(notification.method);
-    const relatedTaskId = (_a = options === null || options === void 0 ? void 0 : options.relatedTask) === null || _a === void 0 ? void 0 : _a.taskId;
+    const relatedTaskId = options?.relatedTask?.taskId;
     if (relatedTaskId) {
       const jsonrpcNotification2 = {
         ...notification,
@@ -18435,7 +18473,7 @@ var Protocol = class {
         params: {
           ...notification.params,
           _meta: {
-            ...((_b = notification.params) === null || _b === void 0 ? void 0 : _b._meta) || {},
+            ...notification.params?._meta || {},
             [RELATED_TASK_META_KEY]: options.relatedTask
           }
         }
@@ -18447,15 +18485,14 @@ var Protocol = class {
       });
       return;
     }
-    const debouncedMethods = (_d = (_c = this._options) === null || _c === void 0 ? void 0 : _c.debouncedNotificationMethods) !== null && _d !== void 0 ? _d : [];
-    const canDebounce = debouncedMethods.includes(notification.method) && !notification.params && !(options === null || options === void 0 ? void 0 : options.relatedRequestId) && !(options === null || options === void 0 ? void 0 : options.relatedTask);
+    const debouncedMethods = this._options?.debouncedNotificationMethods ?? [];
+    const canDebounce = debouncedMethods.includes(notification.method) && !notification.params && !options?.relatedRequestId && !options?.relatedTask;
     if (canDebounce) {
       if (this._pendingDebouncedNotifications.has(notification.method)) {
         return;
       }
       this._pendingDebouncedNotifications.add(notification.method);
       Promise.resolve().then(() => {
-        var _a2, _b2;
         this._pendingDebouncedNotifications.delete(notification.method);
         if (!this._transport) {
           return;
@@ -18464,19 +18501,19 @@ var Protocol = class {
           ...notification,
           jsonrpc: "2.0"
         };
-        if (options === null || options === void 0 ? void 0 : options.relatedTask) {
+        if (options?.relatedTask) {
           jsonrpcNotification2 = {
             ...jsonrpcNotification2,
             params: {
               ...jsonrpcNotification2.params,
               _meta: {
-                ...((_a2 = jsonrpcNotification2.params) === null || _a2 === void 0 ? void 0 : _a2._meta) || {},
+                ...jsonrpcNotification2.params?._meta || {},
                 [RELATED_TASK_META_KEY]: options.relatedTask
               }
             }
           };
         }
-        (_b2 = this._transport) === null || _b2 === void 0 ? void 0 : _b2.send(jsonrpcNotification2, options).catch((error2) => this._onerror(error2));
+        this._transport?.send(jsonrpcNotification2, options).catch((error2) => this._onerror(error2));
       });
       return;
     }
@@ -18484,13 +18521,13 @@ var Protocol = class {
       ...notification,
       jsonrpc: "2.0"
     };
-    if (options === null || options === void 0 ? void 0 : options.relatedTask) {
+    if (options?.relatedTask) {
       jsonrpcNotification = {
         ...jsonrpcNotification,
         params: {
           ...jsonrpcNotification.params,
           _meta: {
-            ...((_e = jsonrpcNotification.params) === null || _e === void 0 ? void 0 : _e._meta) || {},
+            ...jsonrpcNotification.params?._meta || {},
             [RELATED_TASK_META_KEY]: options.relatedTask
           }
         }
@@ -18566,11 +18603,10 @@ var Protocol = class {
    * simply propagates the error.
    */
   async _enqueueTaskMessage(taskId, message, sessionId) {
-    var _a;
     if (!this._taskStore || !this._taskMessageQueue) {
       throw new Error("Cannot enqueue task message: taskStore and taskMessageQueue are not configured");
     }
-    const maxQueueSize = (_a = this._options) === null || _a === void 0 ? void 0 : _a.maxTaskQueueSize;
+    const maxQueueSize = this._options?.maxTaskQueueSize;
     await this._taskMessageQueue.enqueue(taskId, message, sessionId, maxQueueSize);
   }
   /**
@@ -18603,14 +18639,13 @@ var Protocol = class {
    * @returns Promise that resolves when an update occurs or rejects if aborted
    */
   async _waitForTaskUpdate(taskId, signal) {
-    var _a, _b, _c;
-    let interval = (_b = (_a = this._options) === null || _a === void 0 ? void 0 : _a.defaultTaskPollInterval) !== null && _b !== void 0 ? _b : 1e3;
+    let interval = this._options?.defaultTaskPollInterval ?? 1e3;
     try {
-      const task = await ((_c = this._taskStore) === null || _c === void 0 ? void 0 : _c.getTask(taskId));
-      if (task === null || task === void 0 ? void 0 : task.pollInterval) {
+      const task = await this._taskStore?.getTask(taskId);
+      if (task?.pollInterval) {
         interval = task.pollInterval;
       }
-    } catch (_d) {
+    } catch {
     }
     return new Promise((resolve, reject) => {
       if (signal.aborted) {
@@ -18714,7 +18749,7 @@ function mergeCapabilities(base, additional) {
 var import_ajv = __toESM(require_ajv(), 1);
 var import_ajv_formats = __toESM(require_dist(), 1);
 function createDefaultAjvInstance() {
-  const ajv = new import_ajv.Ajv({
+  const ajv = new import_ajv.default({
     strict: false,
     validateFormats: true,
     validateSchema: false,
@@ -18746,7 +18781,7 @@ var AjvJsonSchemaValidator = class {
    * ```
    */
   constructor(ajv) {
-    this._ajv = ajv !== null && ajv !== void 0 ? ajv : createDefaultAjvInstance();
+    this._ajv = ajv ?? createDefaultAjvInstance();
   }
   /**
    * Create a validator for the given JSON Schema
@@ -18758,8 +18793,7 @@ var AjvJsonSchemaValidator = class {
    * @returns A validator function that validates input data
    */
   getValidator(schema) {
-    var _a;
-    const ajvValidator = "$id" in schema && typeof schema.$id === "string" ? (_a = this._ajv.getSchema(schema.$id)) !== null && _a !== void 0 ? _a : this._ajv.compile(schema) : this._ajv.compile(schema);
+    const ajvValidator = "$id" in schema && typeof schema.$id === "string" ? this._ajv.getSchema(schema.$id) ?? this._ajv.compile(schema) : this._ajv.compile(schema);
     return (input) => {
       const valid = ajvValidator(input);
       if (valid) {
@@ -18853,13 +18887,12 @@ var ExperimentalServerTasks = class {
 
 // node_modules/@modelcontextprotocol/sdk/dist/esm/experimental/tasks/helpers.js
 function assertToolsCallTaskCapability(requests, method, entityName) {
-  var _a;
   if (!requests) {
     throw new Error(`${entityName} does not support task creation (required for ${method})`);
   }
   switch (method) {
     case "tools/call":
-      if (!((_a = requests.tools) === null || _a === void 0 ? void 0 : _a.call)) {
+      if (!requests.tools?.call) {
         throw new Error(`${entityName} does not support task creation for tools/call (required for ${method})`);
       }
       break;
@@ -18868,18 +18901,17 @@ function assertToolsCallTaskCapability(requests, method, entityName) {
   }
 }
 function assertClientRequestTaskCapability(requests, method, entityName) {
-  var _a, _b;
   if (!requests) {
     throw new Error(`${entityName} does not support task creation (required for ${method})`);
   }
   switch (method) {
     case "sampling/createMessage":
-      if (!((_a = requests.sampling) === null || _a === void 0 ? void 0 : _a.createMessage)) {
+      if (!requests.sampling?.createMessage) {
         throw new Error(`${entityName} does not support task creation for sampling/createMessage (required for ${method})`);
       }
       break;
     case "elicitation/create":
-      if (!((_b = requests.elicitation) === null || _b === void 0 ? void 0 : _b.create)) {
+      if (!requests.elicitation?.create) {
         throw new Error(`${entityName} does not support task creation for elicitation/create (required for ${method})`);
       }
       break;
@@ -18894,7 +18926,6 @@ var Server = class extends Protocol {
    * Initializes this server with the given name and version information.
    */
   constructor(_serverInfo, options) {
-    var _a, _b;
     super(options);
     this._serverInfo = _serverInfo;
     this._loggingLevels = /* @__PURE__ */ new Map();
@@ -18903,18 +18934,14 @@ var Server = class extends Protocol {
       const currentLevel = this._loggingLevels.get(sessionId);
       return currentLevel ? this.LOG_LEVEL_SEVERITY.get(level) < this.LOG_LEVEL_SEVERITY.get(currentLevel) : false;
     };
-    this._capabilities = (_a = options === null || options === void 0 ? void 0 : options.capabilities) !== null && _a !== void 0 ? _a : {};
-    this._instructions = options === null || options === void 0 ? void 0 : options.instructions;
-    this._jsonSchemaValidator = (_b = options === null || options === void 0 ? void 0 : options.jsonSchemaValidator) !== null && _b !== void 0 ? _b : new AjvJsonSchemaValidator();
+    this._capabilities = options?.capabilities ?? {};
+    this._instructions = options?.instructions;
+    this._jsonSchemaValidator = options?.jsonSchemaValidator ?? new AjvJsonSchemaValidator();
     this.setRequestHandler(InitializeRequestSchema, (request) => this._oninitialize(request));
-    this.setNotificationHandler(InitializedNotificationSchema, () => {
-      var _a2;
-      return (_a2 = this.oninitialized) === null || _a2 === void 0 ? void 0 : _a2.call(this);
-    });
+    this.setNotificationHandler(InitializedNotificationSchema, () => this.oninitialized?.());
     if (this._capabilities.logging) {
       this.setRequestHandler(SetLevelRequestSchema, async (request, extra) => {
-        var _a2;
-        const transportSessionId = extra.sessionId || ((_a2 = extra.requestInfo) === null || _a2 === void 0 ? void 0 : _a2.headers["mcp-session-id"]) || void 0;
+        const transportSessionId = extra.sessionId || extra.requestInfo?.headers["mcp-session-id"] || void 0;
         const { level } = request.params;
         const parseResult = LoggingLevelSchema.safeParse(level);
         if (parseResult.success) {
@@ -18954,21 +18981,20 @@ var Server = class extends Protocol {
    * Override request handler registration to enforce server-side validation for tools/call.
    */
   setRequestHandler(requestSchema, handler) {
-    var _a, _b, _c;
     const shape = getObjectShape(requestSchema);
-    const methodSchema = shape === null || shape === void 0 ? void 0 : shape.method;
+    const methodSchema = shape?.method;
     if (!methodSchema) {
       throw new Error("Schema is missing a method literal");
     }
     let methodValue;
     if (isZ4Schema(methodSchema)) {
       const v4Schema = methodSchema;
-      const v4Def = (_a = v4Schema._zod) === null || _a === void 0 ? void 0 : _a.def;
-      methodValue = (_b = v4Def === null || v4Def === void 0 ? void 0 : v4Def.value) !== null && _b !== void 0 ? _b : v4Schema.value;
+      const v4Def = v4Schema._zod?.def;
+      methodValue = v4Def?.value ?? v4Schema.value;
     } else {
       const v3Schema = methodSchema;
       const legacyDef = v3Schema._def;
-      methodValue = (_c = legacyDef === null || legacyDef === void 0 ? void 0 : legacyDef.value) !== null && _c !== void 0 ? _c : v3Schema.value;
+      methodValue = legacyDef?.value ?? v3Schema.value;
     }
     if (typeof methodValue !== "string") {
       throw new Error("Schema method literal must be a string");
@@ -19003,20 +19029,19 @@ var Server = class extends Protocol {
     return super.setRequestHandler(requestSchema, handler);
   }
   assertCapabilityForMethod(method) {
-    var _a, _b, _c;
     switch (method) {
       case "sampling/createMessage":
-        if (!((_a = this._clientCapabilities) === null || _a === void 0 ? void 0 : _a.sampling)) {
+        if (!this._clientCapabilities?.sampling) {
           throw new Error(`Client does not support sampling (required for ${method})`);
         }
         break;
       case "elicitation/create":
-        if (!((_b = this._clientCapabilities) === null || _b === void 0 ? void 0 : _b.elicitation)) {
+        if (!this._clientCapabilities?.elicitation) {
           throw new Error(`Client does not support elicitation (required for ${method})`);
         }
         break;
       case "roots/list":
-        if (!((_c = this._clientCapabilities) === null || _c === void 0 ? void 0 : _c.roots)) {
+        if (!this._clientCapabilities?.roots) {
           throw new Error(`Client does not support listing roots (required for ${method})`);
         }
         break;
@@ -19025,7 +19050,6 @@ var Server = class extends Protocol {
     }
   }
   assertNotificationCapability(method) {
-    var _a, _b;
     switch (method) {
       case "notifications/message":
         if (!this._capabilities.logging) {
@@ -19049,7 +19073,7 @@ var Server = class extends Protocol {
         }
         break;
       case "notifications/elicitation/complete":
-        if (!((_b = (_a = this._clientCapabilities) === null || _a === void 0 ? void 0 : _a.elicitation) === null || _b === void 0 ? void 0 : _b.url)) {
+        if (!this._clientCapabilities?.elicitation?.url) {
           throw new Error(`Client does not support URL elicitation (required for ${method})`);
         }
         break;
@@ -19107,15 +19131,13 @@ var Server = class extends Protocol {
     }
   }
   assertTaskCapability(method) {
-    var _a, _b;
-    assertClientRequestTaskCapability((_b = (_a = this._clientCapabilities) === null || _a === void 0 ? void 0 : _a.tasks) === null || _b === void 0 ? void 0 : _b.requests, method, "Client");
+    assertClientRequestTaskCapability(this._clientCapabilities?.tasks?.requests, method, "Client");
   }
   assertTaskHandlerCapability(method) {
-    var _a;
     if (!this._capabilities) {
       return;
     }
-    assertToolsCallTaskCapability((_a = this._capabilities.tasks) === null || _a === void 0 ? void 0 : _a.requests, method, "Server");
+    assertToolsCallTaskCapability(this._capabilities.tasks?.requests, method, "Server");
   }
   async _oninitialize(request) {
     const requestedVersion = request.params.protocolVersion;
@@ -19149,9 +19171,8 @@ var Server = class extends Protocol {
   }
   // Implementation
   async createMessage(params, options) {
-    var _a, _b;
     if (params.tools || params.toolChoice) {
-      if (!((_b = (_a = this._clientCapabilities) === null || _a === void 0 ? void 0 : _a.sampling) === null || _b === void 0 ? void 0 : _b.tools)) {
+      if (!this._clientCapabilities?.sampling?.tools) {
         throw new Error("Client does not support sampling tools capability.");
       }
     }
@@ -19191,18 +19212,17 @@ var Server = class extends Protocol {
    * @returns The result of the elicitation request.
    */
   async elicitInput(params, options) {
-    var _a, _b, _c, _d, _e;
-    const mode = (_a = params.mode) !== null && _a !== void 0 ? _a : "form";
+    const mode = params.mode ?? "form";
     switch (mode) {
       case "url": {
-        if (!((_c = (_b = this._clientCapabilities) === null || _b === void 0 ? void 0 : _b.elicitation) === null || _c === void 0 ? void 0 : _c.url)) {
+        if (!this._clientCapabilities?.elicitation?.url) {
           throw new Error("Client does not support url elicitation.");
         }
         const urlParams = params;
         return this.request({ method: "elicitation/create", params: urlParams }, ElicitResultSchema, options);
       }
       case "form": {
-        if (!((_e = (_d = this._clientCapabilities) === null || _d === void 0 ? void 0 : _d.elicitation) === null || _e === void 0 ? void 0 : _e.form)) {
+        if (!this._clientCapabilities?.elicitation?.form) {
           throw new Error("Client does not support form elicitation.");
         }
         const formParams = params.mode === "form" ? params : { ...params, mode: "form" };
@@ -19234,8 +19254,7 @@ var Server = class extends Protocol {
    * @returns A function that emits the completion notification when awaited.
    */
   createElicitationCompletionNotifier(elicitationId, options) {
-    var _a, _b;
-    if (!((_b = (_a = this._clientCapabilities) === null || _a === void 0 ? void 0 : _a.elicitation) === null || _b === void 0 ? void 0 : _b.url)) {
+    if (!this._clientCapabilities?.elicitation?.url) {
       throw new Error("Client does not support URL elicitation (required for notifications/elicitation/complete)");
     }
     return () => this.notification({
@@ -19324,8 +19343,7 @@ var StdioServerTransport = class {
       this.processReadBuffer();
     };
     this._onerror = (error2) => {
-      var _a;
-      (_a = this.onerror) === null || _a === void 0 ? void 0 : _a.call(this, error2);
+      this.onerror?.(error2);
     };
   }
   /**
@@ -19340,21 +19358,19 @@ var StdioServerTransport = class {
     this._stdin.on("error", this._onerror);
   }
   processReadBuffer() {
-    var _a, _b;
     while (true) {
       try {
         const message = this._readBuffer.readMessage();
         if (message === null) {
           break;
         }
-        (_a = this.onmessage) === null || _a === void 0 ? void 0 : _a.call(this, message);
+        this.onmessage?.(message);
       } catch (error2) {
-        (_b = this.onerror) === null || _b === void 0 ? void 0 : _b.call(this, error2);
+        this.onerror?.(error2);
       }
     }
   }
   async close() {
-    var _a;
     this._stdin.off("data", this._ondata);
     this._stdin.off("error", this._onerror);
     const remainingDataListeners = this._stdin.listenerCount("data");
@@ -19362,7 +19378,7 @@ var StdioServerTransport = class {
       this._stdin.pause();
     }
     this._readBuffer.clear();
-    (_a = this.onclose) === null || _a === void 0 ? void 0 : _a.call(this);
+    this.onclose?.();
   }
   send(message) {
     return new Promise((resolve) => {
@@ -19376,7 +19392,7 @@ var StdioServerTransport = class {
   }
 };
 
-// legal-citations/src/validators/citation-validator.ts
+// legal-citations/dist/validators/citation-validator.js
 var CitationValidator = class _CitationValidator {
   // BGE/ATF/DTF citation patterns
   static BGE_PATTERN = /^BGE\s+(\d{1,3})\s+([IVX]+)\s+(\d+)$/i;
@@ -19619,9 +19635,12 @@ var CitationValidator = class _CitationValidator {
       number: number3 || void 0
     };
     let norm = `Art. ${article}`;
-    if (paragraph) norm += ` Abs. ${paragraph}`;
-    if (letter) norm += ` lit. ${letter}`;
-    if (number3) norm += ` Ziff. ${number3}`;
+    if (paragraph)
+      norm += ` Abs. ${paragraph}`;
+    if (letter)
+      norm += ` lit. ${letter}`;
+    if (number3)
+      norm += ` Ziff. ${number3}`;
     norm += ` ${statute.toUpperCase()}`;
     return {
       valid: errors.length === 0,
@@ -19657,9 +19676,12 @@ var CitationValidator = class _CitationValidator {
       number: number3 || void 0
     };
     let norm = `art. ${article}`;
-    if (paragraph) norm += ` al. ${paragraph}`;
-    if (letter) norm += ` let. ${letter}`;
-    if (number3) norm += ` ch. ${number3}`;
+    if (paragraph)
+      norm += ` al. ${paragraph}`;
+    if (letter)
+      norm += ` let. ${letter}`;
+    if (number3)
+      norm += ` ch. ${number3}`;
     norm += ` ${statute.toUpperCase()}`;
     return {
       valid: errors.length === 0,
@@ -19695,9 +19717,12 @@ var CitationValidator = class _CitationValidator {
       number: number3 || void 0
     };
     let norm = `art. ${article}`;
-    if (paragraph) norm += ` cpv. ${paragraph}`;
-    if (letter) norm += ` lett. ${letter}`;
-    if (number3) norm += ` n. ${number3}`;
+    if (paragraph)
+      norm += ` cpv. ${paragraph}`;
+    if (letter)
+      norm += ` lett. ${letter}`;
+    if (number3)
+      norm += ` n. ${number3}`;
     norm += ` ${statute.toUpperCase()}`;
     return {
       valid: errors.length === 0,
@@ -19723,11 +19748,14 @@ var CitationValidator = class _CitationValidator {
     }
     if (normalized.startsWith("ART.")) {
       const resultDE = this.validateStatuteDE(citation);
-      if (resultDE.valid) return resultDE;
+      if (resultDE.valid)
+        return resultDE;
       const resultFR = this.validateStatuteFR(citation);
-      if (resultFR.valid) return resultFR;
+      if (resultFR.valid)
+        return resultFR;
       const resultIT = this.validateStatuteIT(citation);
-      if (resultIT.valid) return resultIT;
+      if (resultIT.valid)
+        return resultIT;
       return resultDE;
     }
     return {
@@ -19738,7 +19766,7 @@ var CitationValidator = class _CitationValidator {
   }
 };
 
-// legal-citations/src/formatters/citation-formatter.ts
+// legal-citations/dist/formatters/citation-formatter.js
 var CitationFormatter = class _CitationFormatter {
   // Statute name mappings across languages
   static STATUTE_NAMES = {
@@ -20035,7 +20063,7 @@ var CitationFormatter = class _CitationFormatter {
   }
 };
 
-// legal-citations/src/parsers/citation-parser.ts
+// legal-citations/dist/parsers/citation-parser.js
 var CitationParser = class {
   validator;
   constructor() {
@@ -20065,7 +20093,8 @@ var CitationParser = class {
       return "de";
     }
     if (normalized.includes(" cc") || normalized.includes(" co") || normalized.includes(" cst")) {
-      if (normalized.includes(" cpv.")) return "it";
+      if (normalized.includes(" cpv."))
+        return "it";
       return "fr";
     }
     if (normalized.includes(" zgb") || normalized.includes(" or") || normalized.includes(" bv")) {
@@ -20078,10 +20107,14 @@ var CitationParser = class {
    */
   detectType(citation) {
     const normalized = citation.trim().toUpperCase();
-    if (normalized.startsWith("BGE")) return "bge";
-    if (normalized.startsWith("ATF")) return "atf";
-    if (normalized.startsWith("DTF")) return "dtf";
-    if (normalized.startsWith("ART.")) return "statute";
+    if (normalized.startsWith("BGE"))
+      return "bge";
+    if (normalized.startsWith("ATF"))
+      return "atf";
+    if (normalized.startsWith("DTF"))
+      return "dtf";
+    if (normalized.startsWith("ART."))
+      return "statute";
     return "unknown";
   }
   /**
@@ -20179,7 +20212,7 @@ var CitationParser = class {
   }
 };
 
-// legal-citations/src/index.ts
+// legal-citations/dist/index.js
 var FEDLEX_BASE_URL = "https://www.fedlex.admin.ch/eli";
 var STATUTE_SR_MAPPING = {
   // Civil Law
@@ -20334,17 +20367,14 @@ var LegalCitationsMCPServer = class {
   formatter;
   parser;
   constructor() {
-    this.server = new Server(
-      {
-        name: "legal-citations",
-        version: "1.1.0"
-      },
-      {
-        capabilities: {
-          tools: {}
-        }
+    this.server = new Server({
+      name: "legal-citations",
+      version: "1.1.0"
+    }, {
+      capabilities: {
+        tools: {}
       }
-    );
+    });
     this.validator = new CitationValidator();
     this.formatter = new CitationFormatter();
     this.parser = new CitationParser();
@@ -20586,48 +20616,35 @@ var LegalCitationsMCPServer = class {
           case "compare_citation_versions":
             return await this.handleCompareCitationVersions(args);
           default:
-            throw new McpError(
-              ErrorCode.MethodNotFound,
-              `Unknown tool: ${name}`
-            );
+            throw new McpError(ErrorCode.MethodNotFound, `Unknown tool: ${name}`);
         }
       } catch (error2) {
         if (error2 instanceof McpError) {
           throw error2;
         }
         const errorMessage = error2 instanceof Error ? error2.message : "Unknown error";
-        throw new McpError(
-          ErrorCode.InternalError,
-          `Error executing tool ${name}: ${errorMessage}`
-        );
+        throw new McpError(ErrorCode.InternalError, `Error executing tool ${name}: ${errorMessage}`);
       }
     });
   }
   async handleValidateCitation(args) {
     const { citation } = args;
     if (!citation || typeof citation !== "string") {
-      throw new McpError(
-        ErrorCode.InvalidParams,
-        "Citation parameter is required and must be a string"
-      );
+      throw new McpError(ErrorCode.InvalidParams, "Citation parameter is required and must be a string");
     }
     const result = this.validator.validate(citation);
     return {
       content: [
         {
           type: "text",
-          text: JSON.stringify(
-            {
-              valid: result.valid,
-              type: result.type,
-              normalized: result.normalized,
-              components: result.components,
-              errors: result.errors,
-              warnings: result.warnings
-            },
-            null,
-            2
-          )
+          text: JSON.stringify({
+            valid: result.valid,
+            type: result.type,
+            normalized: result.normalized,
+            components: result.components,
+            errors: result.errors,
+            warnings: result.warnings
+          }, null, 2)
         }
       ]
     };
@@ -20635,49 +20652,31 @@ var LegalCitationsMCPServer = class {
   async handleFormatCitation(args) {
     const { citation, targetLanguage, fullStatuteName = false } = args;
     if (!citation || typeof citation !== "string") {
-      throw new McpError(
-        ErrorCode.InvalidParams,
-        "Citation parameter is required and must be a string"
-      );
+      throw new McpError(ErrorCode.InvalidParams, "Citation parameter is required and must be a string");
     }
     if (!targetLanguage || !["de", "fr", "it", "en"].includes(targetLanguage)) {
-      throw new McpError(
-        ErrorCode.InvalidParams,
-        "targetLanguage must be one of: de, fr, it, en"
-      );
+      throw new McpError(ErrorCode.InvalidParams, "targetLanguage must be one of: de, fr, it, en");
     }
     const parsed = this.parser.parse(citation);
     if (!parsed.isValid) {
-      throw new McpError(
-        ErrorCode.InvalidParams,
-        `Invalid citation: ${citation}`
-      );
+      throw new McpError(ErrorCode.InvalidParams, `Invalid citation: ${citation}`);
     }
     const options = {
       language: targetLanguage,
       fullStatuteName
     };
-    const formatted = this.formatter.format(
-      parsed.type,
-      parsed.components,
-      targetLanguage,
-      options
-    );
+    const formatted = this.formatter.format(parsed.type, parsed.components, targetLanguage, options);
     return {
       content: [
         {
           type: "text",
-          text: JSON.stringify(
-            {
-              original: citation,
-              formatted: formatted.citation,
-              language: formatted.language,
-              type: formatted.type,
-              fullReference: formatted.fullReference
-            },
-            null,
-            2
-          )
+          text: JSON.stringify({
+            original: citation,
+            formatted: formatted.citation,
+            language: formatted.language,
+            type: formatted.type,
+            fullReference: formatted.fullReference
+          }, null, 2)
         }
       ]
     };
@@ -20685,54 +20684,33 @@ var LegalCitationsMCPServer = class {
   async handleConvertCitation(args) {
     const { citation, targetLanguage, fullStatuteName = false } = args;
     if (!citation || typeof citation !== "string") {
-      throw new McpError(
-        ErrorCode.InvalidParams,
-        "Citation parameter is required and must be a string"
-      );
+      throw new McpError(ErrorCode.InvalidParams, "Citation parameter is required and must be a string");
     }
     if (!targetLanguage || !["de", "fr", "it", "en"].includes(targetLanguage)) {
-      throw new McpError(
-        ErrorCode.InvalidParams,
-        "targetLanguage must be one of: de, fr, it, en"
-      );
+      throw new McpError(ErrorCode.InvalidParams, "targetLanguage must be one of: de, fr, it, en");
     }
     const parsed = this.parser.parse(citation);
     if (!parsed.isValid) {
-      throw new McpError(
-        ErrorCode.InvalidParams,
-        `Invalid citation: ${citation}`
-      );
+      throw new McpError(ErrorCode.InvalidParams, `Invalid citation: ${citation}`);
     }
-    const allTranslations = this.formatter.getAllTranslations(
-      parsed.type,
-      parsed.components
-    );
+    const allTranslations = this.formatter.getAllTranslations(parsed.type, parsed.components);
     const options = {
       language: targetLanguage,
       fullStatuteName
     };
-    const formatted = this.formatter.format(
-      parsed.type,
-      parsed.components,
-      targetLanguage,
-      options
-    );
+    const formatted = this.formatter.format(parsed.type, parsed.components, targetLanguage, options);
     return {
       content: [
         {
           type: "text",
-          text: JSON.stringify(
-            {
-              original: citation,
-              sourceLanguage: parsed.language,
-              targetLanguage,
-              converted: formatted.citation,
-              fullReference: formatted.fullReference,
-              allTranslations
-            },
-            null,
-            2
-          )
+          text: JSON.stringify({
+            original: citation,
+            sourceLanguage: parsed.language,
+            targetLanguage,
+            converted: formatted.citation,
+            fullReference: formatted.fullReference,
+            allTranslations
+          }, null, 2)
         }
       ]
     };
@@ -20740,28 +20718,21 @@ var LegalCitationsMCPServer = class {
   async handleParseCitation(args) {
     const { citation } = args;
     if (!citation || typeof citation !== "string") {
-      throw new McpError(
-        ErrorCode.InvalidParams,
-        "Citation parameter is required and must be a string"
-      );
+      throw new McpError(ErrorCode.InvalidParams, "Citation parameter is required and must be a string");
     }
     const parsed = this.parser.parse(citation);
     return {
       content: [
         {
           type: "text",
-          text: JSON.stringify(
-            {
-              original: parsed.original,
-              type: parsed.type,
-              language: parsed.language,
-              components: parsed.components,
-              isValid: parsed.isValid,
-              suggestions: parsed.suggestions
-            },
-            null,
-            2
-          )
+          text: JSON.stringify({
+            original: parsed.original,
+            type: parsed.type,
+            language: parsed.language,
+            components: parsed.components,
+            isValid: parsed.isValid,
+            suggestions: parsed.suggestions
+          }, null, 2)
         }
       ]
     };
@@ -20772,71 +20743,45 @@ var LegalCitationsMCPServer = class {
   async handleGetProvisionText(args) {
     const { statute, article, paragraph, letter, language = "de", asOfDate } = args;
     if (!statute || typeof statute !== "string") {
-      throw new McpError(
-        ErrorCode.InvalidParams,
-        "statute parameter is required and must be a string"
-      );
+      throw new McpError(ErrorCode.InvalidParams, "statute parameter is required and must be a string");
     }
     if (typeof article !== "number") {
-      throw new McpError(
-        ErrorCode.InvalidParams,
-        "article parameter is required and must be a number"
-      );
+      throw new McpError(ErrorCode.InvalidParams, "article parameter is required and must be a number");
     }
     const normalizedStatute = statute.toUpperCase();
     const srNumber = STATUTE_SR_MAPPING[normalizedStatute] || STATUTE_SR_MAPPING[statute];
     if (!srNumber) {
-      throw new McpError(
-        ErrorCode.InvalidParams,
-        `Unknown statute abbreviation: ${statute}. Supported: ${Object.keys(STATUTE_SR_MAPPING).join(", ")}`
-      );
+      throw new McpError(ErrorCode.InvalidParams, `Unknown statute abbreviation: ${statute}. Supported: ${Object.keys(STATUTE_SR_MAPPING).join(", ")}`);
     }
     const langCode = language === "de" ? "de" : language === "fr" ? "fr" : "it";
     const fedlexUrl = `${FEDLEX_BASE_URL}/cc/${srNumber}/${langCode}`;
-    const formattedCitation = this.buildProvisionReference(
-      normalizedStatute,
-      article,
-      paragraph,
-      letter,
-      language
-    );
-    const provisionText = await this.fetchProvisionText(
-      srNumber,
-      article,
-      paragraph,
-      letter,
-      langCode,
-      asOfDate
-    );
+    const formattedCitation = this.buildProvisionReference(normalizedStatute, article, paragraph, letter, language);
+    const provisionText = await this.fetchProvisionText(srNumber, article, paragraph, letter, langCode, asOfDate);
     const fullStatuteName = STATUTE_FULL_NAMES[normalizedStatute]?.[language] || STATUTE_FULL_NAMES[Object.keys(STATUTE_SR_MAPPING).find((k) => STATUTE_SR_MAPPING[k] === srNumber) || ""]?.[language] || normalizedStatute;
     return {
       content: [
         {
           type: "text",
-          text: JSON.stringify(
-            {
-              success: true,
-              provision: {
-                statute: normalizedStatute,
-                srNumber,
-                article,
-                paragraph,
-                letter,
-                formattedCitation,
-                fullStatuteName
-              },
-              text: provisionText.text,
-              effectiveDate: provisionText.effectiveDate,
-              language,
-              fedlexUrl,
-              metadata: {
-                lastModified: provisionText.lastModified,
-                version: provisionText.version
-              }
+          text: JSON.stringify({
+            success: true,
+            provision: {
+              statute: normalizedStatute,
+              srNumber,
+              article,
+              paragraph,
+              letter,
+              formattedCitation,
+              fullStatuteName
             },
-            null,
-            2
-          )
+            text: provisionText.text,
+            effectiveDate: provisionText.effectiveDate,
+            language,
+            fedlexUrl,
+            metadata: {
+              lastModified: provisionText.lastModified,
+              version: provisionText.version
+            }
+          }, null, 2)
         }
       ]
     };
@@ -20880,10 +20825,7 @@ var LegalCitationsMCPServer = class {
   async handleExtractCitations(args) {
     const { text, includeTypes = ["all"], validateCitations = true } = args;
     if (!text || typeof text !== "string") {
-      throw new McpError(
-        ErrorCode.InvalidParams,
-        "text parameter is required and must be a string"
-      );
+      throw new McpError(ErrorCode.InvalidParams, "text parameter is required and must be a string");
     }
     const extractedCitations = [];
     const patterns = [
@@ -20901,18 +20843,14 @@ var LegalCitationsMCPServer = class {
       { regex: /[A-Z]{2,4}[-_]\d{4}[-_]\d+/g, type: "cantonal" }
     ];
     const shouldIncludeAll = includeTypes.includes("all");
-    const filteredPatterns = patterns.filter(
-      (p) => shouldIncludeAll || includeTypes.includes(p.type)
-    );
+    const filteredPatterns = patterns.filter((p) => shouldIncludeAll || includeTypes.includes(p.type));
     for (const { regex, type } of filteredPatterns) {
       let match;
       const regexCopy = new RegExp(regex.source, regex.flags);
       while ((match = regexCopy.exec(text)) !== null) {
         const citation = match[0].trim();
         const position = { start: match.index, end: match.index + citation.length };
-        const isDuplicate = extractedCitations.some(
-          (ec) => ec.citation === citation && ec.position.start === position.start
-        );
+        const isDuplicate = extractedCitations.some((ec) => ec.citation === citation && ec.position.start === position.start);
         if (!isDuplicate) {
           const entry = {
             citation,
@@ -20942,16 +20880,12 @@ var LegalCitationsMCPServer = class {
       content: [
         {
           type: "text",
-          text: JSON.stringify(
-            {
-              success: true,
-              citations: extractedCitations,
-              statistics,
-              textLength: text.length
-            },
-            null,
-            2
-          )
+          text: JSON.stringify({
+            success: true,
+            citations: extractedCitations,
+            statistics,
+            textLength: text.length
+          }, null, 2)
         }
       ]
     };
@@ -20962,16 +20896,10 @@ var LegalCitationsMCPServer = class {
   async handleStandardizeDocumentCitations(args) {
     const { text, targetLanguage, format = "short", includeFullNames = false } = args;
     if (!text || typeof text !== "string") {
-      throw new McpError(
-        ErrorCode.InvalidParams,
-        "text parameter is required and must be a string"
-      );
+      throw new McpError(ErrorCode.InvalidParams, "text parameter is required and must be a string");
     }
     if (!targetLanguage || !["de", "fr", "it", "en"].includes(targetLanguage)) {
-      throw new McpError(
-        ErrorCode.InvalidParams,
-        "targetLanguage must be one of: de, fr, it, en"
-      );
+      throw new McpError(ErrorCode.InvalidParams, "targetLanguage must be one of: de, fr, it, en");
     }
     const extractResult = await this.handleExtractCitations({
       text,
@@ -20990,12 +20918,7 @@ var LegalCitationsMCPServer = class {
         language: targetLanguage,
         fullStatuteName: includeFullNames
       };
-      const formatted = this.formatter.format(
-        parsed.type,
-        parsed.components,
-        targetLanguage,
-        options
-      );
+      const formatted = this.formatter.format(parsed.type, parsed.components, targetLanguage, options);
       let standardized = formatted.citation;
       if (format === "long" && formatted.fullReference) {
         standardized = formatted.fullReference;
@@ -21013,9 +20936,7 @@ var LegalCitationsMCPServer = class {
       }
     }
     let standardizedText = text;
-    const sortedReplacements = [...replacements].sort(
-      (a, b) => b.position.start - a.position.start
-    );
+    const sortedReplacements = [...replacements].sort((a, b) => b.position.start - a.position.start);
     for (const replacement of sortedReplacements) {
       standardizedText = standardizedText.substring(0, replacement.position.start) + replacement.standardized + standardizedText.substring(replacement.position.end);
     }
@@ -21023,23 +20944,19 @@ var LegalCitationsMCPServer = class {
       content: [
         {
           type: "text",
-          text: JSON.stringify(
-            {
-              success: true,
-              originalText: text,
-              standardizedText,
-              targetLanguage,
-              format,
-              replacements,
-              statistics: {
-                totalCitations: citations.length,
-                standardized: replacements.length,
-                unchanged: citations.length - replacements.length
-              }
-            },
-            null,
-            2
-          )
+          text: JSON.stringify({
+            success: true,
+            originalText: text,
+            standardizedText,
+            targetLanguage,
+            format,
+            replacements,
+            statistics: {
+              totalCitations: citations.length,
+              standardized: replacements.length,
+              unchanged: citations.length - replacements.length
+            }
+          }, null, 2)
         }
       ]
     };
@@ -21050,67 +20967,41 @@ var LegalCitationsMCPServer = class {
   async handleCompareCitationVersions(args) {
     const { statute, article, paragraph, dateFrom, dateTo, language = "de" } = args;
     if (!statute || typeof statute !== "string") {
-      throw new McpError(
-        ErrorCode.InvalidParams,
-        "statute parameter is required and must be a string"
-      );
+      throw new McpError(ErrorCode.InvalidParams, "statute parameter is required and must be a string");
     }
     if (typeof article !== "number") {
-      throw new McpError(
-        ErrorCode.InvalidParams,
-        "article parameter is required and must be a number"
-      );
+      throw new McpError(ErrorCode.InvalidParams, "article parameter is required and must be a number");
     }
     const normalizedStatute = statute.toUpperCase();
     const srNumber = STATUTE_SR_MAPPING[normalizedStatute] || STATUTE_SR_MAPPING[statute];
     if (!srNumber) {
-      throw new McpError(
-        ErrorCode.InvalidParams,
-        `Unknown statute abbreviation: ${statute}`
-      );
+      throw new McpError(ErrorCode.InvalidParams, `Unknown statute abbreviation: ${statute}`);
     }
     const fromDate = dateFrom ? new Date(dateFrom) : /* @__PURE__ */ new Date("2000-01-01");
     const toDate = dateTo ? new Date(dateTo) : /* @__PURE__ */ new Date();
-    const versions = await this.fetchProvisionVersions(
-      srNumber,
-      article,
-      paragraph,
-      fromDate,
-      toDate,
-      language
-    );
-    const formattedCitation = this.buildProvisionReference(
-      normalizedStatute,
-      article,
-      paragraph,
-      void 0,
-      language
-    );
+    const versions = await this.fetchProvisionVersions(srNumber, article, paragraph, fromDate, toDate, language);
+    const formattedCitation = this.buildProvisionReference(normalizedStatute, article, paragraph, void 0, language);
     return {
       content: [
         {
           type: "text",
-          text: JSON.stringify(
-            {
-              success: true,
-              provision: {
-                statute: normalizedStatute,
-                srNumber,
-                article,
-                paragraph,
-                formattedCitation
-              },
-              dateRange: {
-                from: fromDate.toISOString().split("T")[0],
-                to: toDate.toISOString().split("T")[0]
-              },
-              versions,
-              totalVersions: versions.length,
-              hasChanges: versions.length > 1
+          text: JSON.stringify({
+            success: true,
+            provision: {
+              statute: normalizedStatute,
+              srNumber,
+              article,
+              paragraph,
+              formattedCitation
             },
-            null,
-            2
-          )
+            dateRange: {
+              from: fromDate.toISOString().split("T")[0],
+              to: toDate.toISOString().split("T")[0]
+            },
+            versions,
+            totalVersions: versions.length,
+            hasChanges: versions.length > 1
+          }, null, 2)
         }
       ]
     };

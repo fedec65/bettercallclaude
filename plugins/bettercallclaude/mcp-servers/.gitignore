@@ -1,0 +1,3 @@
+# Include node_modules for plugin distribution (no build steps for end users)
+!node_modules/
+!node_modules/sql.js/
