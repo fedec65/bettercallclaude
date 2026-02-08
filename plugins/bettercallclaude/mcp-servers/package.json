@@ -1,9 +1,0 @@
-{
-  "name": "@bettercallclaude/mcp-servers-dist",
-  "version": "2.0.0",
-  "private": true,
-  "description": "Runtime dependencies for BetterCallClaude MCP servers",
-  "dependencies": {
-    "sql.js": "^1.11.0"
-  }
-}
