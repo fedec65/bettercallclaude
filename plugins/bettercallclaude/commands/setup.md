@@ -123,6 +123,17 @@ After adding, restart Cowork Desktop and re-run /bettercallclaude:setup to verif
 Also verify:
 - **Node.js**: Run `node --version` via Bash. Require >= 18.0.0. If not found or too old, warn the user.
 
+## Step 5: Interpret Backend Errors
+
+If a server connects but returns errors during use, consult this diagnostic guide:
+
+| Error Pattern | Likely Cause | Resolution |
+|---------------|-------------|------------|
+| "table cache_entries does not exist" or similar missing table errors | Database initialization failed — TypeORM `synchronize` was disabled | Update to plugin version 1.3.1+ which fixes this. Re-register the server and restart. |
+| SPARQL endpoint timeout or HTTP 5xx from fedlex-sparql | Fedlex service (`fedlex.data.admin.ch`) is temporarily unavailable | Retry later. The server has built-in retry logic (3 attempts, 2s delay). This is an external service issue, not a plugin bug. |
+| "ECONNREFUSED" or "ENOTFOUND" from onlinekommentar | `onlinekommentar.ch` API is unreachable — likely blocked by Cowork Desktop's network sandbox | This server requires external network access. It will not work in sandboxed environments. Use it in Claude Code CLI instead. |
+| Connection works but no search results | Server is healthy but the query returned no matches | Try broader search terms or different parameters. |
+
 ## Notes
 
 - MCP servers are required for live database access (court decisions, legislation, citation verification)
