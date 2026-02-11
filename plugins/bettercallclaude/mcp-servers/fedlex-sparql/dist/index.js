@@ -36318,11 +36318,11 @@ var require_sparql_client = __commonJS({
     exports2.DEFAULT_CONFIG = {
       endpoint: "https://fedlex.data.admin.ch/sparqlendpoint",
       // Correct Fedlex SPARQL endpoint
-      timeout: 3e4,
-      // 30 seconds
+      timeout: 6e4,
+      // 60 seconds (complex SPARQL queries need more time)
       maxRetries: 3,
-      retryDelay: 1e3,
-      // 1 second
+      retryDelay: 2e3,
+      // 2 seconds (government endpoint needs more backoff)
       userAgent: "BetterCallClaude/2.0.1 (Swiss Legal Intelligence)"
     };
     var SPARQLClient = class {
@@ -36366,11 +36366,12 @@ var require_sparql_client = __commonJS({
             return result;
           } catch (error) {
             lastError = error;
-            if (lastError.message.includes("4")) {
+            if (/\b4\d{2}\b/.test(lastError.message) && !/\b408\b/.test(lastError.message) && !/\b429\b/.test(lastError.message)) {
               throw this.createFedlexError(lastError, sparql);
             }
             if (attempt < this.config.maxRetries - 1) {
-              await this.delay(this.config.retryDelay * (attempt + 1));
+              const backoff = this.config.retryDelay * Math.pow(2, attempt);
+              await this.delay(backoff);
             }
           }
         }
@@ -36462,10 +36463,17 @@ var require_sparql_client = __commonJS({
        * Create a FedlexError from an Error
        */
       createFedlexError(error, query) {
+        const isTimeout = error.name === "AbortError" || error.message?.includes("abort");
+        const isNetwork = error.message?.includes("ECONNREFUSED") || error.message?.includes("ENOTFOUND") || error.message?.includes("network");
+        let helpfulMessage = error.message;
+        if (isTimeout) {
+          helpfulMessage = `SPARQL query timed out after ${this.config.timeout / 1000}s. The Fedlex endpoint may be under heavy load, or the query is too complex. Try simplifying the search or retry later.`;
+        } else if (isNetwork) {
+          helpfulMessage = `Cannot reach the Fedlex SPARQL endpoint (${this.config.endpoint}). The government service may be temporarily down. Please try again later.`;
+        }
         return {
-          code: "SPARQL_ERROR",
-          message: error.message,
-          query,
+          code: isTimeout ? "SPARQL_TIMEOUT" : isNetwork ? "SPARQL_NETWORK_ERROR" : "SPARQL_ERROR",
+          message: helpfulMessage,
           endpoint: this.config.endpoint
         };
       }
@@ -37980,6 +37988,53 @@ function initializeClient() {
   });
   console.error(`Fedlex SPARQL client initialized - endpoint: ${sparqlClient.getEndpoint()}`);
 }
+async function lookupStatuteViaELI(srNumber, language) {
+  const eliUrl = `https://fedlex.data.admin.ch/eli/cc/${srNumber}`;
+  const controller = new AbortController();
+  const timeoutId = setTimeout(() => controller.abort(), 30000);
+  try {
+    const response = await fetch(eliUrl, {
+      headers: {
+        "Accept": "application/ld+json",
+        "User-Agent": "BetterCallClaude/2.0.1 (Swiss Legal Intelligence)",
+        "Accept-Language": language || "de,fr,it,en"
+      },
+      signal: controller.signal
+    });
+    clearTimeout(timeoutId);
+    if (!response.ok) {
+      return null;
+    }
+    const data = await response.json();
+    const graph = data["@graph"] || [data];
+    const mainEntry = graph.find((e) => e["@type"]?.includes?.("LegalResource") || e["@type"]?.includes?.("Act") || e.classifiedByTaxonomyEntry) || graph[0];
+    if (!mainEntry) return null;
+    const title = {};
+    const titleData = mainEntry.title || mainEntry["rdfs:label"] || mainEntry.prefLabel;
+    if (typeof titleData === "string") {
+      title["de"] = titleData;
+    } else if (Array.isArray(titleData)) {
+      for (const t of titleData) {
+        if (t["@language"] && t["@value"]) title[t["@language"]] = t["@value"];
+      }
+    } else if (titleData && titleData["@value"]) {
+      title[titleData["@language"] || "de"] = titleData["@value"];
+    }
+    return {
+      uri: eliUrl,
+      srNumber: srNumber,
+      title: Object.keys(title).length > 0 ? title : { de: `SR ${srNumber}` },
+      abbreviation: {},
+      actType: mainEntry.typeDocument || mainEntry["@type"]?.[0] || "unknown",
+      dateDocument: mainEntry.dateDocument || "",
+      dateInForce: mainEntry.dateEntryInForce || "",
+      status: "unknown"
+    };
+  } catch (error) {
+    clearTimeout(timeoutId);
+    return null;
+  }
+}
 async function lookupStatute(input) {
   const startTime = Date.now();
   try {
@@ -37995,6 +38050,18 @@ async function lookupStatute(input) {
     const result = await sparqlClient.query(query);
     const bindings = result.results.bindings;
     if (bindings.length === 0) {
+      if (searchType === "srNumber") {
+        console.error("SPARQL returned no results, trying ELI fallback...");
+        const eliResult = await lookupStatuteViaELI(input.identifier, input.language);
+        if (eliResult) {
+          return {
+            found: true,
+            acts: [eliResult],
+            searchType: "eli_fallback",
+            searchTimeMs: Date.now() - startTime
+          };
+        }
+      }
       return {
         found: false,
         searchTimeMs: Date.now() - startTime
@@ -38023,8 +38090,20 @@ async function lookupStatute(input) {
       searchTimeMs: Date.now() - startTime
     };
   } catch (error) {
-    console.error("Lookup statute failed:", error);
-    throw error;
+    console.error("SPARQL lookup statute failed, trying ELI fallback:", error.message || error);
+    if (/^\d/.test(input.identifier)) {
+      const eliResult = await lookupStatuteViaELI(input.identifier, input.language);
+      if (eliResult) {
+        return {
+          found: true,
+          acts: [eliResult],
+          searchType: "eli_fallback",
+          note: "SPARQL endpoint was unavailable, results from ELI URI dereferencing",
+          searchTimeMs: Date.now() - startTime
+        };
+      }
+    }
+    throw new Error(`Fedlex lookup failed: ${error.message || error}. The SPARQL endpoint at fedlex.data.admin.ch may be temporarily unavailable. Try again in a few minutes, or use a simpler query.`);
   }
 }
 async function getArticle(input) {
@@ -38091,8 +38170,8 @@ async function getArticle(input) {
       searchTimeMs: Date.now() - startTime
     };
   } catch (error) {
-    console.error("Get article failed:", error);
-    throw error;
+    console.error("SPARQL get article failed:", error.message || error);
+    throw new Error(`Fedlex article lookup failed: ${error.message || error}. The SPARQL endpoint may be temporarily unavailable. Try again in a few minutes, or try lookup_statute first to verify the SR number exists.`);
   }
 }
 async function searchLegislation(input) {
@@ -38151,8 +38230,8 @@ async function searchLegislation(input) {
       searchTimeMs: Date.now() - startTime
     };
   } catch (error) {
-    console.error("Search legislation failed:", error);
-    throw error;
+    console.error("SPARQL search legislation failed:", error.message || error);
+    throw new Error(`Fedlex legislation search failed: ${error.message || error}. The SPARQL endpoint may be temporarily unavailable or the query may be too complex. Try a simpler search term, or try again in a few minutes.`);
   }
 }
 async function findRelated(input) {
@@ -38190,8 +38269,8 @@ async function findRelated(input) {
       searchTimeMs: Date.now() - startTime
     };
   } catch (error) {
-    console.error("Find related failed:", error);
-    throw error;
+    console.error("SPARQL find related failed:", error.message || error);
+    throw new Error(`Fedlex find related failed: ${error.message || error}. The SPARQL endpoint may be temporarily unavailable. Try again in a few minutes.`);
   }
 }
 async function getMetadata(input) {
@@ -38262,8 +38341,8 @@ async function getMetadata(input) {
       searchTimeMs: Date.now() - startTime
     };
   } catch (error) {
-    console.error("Get metadata failed:", error);
-    throw error;
+    console.error("SPARQL get metadata failed:", error.message || error);
+    throw new Error(`Fedlex metadata lookup failed: ${error.message || error}. The SPARQL endpoint may be temporarily unavailable. Try again in a few minutes.`);
   }
 }
 async function main() {

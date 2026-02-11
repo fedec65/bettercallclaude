@@ -20653,6 +20653,39 @@ var StdioServerTransport = class {
   }
 };
 
+// onlinekommentar/dist/cache.js
+var path = require("path");
+var fs = require("fs");
+var CACHE_FILE_PATH = path.join(__dirname, "onlinekommentar-cache.json");
+var okCache = null;
+var cacheLoadedAt = null;
+function loadCache() {
+  try {
+    if (fs.existsSync(CACHE_FILE_PATH)) {
+      const raw = fs.readFileSync(CACHE_FILE_PATH, "utf-8");
+      okCache = JSON.parse(raw);
+      cacheLoadedAt = new Date().toISOString();
+      const cacheDate = okCache?.metadata?.fetchedAt || "unknown";
+      console.error(`OnlineKommentar cache loaded: ${okCache?.commentaries?.length || 0} commentaries, ${okCache?.legislativeActs?.length || 0} legislative acts (fetched: ${cacheDate})`);
+      return true;
+    }
+  } catch (err) {
+    console.error("Failed to load OnlineKommentar cache:", err.message);
+  }
+  okCache = null;
+  return false;
+}
+function getCachedCommentaries() { return okCache?.commentaries || []; }
+function getCachedLegislativeActs() { return okCache?.legislativeActs || []; }
+function getCacheMetadata() { return okCache?.metadata || null; }
+function isCacheAvailable() { return okCache !== null && getCachedCommentaries().length > 0; }
+function getCacheAge() {
+  if (!okCache?.metadata?.fetchedAt) return Infinity;
+  return (Date.now() - new Date(okCache.metadata.fetchedAt).getTime()) / (1000 * 60 * 60 * 24);
+}
+// Load cache at startup
+loadCache();
+
 // onlinekommentar/dist/client.js
 var DEFAULT_BASE_URL = "https://onlinekommentar.ch/api";
 var DEFAULT_RATE_LIMIT_MS = 1e3;
@@ -20663,10 +20696,21 @@ var OnlineKommentarClient = class {
   timeoutMs;
   lastRequestTime = 0;
   legislativeActMapping = {};
+  networkAvailable = null;
   constructor(options = {}) {
     this.baseUrl = options.baseUrl ?? DEFAULT_BASE_URL;
     this.rateLimitMs = options.rateLimitMs ?? DEFAULT_RATE_LIMIT_MS;
     this.timeoutMs = options.timeoutMs ?? DEFAULT_TIMEOUT_MS;
+    if (isCacheAvailable()) {
+      const acts = getCachedLegislativeActs();
+      for (const act of acts) {
+        if (act.abbreviation) this.legislativeActMapping[act.abbreviation.toLowerCase()] = act.id;
+        if (act.abbreviation_de) this.legislativeActMapping[act.abbreviation_de.toLowerCase()] = act.id;
+        if (act.abbreviation_fr) this.legislativeActMapping[act.abbreviation_fr.toLowerCase()] = act.id;
+        if (act.abbreviation_it) this.legislativeActMapping[act.abbreviation_it.toLowerCase()] = act.id;
+      }
+      console.error(`Legislative act mapping initialized from cache: ${Object.keys(this.legislativeActMapping).length} entries`);
+    }
   }
   /**
    * Rate-limited fetch wrapper
@@ -20730,22 +20774,71 @@ var OnlineKommentarClient = class {
    */
   async searchCommentaries(query, options = {}) {
     const { language, legislative_act, sort, page } = options;
-    const url2 = this.buildUrl("/commentaries", {
-      search: query || void 0,
-      language,
-      legislative_act,
-      sort,
-      page
-    });
-    const response = await this.rateLimitedFetch(url2);
-    const data = await response.json();
-    if (!data.success && data.error) {
-      throw new Error(data.error);
+    try {
+      const url2 = this.buildUrl("/commentaries", {
+        search: query || void 0,
+        language,
+        legislative_act,
+        sort,
+        page
+      });
+      const response = await this.rateLimitedFetch(url2);
+      const data = await response.json();
+      if (!data.success && data.error) {
+        throw new Error(data.error);
+      }
+      this.networkAvailable = true;
+      const result = data.data ?? data;
+      result._source = "live";
+      return result;
+    } catch (liveError) {
+      console.error("Live API failed, trying cache:", liveError.message);
+      this.networkAvailable = false;
+      if (!isCacheAvailable()) {
+        throw new Error(`OnlineKommentar API unavailable and no local cache found. Error: ${liveError.message}. Run the fetch script to build a local cache: node scripts/fetch-onlinekommentar-data.js`);
+      }
+      let commentaries = getCachedCommentaries();
+      if (query) {
+        const queryLower = query.toLowerCase();
+        commentaries = commentaries.filter((c) =>
+          (c.title && c.title.toLowerCase().includes(queryLower)) ||
+          (c.abstract && c.abstract.toLowerCase().includes(queryLower)) ||
+          (c.content && c.content.toLowerCase().includes(queryLower))
+        );
+      }
+      if (language) {
+        commentaries = commentaries.filter((c) => c.language === language);
+      }
+      if (legislative_act) {
+        commentaries = commentaries.filter((c) =>
+          c.legislative_act?.id === legislative_act ||
+          c.legislative_act?.abbreviation?.toLowerCase() === legislative_act.toLowerCase()
+        );
+      }
+      if (sort) {
+        const desc = sort.startsWith("-");
+        const field = desc ? sort.slice(1) : sort;
+        commentaries.sort((a, b) => {
+          const aVal = a[field] || "";
+          const bVal = b[field] || "";
+          return desc ? bVal.localeCompare(aVal) : aVal.localeCompare(bVal);
+        });
+      }
+      const pageSize = 20;
+      const pageNum = parseInt(page) || 1;
+      const start = (pageNum - 1) * pageSize;
+      const paged = commentaries.slice(start, start + pageSize);
+      const cacheAge = getCacheAge();
+      return {
+        count: paged.length,
+        page: pageNum,
+        total_pages: Math.ceil(commentaries.length / pageSize),
+        commentaries: paged,
+        _source: "cache",
+        _cacheDate: getCacheMetadata()?.fetchedAt,
+        _cacheWarning: cacheAge > 30 ? `Cache is ${Math.round(cacheAge)} days old. Run fetch script to update.` : undefined
+      };
     }
-    if (data.data) {
-      return data.data;
-    }
-    return data;
   }
   /**
    * Get detailed commentary by ID
@@ -20757,19 +20850,35 @@ var OnlineKommentarClient = class {
     if (!id || !/^[a-zA-Z0-9-]+$/.test(id)) {
       throw new Error("Invalid commentary ID");
     }
-    const url2 = this.buildUrl(`/commentaries/${encodeURIComponent(id)}`);
-    const response = await this.rateLimitedFetch(url2);
-    const data = await response.json();
-    if (!data.success && data.error) {
-      if (data.error.includes("not found") || data.error.includes("404")) {
-        throw new Error("Commentary not found");
+    try {
+      const url2 = this.buildUrl(`/commentaries/${encodeURIComponent(id)}`);
+      const response = await this.rateLimitedFetch(url2);
+      const data = await response.json();
+      if (!data.success && data.error) {
+        if (data.error.includes("not found") || data.error.includes("404")) {
+          throw new Error("Commentary not found");
+        }
+        throw new Error(data.error);
       }
-      throw new Error(data.error);
+      this.networkAvailable = true;
+      const result = data.data ?? data;
+      result._source = "live";
+      return result;
+    } catch (liveError) {
+      if (liveError.message === "Commentary not found" || liveError.message === "Invalid commentary ID") {
+        throw liveError;
+      }
+      console.error("Live API failed for getCommentary, trying cache:", liveError.message);
+      this.networkAvailable = false;
+      if (!isCacheAvailable()) {
+        throw new Error(`OnlineKommentar API unavailable and no local cache. Error: ${liveError.message}`);
+      }
+      const cached = getCachedCommentaries().find((c) => c.id === id);
+      if (!cached) {
+        throw new Error("Commentary not found in local cache");
+      }
+      return { ...cached, _source: "cache", _cacheDate: getCacheMetadata()?.fetchedAt };
     }
-    if (data.data) {
-      return data.data;
-    }
-    return data;
   }
   /**
    * List all available legislative acts
@@ -20778,28 +20887,64 @@ var OnlineKommentarClient = class {
    * @returns Array of LegislativeAct
    */
   async listLegislativeActs(language) {
-    const url2 = this.buildUrl("/legislative-acts", { language });
-    const response = await this.rateLimitedFetch(url2);
-    const data = await response.json();
-    if (!data.success && data.error) {
-      throw new Error(data.error);
+    // First try extracting from live commentaries API
+    try {
+      const url2 = this.buildUrl("/commentaries", { page: 1 });
+      const response = await this.rateLimitedFetch(url2);
+      const data = await response.json();
+      this.networkAvailable = true;
+      // Extract unique legislative acts from commentaries
+      const items = data.data ? Object.values(data.data) : (Array.isArray(data) ? data : []);
+      const actsMap = new Map();
+      for (const c of items) {
+        const la = c.legislative_act;
+        if (la && la.id && !actsMap.has(la.id)) {
+          actsMap.set(la.id, {
+            id: la.id,
+            name: la.title || la.name || "",
+            abbreviation: la.title || la.abbreviation || ""
+          });
+        }
+      }
+      // Also use cached acts to get a more complete list
+      if (isCacheAvailable()) {
+        for (const act of getCachedLegislativeActs()) {
+          if (act.id && !actsMap.has(act.id)) {
+            actsMap.set(act.id, act);
+          }
+        }
+      }
+      const acts = Array.from(actsMap.values());
+      for (const act of acts) {
+        if (act.abbreviation) this.legislativeActMapping[act.abbreviation.toLowerCase()] = act.id;
+        if (act.abbreviation_de) this.legislativeActMapping[act.abbreviation_de.toLowerCase()] = act.id;
+        if (act.abbreviation_fr) this.legislativeActMapping[act.abbreviation_fr.toLowerCase()] = act.id;
+        if (act.abbreviation_it) this.legislativeActMapping[act.abbreviation_it.toLowerCase()] = act.id;
+        if (act.name) this.legislativeActMapping[act.name.toLowerCase()] = act.id;
+      }
+      acts._source = "live";
+      return acts;
+    } catch (liveError) {
+      console.error("Live API failed for listLegislativeActs, trying cache:", liveError.message);
+      this.networkAvailable = false;
+      if (!isCacheAvailable()) {
+        throw new Error(`OnlineKommentar API unavailable and no local cache. Error: ${liveError.message}`);
+      }
+      let acts = getCachedLegislativeActs();
+      if (language) {
+        acts = acts.filter((a) => a.language === language);
+      }
+      for (const act of acts) {
+        if (act.abbreviation) this.legislativeActMapping[act.abbreviation.toLowerCase()] = act.id;
+        if (act.abbreviation_de) this.legislativeActMapping[act.abbreviation_de.toLowerCase()] = act.id;
+        if (act.abbreviation_fr) this.legislativeActMapping[act.abbreviation_fr.toLowerCase()] = act.id;
+        if (act.abbreviation_it) this.legislativeActMapping[act.abbreviation_it.toLowerCase()] = act.id;
+        if (act.name) this.legislativeActMapping[act.name.toLowerCase()] = act.id;
+      }
+      acts._source = "cache";
+      acts._cacheDate = getCacheMetadata()?.fetchedAt;
+      return acts;
     }
-    const acts = data.data ?? data;
-    for (const act of acts) {
-      if (act.abbreviation) {
-        this.legislativeActMapping[act.abbreviation.toLowerCase()] = act.id;
-      }
-      if (act.abbreviation_de) {
-        this.legislativeActMapping[act.abbreviation_de.toLowerCase()] = act.id;
-      }
-      if (act.abbreviation_fr) {
-        this.legislativeActMapping[act.abbreviation_fr.toLowerCase()] = act.id;
-      }
-      if (act.abbreviation_it) {
-        this.legislativeActMapping[act.abbreviation_it.toLowerCase()] = act.id;
-      }
-    }
-    return acts;
   }
   /**
    * Get commentary for a specific article reference
@@ -21036,25 +21181,29 @@ server.setRequestHandler(CallToolRequestSchema, async (request) => {
           page: args?.page
         };
         const result = await client.searchCommentaries(query, options);
+        const response = {
+          success: true,
+          source: result._source || "live",
+          count: result.count,
+          page: result.page,
+          total_pages: result.total_pages,
+          commentaries: (result.commentaries || []).map((c) => ({
+            id: c.id,
+            title: c.title,
+            authors: c.authors,
+            legislative_act: c.legislative_act?.abbreviation || c.legislative_act,
+            language: c.language,
+            updated: c.updated,
+            url: c.url
+          }))
+        };
+        if (result._cacheDate) response.cache_date = result._cacheDate;
+        if (result._cacheWarning) response.cache_warning = result._cacheWarning;
         return {
           content: [
             {
               type: "text",
-              text: JSON.stringify({
-                success: true,
-                count: result.count,
-                page: result.page,
-                total_pages: result.total_pages,
-                commentaries: result.commentaries.map((c) => ({
-                  id: c.id,
-                  title: c.title,
-                  authors: c.authors,
-                  legislative_act: c.legislative_act.abbreviation,
-                  language: c.language,
-                  updated: c.updated,
-                  url: c.url
-                }))
-              }, null, 2)
+              text: JSON.stringify(response, null, 2)
             }
           ]
         };
@@ -21073,27 +21222,30 @@ server.setRequestHandler(CallToolRequestSchema, async (request) => {
           };
         }
         const result = await client.getCommentary(id);
+        const response = {
+          success: true,
+          source: result._source || "live",
+          commentary: {
+            id: result.id,
+            title: result.title,
+            authors: result.authors,
+            legislative_act: result.legislative_act,
+            language: result.language,
+            updated: result.updated,
+            url: result.url,
+            abstract: result.abstract,
+            content: result.content,
+            sections: result.sections,
+            citations: result.citations,
+            related_commentaries: result.related_commentaries
+          }
+        };
+        if (result._cacheDate) response.cache_date = result._cacheDate;
         return {
           content: [
             {
               type: "text",
-              text: JSON.stringify({
-                success: true,
-                commentary: {
-                  id: result.id,
-                  title: result.title,
-                  authors: result.authors,
-                  legislative_act: result.legislative_act,
-                  language: result.language,
-                  updated: result.updated,
-                  url: result.url,
-                  abstract: result.abstract,
-                  content: result.content,
-                  sections: result.sections,
-                  citations: result.citations,
-                  related_commentaries: result.related_commentaries
-                }
-              }, null, 2)
+              text: JSON.stringify(response, null, 2)
             }
           ]
         };
@@ -21116,26 +21268,30 @@ server.setRequestHandler(CallToolRequestSchema, async (request) => {
           };
         }
         const result = await client.getCommentaryForArticle(articleReference, language);
+        const response = {
+          success: true,
+          source: result._source || "live",
+          article_reference: articleReference,
+          count: result.count,
+          page: result.page,
+          total_pages: result.total_pages,
+          commentaries: (result.commentaries || []).map((c) => ({
+            id: c.id,
+            title: c.title,
+            authors: c.authors,
+            legislative_act: c.legislative_act?.abbreviation || c.legislative_act,
+            language: c.language,
+            updated: c.updated,
+            url: c.url
+          }))
+        };
+        if (result._cacheDate) response.cache_date = result._cacheDate;
+        if (result._cacheWarning) response.cache_warning = result._cacheWarning;
         return {
           content: [
             {
               type: "text",
-              text: JSON.stringify({
-                success: true,
-                article_reference: articleReference,
-                count: result.count,
-                page: result.page,
-                total_pages: result.total_pages,
-                commentaries: result.commentaries.map((c) => ({
-                  id: c.id,
-                  title: c.title,
-                  authors: c.authors,
-                  legislative_act: c.legislative_act.abbreviation,
-                  language: c.language,
-                  updated: c.updated,
-                  url: c.url
-                }))
-              }, null, 2)
+              text: JSON.stringify(response, null, 2)
             }
           ]
         };
@@ -21143,24 +21299,27 @@ server.setRequestHandler(CallToolRequestSchema, async (request) => {
       case "list_legislative_acts": {
         const language = args?.language;
         const result = await client.listLegislativeActs(language);
+        const response = {
+          success: true,
+          source: result._source || "live",
+          count: result.length,
+          legislative_acts: (Array.isArray(result) ? result : []).map((act) => ({
+            id: act.id,
+            name: act.name,
+            abbreviation: act.abbreviation,
+            abbreviation_de: act.abbreviation_de,
+            abbreviation_fr: act.abbreviation_fr,
+            abbreviation_it: act.abbreviation_it,
+            language: act.language
+          })),
+          mapping: client.getLegislativeActMapping()
+        };
+        if (result._cacheDate) response.cache_date = result._cacheDate;
         return {
           content: [
             {
               type: "text",
-              text: JSON.stringify({
-                success: true,
-                count: result.length,
-                legislative_acts: result.map((act) => ({
-                  id: act.id,
-                  name: act.name,
-                  abbreviation: act.abbreviation,
-                  abbreviation_de: act.abbreviation_de,
-                  abbreviation_fr: act.abbreviation_fr,
-                  abbreviation_it: act.abbreviation_it,
-                  language: act.language
-                })),
-                mapping: client.getLegislativeActMapping()
-              }, null, 2)
+              text: JSON.stringify(response, null, 2)
             }
           ]
         };
