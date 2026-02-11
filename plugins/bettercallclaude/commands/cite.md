@@ -56,6 +56,14 @@ Format: `AUTHOR(S), Title, Edition, Place Year, N [margin number]`
 
 Example: `GAUCH/SCHLUEP/SCHMID, Schweizerisches Obligationenrecht Allgemeiner Teil, 10. Aufl., Zuerich 2014, N 123`
 
+## MCP Server Availability
+
+Before executing citation tasks, check if MCP server tools are available. If MCP tools are not available (server not connected), inform the user clearly:
+
+> "MCP server [name] is not connected. Running in reduced mode -- results are from training data, not live databases. Run /bettercallclaude:setup to enable full functionality."
+
+Without MCP servers, you can still perform format validation and conversion using the citation rules above, but cannot verify whether citations reference real decisions. Mark all unverified citations as **format-checked only** and note that existence could not be confirmed programmatically.
+
 ## Execute the Task
 
 ### For Validation

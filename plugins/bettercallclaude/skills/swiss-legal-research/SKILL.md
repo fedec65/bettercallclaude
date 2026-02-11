@@ -130,6 +130,25 @@ Swiss federal statutes exist in three equally authentic languages. Always:
 | Treu und Glauben | bonne foi | buona fede | good faith |
 | Erfullungsinteresse | interet positif | interesse positivo | expectation interest |
 
+## MCP Server Availability
+
+BetterCallClaude MCP servers provide live database access. When servers are unavailable, the following degradation applies:
+
+| Server | Full Mode | Reduced Mode (no MCP) |
+|--------|-----------|----------------------|
+| entscheidsuche | Live search across BGer + 6 cantonal courts | Training data only, citations unverified |
+| bge-search | Structured BGE search with metadata | Training data only, no structured search |
+| legal-citations | Format validation + existence verification | Format validation only, no existence check |
+| fedlex-sparql | Live federal legislation queries | Training data statute references |
+| onlinekommentar | Legal commentary access | No commentary access |
+
+When operating in reduced mode:
+- Inform the user that MCP servers are not connected
+- Mark all citations as **unverified** (do not use the "Verified" label)
+- Suggest running `/bettercallclaude:setup` to configure MCP servers
+- Still provide analysis using built-in Swiss law knowledge
+- Note limitations in the professional disclaimer
+
 ## Quality Gate Checklist
 
 Before delivering any research output, verify:

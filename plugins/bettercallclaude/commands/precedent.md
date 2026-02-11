@@ -14,6 +14,14 @@ Determine the user's entry point:
 2. **Legal topic**: A statutory article or legal concept to search for leading cases.
 3. **Fact pattern**: A factual scenario to match against decided cases.
 
+## MCP Server Availability
+
+Before executing precedent analysis, check if MCP server tools are available. If MCP tools are not available (server not connected), inform the user clearly:
+
+> "MCP server [name] is not connected. Running in reduced mode -- results are from training data, not live databases. Run /bettercallclaude:setup to enable full functionality."
+
+Fall back to built-in Swiss law knowledge for precedent analysis, but mark all citations as **unverified** and note that live precedent chain tracking was unavailable.
+
 ## Execute Precedent Search
 
 ### Step 1 -- Initial Discovery

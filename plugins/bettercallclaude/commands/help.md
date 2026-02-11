@@ -18,7 +18,7 @@ BetterCallClaude provides Swiss legal intelligence through three interfaces:
 
 ---
 
-## Commands (15)
+## Commands (16)
 
 ### Core Commands
 
@@ -57,6 +57,7 @@ BetterCallClaude provides Swiss legal intelligence through three interfaces:
 | Command | Description |
 |---------|-------------|
 | `/bettercallclaude:cite` | Format and verify individual Swiss legal citations |
+| `/bettercallclaude:setup` | Check MCP server status and configure for Cowork Desktop |
 | `/bettercallclaude:version` | Display plugin version, components, and system status |
 | `/bettercallclaude:help` | This command reference |
 

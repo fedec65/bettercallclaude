@@ -16,6 +16,14 @@ Determine the following from the user's input before proceeding:
 4. **Relevant statutes**: Identify applicable codes (ZGB/CC, OR/CO, StGB/CP, ZPO/CPC, BV/Cst., etc.).
 5. **Time scope**: Note if the query concerns current law or historical provisions.
 
+## MCP Server Availability
+
+Before executing research, check if MCP server tools are available. If MCP tools are not available (server not connected), inform the user clearly:
+
+> "MCP server [name] is not connected. Running in reduced mode -- results are from training data, not live databases. Run /bettercallclaude:setup to enable full functionality."
+
+Fall back to built-in Swiss law knowledge for analysis and cite from training data, but mark all citations as **unverified** and note that live database search was unavailable.
+
 ## Execute Research
 
 ### Step 1 -- Precedent Search

@@ -20,7 +20,7 @@ Output the following formatted block:
   License:      MIT
 ======================================================
 
-  COMMANDS (15)
+  COMMANDS (16)
   -------------
   [x] legal          - Intelligent gateway and router
   [x] research       - BGE/ATF/DTF precedent search
@@ -35,6 +35,7 @@ Output the following formatted block:
   [x] adversarial    - Three-agent adversarial analysis
   [x] workflow       - Multi-agent pipeline execution
   [x] translate      - Legal translation DE/FR/IT/EN
+  [x] setup          - MCP server configuration
   [x] version        - This status display
   [x] help           - Command reference
 
@@ -63,7 +64,7 @@ Output the following formatted block:
   [ ] fedlex-sparql     - Federal legislation database
   [ ] onlinekommentar   - Legal commentary access
 
-  (Check MCP server availability by testing tool access)
+  Run /bettercallclaude:setup to configure MCP servers
 
   LANGUAGES
   ---------

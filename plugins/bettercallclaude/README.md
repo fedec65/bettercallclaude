@@ -4,7 +4,7 @@ BetterCallClaude is a plugin for legal professionals working in Cowork or Claude
 
 The plugin covers the full spectrum of Swiss legal work: BGE/ATF/DTF precedent research, case strategy development with risk assessment, adversarial legal analysis, compliance and data protection advisory, fiscal and corporate law expertise, real estate law, legal drafting with jurisdiction-aware templates, legal translation, and citation verification across all 26 Swiss cantons. Privacy compliance with Anwaltsgeheimnis (Art. 321 StGB) is enforced automatically through a pre-tool-use hook that detects privileged content before it leaves the local environment.
 
-**Version**: 2.0.0 -- 17 agents, 15 commands, 9 skills, 5 MCP servers.
+**Version**: 2.0.0 -- 17 agents, 16 commands, 9 skills, 5 MCP servers.
 
 ---
 
@@ -59,6 +59,7 @@ claude --plugin-dir ./plugins/bettercallclaude
 | `/bettercallclaude:translate` | Translate Swiss legal documents between DE, FR, IT, and EN while preserving legal terminology precision. |
 | `/bettercallclaude:doc-analyze` | Analyze Swiss legal documents -- identify legal issues, extract key clauses, verify citations, assess compliance. |
 | `/bettercallclaude:help` | Show complete command reference, available agents, skills, and usage examples. |
+| `/bettercallclaude:setup` | Check MCP server status and configure for Claude Code CLI or Cowork Desktop. |
 | `/bettercallclaude:version` | Display plugin version, installed components, and system status. |
 
 ### Usage examples
@@ -239,7 +240,26 @@ The plugin includes five pre-compiled MCP servers that provide direct integratio
 
 - Node.js >= 18
 
-MCP servers are pre-compiled and included in the plugin. No build step is required for end users. All server paths are configured in `.mcp.json` using the `${CLAUDE_PLUGIN_ROOT}` variable for portability.
+MCP servers are pre-compiled and self-contained (all dependencies bundled inline). No build step or `npm install` is required.
+
+### Claude Code CLI
+
+MCP servers register automatically via the plugin's `.mcp.json` file. After installing the plugin, verify with `/mcp` that all 5 servers appear. If they don't, restart Claude Code.
+
+### Cowork Desktop
+
+Cowork Desktop may not auto-register MCP servers from the plugin's `.mcp.json`. Run `/bettercallclaude:setup` after installation to check server status and get guided configuration instructions. The setup command will generate a ready-to-paste configuration with absolute paths for your environment.
+
+### Without MCP Servers
+
+BetterCallClaude operates in **reduced mode** when MCP servers are not connected. Commands and skills still work using built-in Swiss law knowledge, but:
+
+- Precedent search uses training data instead of live court databases
+- Citations are format-checked only (existence cannot be verified)
+- Legislation queries use static knowledge instead of Fedlex SPARQL
+- Commentary access is unavailable
+
+Run `/bettercallclaude:setup` at any time to check status and configure servers.
 
 ---
 
