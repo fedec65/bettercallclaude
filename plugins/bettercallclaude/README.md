@@ -12,24 +12,26 @@ The plugin covers the full spectrum of Swiss legal work: BGE/ATF/DTF precedent r
 
 BetterCallClaude can be installed through three channels.
 
-### From GitHub (Available Now)
+### Claude Cowork (Recommended)
 
-Register the marketplace and install the plugin from within Cowork or Claude Code:
+In Cowork, add the marketplace through the GUI:
+1. Open the plugin/marketplace section in Cowork
+2. Add marketplace via GitHub link: `fedec65/BetterCallClaude_Marketplace`
+3. Install the BetterCallClaude plugin
+4. Run `/bettercallclaude:setup` to configure MCP servers
+
+For full MCP server access in Cowork, you also need to install the servers at the Claude Desktop level. See the **Cowork Desktop** section under MCP Servers below.
+
+### Claude Code CLI
+
+Register the marketplace and install from the CLI:
 
 ```
 /plugin marketplace add fedec65/BetterCallClaude_Marketplace
 /plugin install bettercallclaude@bettercallclaude-marketplace
 ```
 
-### Official Marketplace (Coming Soon)
-
-Once accepted into the Anthropic official plugin catalog:
-
-```
-/plugin install bettercallclaude@claude-plugins-official
-```
-
-### Manual Installation
+### Manual Installation (Claude Code CLI)
 
 Clone the repository and point Claude Code to the plugin directory:
 
@@ -271,7 +273,41 @@ MCP servers register automatically via the plugin's `.mcp.json` file. After inst
 
 ### Cowork Desktop
 
-Cowork Desktop may not auto-register MCP servers from the plugin's `.mcp.json`. Run `/bettercallclaude:setup` after installation to check server status and get guided configuration instructions. The setup command will generate a ready-to-paste configuration with absolute paths for your environment.
+> **Quick Start** (after installing the plugin in Cowork):
+> 1. On your host machine: `git clone https://github.com/fedec65/BetterCallClaude_Marketplace.git`
+> 2. Run: `cd BetterCallClaude_Marketplace && bash scripts/install-claude-desktop.sh`
+> 3. Restart Claude Desktop (quit entirely and reopen)
+> 4. In Cowork: `/bettercallclaude:setup` to verify 5/5 connected
+
+Cowork runs inside a VM with restricted network access. Four of the five MCP servers require external API access and will not work from within the Cowork sandbox. The recommended solution is to install the servers at the **Claude Desktop level**, where they run on your host OS with full network access and are proxied to the Cowork VM.
+
+#### Option 1: One-Click MCPB Bundles (Easiest)
+
+Download `.mcpb` files from the [GitHub Releases](https://github.com/fedec65/BetterCallClaude_Marketplace/releases) page and double-click each one to install into Claude Desktop. Restart Claude Desktop after installing.
+
+#### Option 2: Installer Script
+
+```bash
+git clone https://github.com/fedec65/BetterCallClaude_Marketplace.git
+cd BetterCallClaude_Marketplace
+bash scripts/install-claude-desktop.sh
+```
+
+The script auto-detects server locations, merges the configuration into `claude_desktop_config.json` (preserving existing servers), and validates Node.js. Restart Claude Desktop after running.
+
+#### Option 3: Manual Configuration
+
+Add the 5 MCP servers to your Claude Desktop config file manually:
+
+- macOS: `~/Library/Application Support/Claude/claude_desktop_config.json`
+- Windows: `%APPDATA%\Claude\claude_desktop_config.json`
+- Linux: `~/.config/Claude/claude_desktop_config.json`
+
+Run `/bettercallclaude:setup` inside a Cowork session for guided instructions and a ready-to-paste config block with absolute paths.
+
+#### Why Desktop-Level?
+
+MCP servers configured in Claude Desktop (Settings > Developer) run on the host OS, not inside the Cowork VM. This means they have full network access to reach bger.ch, fedlex.data.admin.ch, and onlinekommentar.ch. The MCP protocol proxies tool calls from the Cowork VM to your host transparently.
 
 ### Without MCP Servers
 

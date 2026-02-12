@@ -16,9 +16,9 @@ BetterCallClaude can be installed through several channels.
 
 Visit the installation page at **[bettercallclaude.ch/marketplace](https://bettercallclaude.ch/marketplace)** for guided setup instructions. The page walks you through installing the plugin directly in Claude Cowork with a few clicks.
 
-### From GitHub
+### From GitHub (Claude Code CLI)
 
-Register the marketplace and install the plugin from within Cowork or Claude Code:
+Register the marketplace and install the plugin from the Claude Code CLI:
 
 ```
 /plugin marketplace add fedec65/BetterCallClaude_Marketplace
@@ -259,6 +259,8 @@ The plugin includes five pre-compiled MCP servers that provide direct integratio
 - Node.js >= 18
 
 MCP servers are pre-compiled and included in the plugin. No build step is required for end users. All server paths are configured in `.mcp.json` using the `${CLAUDE_PLUGIN_ROOT}` variable for portability.
+
+**Cowork users**: Cowork runs in a sandboxed VM, so 4 of 5 MCP servers cannot reach external APIs from inside Cowork. To get full MCP server access, install the servers at the Claude Desktop level using `bash scripts/install-claude-desktop.sh` (requires cloning this repo on your host machine first). See the plugin's [README](plugins/bettercallclaude/README.md#cowork-desktop) for detailed instructions.
 
 ---
 
