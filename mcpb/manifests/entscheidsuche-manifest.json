@@ -1,0 +1,62 @@
+{
+  "manifest_version": "0.3",
+  "name": "bettercallclaude-entscheidsuche",
+  "display_name": "BetterCallClaude: Swiss Court Decisions",
+  "version": "2.2.4",
+  "description": "Search Swiss federal and cantonal court decisions across all 26 cantons. Part of the BetterCallClaude Swiss Legal Intelligence suite.",
+  "author": {
+    "name": "Federico Cesconi",
+    "url": "https://bettercallclaude.ch"
+  },
+  "server": {
+    "type": "node",
+    "entry_point": "server/index.js",
+    "mcp_config": {
+      "command": "node",
+      "args": ["${__dirname}/server/index.js"]
+    }
+  },
+  "tools": [
+    {
+      "name": "search_decisions",
+      "description": "Unified search across Swiss federal and cantonal court decisions with database caching and multi-canton parallel search"
+    },
+    {
+      "name": "search_canton",
+      "description": "Search specific canton(s) with parallel aggregation, optimized for cantonal-only searches"
+    },
+    {
+      "name": "get_related_decisions",
+      "description": "Find related court decisions via citation graph analysis"
+    },
+    {
+      "name": "get_decision_details",
+      "description": "Retrieve full details of a specific court decision by ID"
+    },
+    {
+      "name": "analyze_precedent_success_rate",
+      "description": "Analyze historical success rates for specific claim types in a legal area"
+    },
+    {
+      "name": "find_similar_cases",
+      "description": "Find analogous court decisions based on a fact pattern or existing decision"
+    },
+    {
+      "name": "get_legal_provision_interpretation",
+      "description": "Retrieve BGE interpretations of a specific statutory provision"
+    }
+  ],
+  "compatibility": {
+    "platforms": ["darwin", "win32", "linux"],
+    "runtimes": {
+      "node": ">=18.0.0"
+    }
+  },
+  "homepage": "https://bettercallclaude.ch",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/fedec65/BetterCallClaude_Marketplace"
+  },
+  "license": "AGPL-3.0",
+  "keywords": ["swiss-law", "legal-research", "court-decisions", "BGE", "entscheidsuche", "cantonal-courts"]
+}

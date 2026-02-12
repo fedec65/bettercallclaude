@@ -1,0 +1,46 @@
+{
+  "manifest_version": "0.3",
+  "name": "bettercallclaude-bge-search",
+  "display_name": "BetterCallClaude: BGE Federal Court Search",
+  "version": "2.2.4",
+  "description": "Search and retrieve Swiss Federal Supreme Court (BGE/ATF/DTF) decisions with citation validation. Part of the BetterCallClaude Swiss Legal Intelligence suite.",
+  "author": {
+    "name": "Federico Cesconi",
+    "url": "https://bettercallclaude.ch"
+  },
+  "server": {
+    "type": "node",
+    "entry_point": "server/index.js",
+    "mcp_config": {
+      "command": "node",
+      "args": ["${__dirname}/server/index.js"]
+    }
+  },
+  "tools": [
+    {
+      "name": "search_bge",
+      "description": "Search Swiss Federal Supreme Court (BGE) decisions by query, date range, chamber, and legal area"
+    },
+    {
+      "name": "get_bge_decision",
+      "description": "Retrieve a specific BGE decision by citation with cache-first strategy"
+    },
+    {
+      "name": "validate_citation",
+      "description": "Validate BGE citation format and normalize it"
+    }
+  ],
+  "compatibility": {
+    "platforms": ["darwin", "win32", "linux"],
+    "runtimes": {
+      "node": ">=18.0.0"
+    }
+  },
+  "homepage": "https://bettercallclaude.ch",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/fedec65/BetterCallClaude_Marketplace"
+  },
+  "license": "AGPL-3.0",
+  "keywords": ["swiss-law", "BGE", "ATF", "DTF", "federal-court", "bundesgericht"]
+}

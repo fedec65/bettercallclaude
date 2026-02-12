@@ -1,0 +1,50 @@
+{
+  "manifest_version": "0.3",
+  "name": "bettercallclaude-onlinekommentar",
+  "display_name": "BetterCallClaude: Swiss Legal Commentaries",
+  "version": "2.2.4",
+  "description": "Search and retrieve Swiss legal commentaries (Kommentare) from OnlineKommentar.ch. Part of the BetterCallClaude Swiss Legal Intelligence suite.",
+  "author": {
+    "name": "Federico Cesconi",
+    "url": "https://bettercallclaude.ch"
+  },
+  "server": {
+    "type": "node",
+    "entry_point": "server/index.js",
+    "mcp_config": {
+      "command": "node",
+      "args": ["${__dirname}/server/index.js"]
+    }
+  },
+  "tools": [
+    {
+      "name": "search_commentaries",
+      "description": "Search Swiss legal commentaries by keyword, article reference, or legal term"
+    },
+    {
+      "name": "get_commentary",
+      "description": "Get detailed commentary content by ID including full text, authors, and citations"
+    },
+    {
+      "name": "get_commentary_for_article",
+      "description": "Find commentaries for a specific Swiss law article reference (e.g., Art. 97 OR)"
+    },
+    {
+      "name": "list_legislative_acts",
+      "description": "List all available Swiss legislative acts with UUIDs for filtering searches"
+    }
+  ],
+  "compatibility": {
+    "platforms": ["darwin", "win32", "linux"],
+    "runtimes": {
+      "node": ">=18.0.0"
+    }
+  },
+  "homepage": "https://bettercallclaude.ch",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/fedec65/BetterCallClaude_Marketplace"
+  },
+  "license": "AGPL-3.0",
+  "keywords": ["swiss-law", "legal-commentaries", "onlinekommentar", "doctrine", "Kommentar"]
+}
