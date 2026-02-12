@@ -206,18 +206,41 @@ Federal law is the default jurisdiction when no canton is specified. The plugin 
 
 ### Cantonal Law
 
-Six cantons are fully configured with court system details, citation formats, and local databases:
+All 26 Swiss cantons are fully configured with court system details, citation formats, and MCP search capability via entscheidsuche.ch:
 
 | Canton | Code | Language | Key Characteristics |
 |--------|------|----------|---------------------|
-| Zurich | ZH | DE | Largest canton. Major commercial center. Handelsgericht for commercial disputes. |
-| Bern | BE | DE/FR | Bilingual canton. Federal capital influence. Strong administrative law practice. |
-| Geneva | GE | FR | International arbitration hub. Banking and private wealth. French legal tradition. |
-| Basel-Stadt | BS | DE | Pharmaceutical and life sciences center. Cross-border commerce with DE/FR. |
-| Vaud | VD | FR | French-speaking. Home to Federal Supreme Court in Lausanne. |
-| Ticino | TI | IT | Only Italian-speaking canton. Cross-border practice with Italy. |
-
-All 26 cantons are supported for general analysis. The cantonal law expert agent provides detailed knowledge of cantonal constitutions, intercantonal concordats, and cantonal court systems across the full Swiss Confederation.
+| **German-speaking** | | | |
+| Aargau | AG | DE | Third largest by population. Industrial center, energy sector. |
+| Appenzell I.Rh. | AI | DE | Smallest canton. Landsgemeinde tradition. |
+| Appenzell A.Rh. | AR | DE | Rural canton. Textile heritage. |
+| Basel-Landschaft | BL | DE | Suburban to Basel. Pharmaceutical industry. |
+| Basel-Stadt | BS | DE | Pharmaceutical and life sciences center. Cross-border commerce. |
+| Glarus | GL | DE | Landsgemeinde tradition. Industrial heritage. |
+| Luzern | LU | DE | Central Switzerland hub. Tourism center. |
+| Nidwalden | NW | DE | Business-friendly. Low tax canton. |
+| Obwalden | OW | DE | Low tax canton. Private banking. |
+| Schaffhausen | SH | DE | Northernmost canton. Cross-border with Germany. |
+| Schwyz | SZ | DE | Origin of Swiss name. No inheritance tax. |
+| Solothurn | SO | DE | Watch industry center (Jura arc). |
+| St. Gallen | SG | DE | Eastern Switzerland center. University (HSG). Handelsgericht. |
+| Thurgau | TG | DE | Lake Constance. Agriculture and food industry. |
+| Uri | UR | DE | Gotthard corridor. Founding canton. |
+| Zug | ZG | DE | Crypto/commodity hub. Very low taxes. |
+| Zurich | ZH | DE | Largest canton. Major commercial center. Handelsgericht. |
+| **French-speaking** | | | |
+| Geneva | GE | FR | International arbitration hub. Banking and private wealth. |
+| Jura | JU | FR | Newest canton (1979). Watchmaking. |
+| Neuchatel | NE | FR | Watchmaking capital. Innovation hub. |
+| Vaud | VD | FR | Home to Federal Supreme Court in Lausanne. |
+| **Italian-speaking** | | | |
+| Ticino | TI | IT | Only Italian-speaking canton. Cross-border with Italy. |
+| **Bilingual DE/FR** | | | |
+| Bern | BE | DE/FR | Federal capital. Strong administrative law. |
+| Fribourg | FR | DE/FR | University city. Bridge between language regions. |
+| Valais/Wallis | VS | DE/FR | Major tourism. Wine region. Alpine economy. |
+| **Trilingual** | | | |
+| Graubuenden | GR | DE/IT/RM | Largest by area. Major tourism (St. Moritz, Davos). |
 
 Jurisdiction routing is automatic. Mentioning a canton code, canton name, or cantonal court triggers the appropriate cantonal law mode. Cross-cantonal issues default to federal law analysis.
 

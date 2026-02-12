@@ -194,7 +194,7 @@ Search across Swiss court databases with filtering by court, date, and language.
 | Parameter | Type | Required | Description |
 |-----------|------|----------|-------------|
 | `query` | string | Yes | Free-text search query. Supports keywords, legal concepts, article references, and natural language descriptions. |
-| `court` | string | No | Filter by court system. One of: `bundesgericht` (Federal Supreme Court), `zh` (Zurich courts), `be` (Bern courts), `ge` (Geneva courts), `bs` (Basel-Stadt courts), `vd` (Vaud courts), `ti` (Ticino courts). If omitted, searches all available court databases. |
+| `court` | string | No | Filter by court system. One of: `bundesgericht` (Federal Supreme Court), or any of the 26 cantonal codes in lowercase: `ag`, `ai`, `ar`, `be`, `bl`, `bs`, `fr`, `ge`, `gl`, `gr`, `ju`, `lu`, `ne`, `nw`, `ow`, `sg`, `sh`, `so`, `sz`, `tg`, `ti`, `ur`, `vd`, `vs`, `zg`, `zh`. If omitted, searches all available court databases. |
 | `date_from` | string | No | Start date for date range filter. Format: `YYYY-MM-DD`. |
 | `date_to` | string | No | End date for date range filter. Format: `YYYY-MM-DD`. |
 | `language` | string | No | Filter by decision language. One of: `de`, `fr`, `it`. If omitted, returns decisions in all available languages. |
