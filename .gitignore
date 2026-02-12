@@ -3,6 +3,8 @@ node_modules/
 
 # Build artifacts (source MCP servers keep dist/ checked in as pre-compiled)
 *.tsbuildinfo
+dist/mcpb/
+dist/mcpb-staging/
 
 # OS files
 .DS_Store

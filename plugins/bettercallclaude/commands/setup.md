@@ -78,14 +78,34 @@ Replace <plugin-path> with the actual path to the bettercallclaude plugin direct
 
 #### For Cowork Desktop users:
 
-Ask the user: "What is the path where the bettercallclaude plugin is installed? You can find it in your Claude plugins cache, typically at: `~/.claude/plugins/cache/`"
+**Important background**: Cowork runs inside a VM with restricted network access. 4 of 5 MCP servers require external API calls (bger.ch, fedlex.data.admin.ch, onlinekommentar.ch) and will fail inside the Cowork sandbox. The solution is to install the servers at the **Claude Desktop level** (Settings > Developer), where they run on the host OS with full network access and are proxied to Cowork via the SDK bridge.
 
-Once the user provides the path (or you can attempt to locate it), generate a ready-to-paste configuration block:
+##### Option A: Desktop-Level Installation (Recommended)
 
+This is the recommended approach. MCP servers configured in Claude Desktop run on your macOS/Windows/Linux host with full network access.
+
+**One-command installer** (if you have the repo cloned):
+
+```bash
+git clone https://github.com/fedec65/BetterCallClaude_Marketplace.git
+cd BetterCallClaude_Marketplace
+bash scripts/install-claude-desktop.sh
 ```
-To configure MCP servers in Cowork Desktop, add the following to your
-project's .mcp.json file (or create one in your project root):
 
+The installer will:
+1. Auto-detect the MCP server location
+2. Add all 5 servers to your Claude Desktop config
+3. Preserve any existing MCP server configuration
+4. Tell you to restart Claude Desktop
+
+**Manual Desktop installation** (if you prefer):
+
+Add the following to Claude Desktop's config file:
+- macOS: `~/Library/Application Support/Claude/claude_desktop_config.json`
+- Windows: `%APPDATA%\Claude\claude_desktop_config.json`
+- Linux: `~/.config/Claude/claude_desktop_config.json`
+
+```json
 {
   "mcpServers": {
     "bettercallclaude-entscheidsuche": {
@@ -110,11 +130,23 @@ project's .mcp.json file (or create one in your project root):
     }
   }
 }
-
-Replace <ABSOLUTE_PATH> with the full path to the bettercallclaude plugin.
-
-After adding, restart Cowork Desktop and re-run /bettercallclaude:setup to verify.
 ```
+
+Replace `<ABSOLUTE_PATH>` with the full path to the bettercallclaude plugin's directory (e.g., `/Users/you/BetterCallClaude_Marketplace/plugins/bettercallclaude`).
+
+After adding, restart Claude Desktop and open a Cowork session. Re-run `/bettercallclaude:setup` to verify.
+
+**MCPB one-click install** (easiest):
+
+Download `.mcpb` bundle files from the [GitHub Releases page](https://github.com/fedec65/BetterCallClaude_Marketplace/releases) and double-click each one to install directly into Claude Desktop.
+
+##### Option B: Project-Level Configuration (Limited)
+
+If Desktop-level installation is not possible, you can configure servers at the project level. Note that servers requiring external network access (entscheidsuche, bge-search, fedlex-sparql, onlinekommentar) will NOT work in the Cowork sandbox. Only `legal-citations` works without network access.
+
+Ask the user: "What is the path where the bettercallclaude plugin is installed? You can find it in your Claude plugins cache, typically at: `~/.claude/plugins/cache/`"
+
+Once the user provides the path, generate a project-level `.mcp.json` with absolute paths.
 
 **Important**: Replace `<ABSOLUTE_PATH>` in the output with the actual absolute path the user provided. Do NOT use `${CLAUDE_PLUGIN_ROOT}` — Cowork Desktop does not expand this variable.
 
@@ -131,7 +163,7 @@ If a server connects but returns errors during use, consult this diagnostic guid
 |---------------|-------------|------------|
 | "table cache_entries does not exist" or similar missing table errors | Database initialization failed — TypeORM `synchronize` was disabled | Update to plugin version 1.3.1+ which fixes this. Re-register the server and restart. |
 | SPARQL endpoint timeout or HTTP 5xx from fedlex-sparql | Fedlex service (`fedlex.data.admin.ch`) is temporarily unavailable | Retry later. The server has built-in retry logic (3 attempts, 2s delay). This is an external service issue, not a plugin bug. |
-| "ECONNREFUSED" or "ENOTFOUND" from onlinekommentar | `onlinekommentar.ch` API is unreachable — likely blocked by Cowork Desktop's network sandbox | This server requires external network access. It will not work in sandboxed environments. Use it in Claude Code CLI instead. |
+| "ECONNREFUSED" or "ENOTFOUND" from onlinekommentar | `onlinekommentar.ch` API is unreachable — likely blocked by Cowork Desktop's network sandbox | Install at the Desktop level (Settings > Developer) instead. Desktop-level MCP servers run on the host OS and bypass the sandbox. Run `bash scripts/install-claude-desktop.sh` or see Option A above. |
 | Connection works but no search results | Server is healthy but the query returned no matches | Try broader search terms or different parameters. |
 
 ## Notes
