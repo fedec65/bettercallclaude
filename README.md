@@ -10,9 +10,13 @@ The plugin covers the full spectrum of Swiss legal work: BGE/ATF/DTF precedent r
 
 ## Installation
 
-BetterCallClaude can be installed through three channels.
+BetterCallClaude can be installed through several channels.
 
-### From GitHub (Available Now)
+### Claude Cowork (Recommended)
+
+Visit the installation page at **[bettercallclaude.ch/marketplace](https://bettercallclaude.ch/marketplace)** for guided setup instructions. The page walks you through installing the plugin directly in Claude Cowork with a few clicks.
+
+### From GitHub
 
 Register the marketplace and install the plugin from within Cowork or Claude Code:
 
@@ -21,15 +25,7 @@ Register the marketplace and install the plugin from within Cowork or Claude Cod
 /plugin install bettercallclaude@bettercallclaude-marketplace
 ```
 
-### Official Marketplace (Coming Soon)
-
-Once accepted into the Anthropic official plugin catalog:
-
-```
-/plugin install bettercallclaude@claude-plugins-official
-```
-
-### Manual Installation
+### Manual Installation (Claude Code CLI)
 
 Clone the repository and point Claude Code to the plugin directory:
 
