@@ -6,10 +6,5 @@
     "name": "Federico Cesconi"
   },
   "homepage": "https://bettercallclaude.ch",
-  "repository": {
-    "type": "git",
-    "url": "https://github.com/fedec65/bettercallclaude"
-  },
-  "license": "AGPL-3.0",
-  "category": "legal"
+  "license": "AGPL-3.0"
 }

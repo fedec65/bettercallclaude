@@ -49,16 +49,41 @@ jobs:
         with:
           node-version: 20
 
+      - name: Check marketplace.json
+        run: |
+          echo "Checking .claude-plugin/marketplace.json..."
+          node -e "
+            const m = JSON.parse(require('fs').readFileSync('.claude-plugin/marketplace.json','utf8'));
+            if (!m.name) { console.error('Missing marketplace name'); process.exit(1); }
+            if (!m.owner || !m.owner.name) { console.error('Missing owner.name'); process.exit(1); }
+            if (!m.plugins || !m.plugins.length) { console.error('No plugins defined'); process.exit(1); }
+            m.plugins.forEach(p => {
+              if (!p.name || !p.source) { console.error('Plugin missing name or source:', p); process.exit(1); }
+            });
+            console.log('marketplace.json OK:', m.name, '(' + m.plugins.length + ' plugins)');
+          "
+
       - name: Check plugin.json
         run: |
-          echo "Checking .claude-plugin/plugin.json..."
+          echo "Checking bettercallclaude/.claude-plugin/plugin.json..."
           node -e "
-            const p = JSON.parse(require('fs').readFileSync('.claude-plugin/plugin.json','utf8'));
+            const p = JSON.parse(require('fs').readFileSync('bettercallclaude/.claude-plugin/plugin.json','utf8'));
             const required = ['name','description','version','author'];
             const missing = required.filter(f => !p[f]);
             if (missing.length) { console.error('Missing fields:', missing); process.exit(1); }
             console.log('plugin.json OK:', p.name, 'v' + p.version);
           "
+
+      - name: Check plugin symlinks resolve
+        run: |
+          for link in agents commands skills hooks mcp-servers scripts .mcp.json; do
+            target="bettercallclaude/$link"
+            if [ ! -e "$target" ]; then
+              echo "FAIL: $target does not exist or symlink broken"
+              exit 1
+            fi
+            echo "OK: $target"
+          done
 
       - name: Check compiled bundles exist
         run: |
