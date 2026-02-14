@@ -2,7 +2,7 @@
   "manifest_version": "0.3",
   "name": "bettercallclaude-bge-search",
   "display_name": "BetterCallClaude: BGE Federal Court Search",
-  "version": "2.2.4",
+  "version": "3.0.0",
   "description": "Search and retrieve Swiss Federal Supreme Court (BGE/ATF/DTF) decisions with citation validation. Part of the BetterCallClaude Swiss Legal Intelligence suite.",
   "author": {
     "name": "Federico Cesconi",

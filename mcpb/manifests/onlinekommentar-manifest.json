@@ -2,7 +2,7 @@
   "manifest_version": "0.3",
   "name": "bettercallclaude-onlinekommentar",
   "display_name": "BetterCallClaude: Swiss Legal Commentaries",
-  "version": "2.2.4",
+  "version": "3.0.0",
   "description": "Search and retrieve Swiss legal commentaries (Kommentare) from OnlineKommentar.ch. Part of the BetterCallClaude Swiss Legal Intelligence suite.",
   "author": {
     "name": "Federico Cesconi",

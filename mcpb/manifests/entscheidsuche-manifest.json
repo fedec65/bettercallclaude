@@ -2,7 +2,7 @@
   "manifest_version": "0.3",
   "name": "bettercallclaude-entscheidsuche",
   "display_name": "BetterCallClaude: Swiss Court Decisions",
-  "version": "2.2.4",
+  "version": "3.0.0",
   "description": "Search Swiss federal and cantonal court decisions across all 26 cantons. Part of the BetterCallClaude Swiss Legal Intelligence suite.",
   "author": {
     "name": "Federico Cesconi",

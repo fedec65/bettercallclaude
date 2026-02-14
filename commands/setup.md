@@ -52,118 +52,47 @@ Skip to Step 5 (Requirements Check).
 
 ### If any servers are missing:
 
-Automatically install the MCP servers at the Claude Desktop level. This ensures they run on the host OS with full network access, bypassing any sandbox restrictions.
+Install the MCP servers at the Claude Desktop level so they run on the host OS with full network access.
 
 **Important background**: When running inside Cowork Desktop, MCP servers execute in a sandboxed VM with restricted network access. 4 of 5 servers require external API calls (bger.ch, fedlex.data.admin.ch, onlinekommentar.ch) and will fail in the sandbox. Desktop-level installation solves this because those servers run on the host machine.
 
-#### Step 3a: Locate the plugin's MCP server directory
+#### Step 3a: Download and install MCPB bundles (recommended)
 
-Run the following via Bash to find the installed plugin path:
-
-```bash
-SERVER_DIR="$(find ~/.claude/plugins -name "entscheidsuche" -path "*/mcp-servers/*" -type d 2>/dev/null | head -1 | xargs dirname 2>/dev/null)"
-```
-
-If that returns empty, try alternative locations:
-
-```bash
-# Try common locations
-for candidate in \
-  "$HOME/.claude/plugins/cache/"*"/bettercallclaude/mcp-servers" \
-  "$HOME/.claude/plugins/cache/"*"/mcp-servers" \
-  "$HOME/Dev/BetterCallClaude_Marketplace/mcp-servers" \
-  "$HOME/BetterCallClaude_Marketplace/mcp-servers"; do
-  if [ -d "$candidate/entscheidsuche" ]; then
-    SERVER_DIR="$candidate"
-    break
-  fi
-done
-echo "SERVER_DIR=$SERVER_DIR"
-```
-
-If SERVER_DIR is still empty, ask the user for the plugin path and construct it as `<user-provided-path>/mcp-servers`.
-
-#### Step 3b: Verify server files exist
-
-Before installing, confirm the compiled server bundles are present:
-
-```bash
-for server in entscheidsuche bge-search legal-citations fedlex-sparql onlinekommentar; do
-  if [ -f "$SERVER_DIR/$server/dist/index.js" ]; then
-    echo "$server: OK"
-  else
-    echo "$server: MISSING"
-  fi
-done
-```
-
-If any are MISSING, warn the user that the plugin installation may be incomplete and suggest re-installing.
-
-#### Step 3c: Detect OS and config path
-
-```bash
-if [ "$(uname)" = "Darwin" ]; then
-  CONFIG_PATH="$HOME/Library/Application Support/Claude/claude_desktop_config.json"
-elif [ -d "$HOME/.config/Claude" ]; then
-  CONFIG_PATH="$HOME/.config/Claude/claude_desktop_config.json"
-else
-  CONFIG_PATH="$HOME/.config/Claude/claude_desktop_config.json"
-fi
-echo "CONFIG_PATH=$CONFIG_PATH"
-```
-
-#### Step 3d: Install servers into Claude Desktop config
-
-Run the following Node.js script via Bash to merge the 5 server entries into the Claude Desktop config file. This preserves any existing MCP server configuration:
-
-```bash
-node -e "
-const fs = require('fs');
-const path = require('path');
-const configPath = process.argv[1];
-const serverDir = process.argv[2];
-let config = {};
-try { config = JSON.parse(fs.readFileSync(configPath, 'utf8')); } catch(e) {}
-if (!config.mcpServers) config.mcpServers = {};
-const servers = ['entscheidsuche','bge-search','legal-citations','fedlex-sparql','onlinekommentar'];
-let added = 0;
-servers.forEach(s => {
-  const key = 'bettercallclaude-' + s;
-  const jsPath = path.join(serverDir, s, 'dist', 'index.js');
-  if (!fs.existsSync(jsPath)) { console.error('WARN: ' + jsPath + ' not found, skipping'); return; }
-  config.mcpServers[key] = { command: 'node', args: [jsPath] };
-  added++;
-});
-fs.mkdirSync(path.dirname(configPath), { recursive: true });
-fs.writeFileSync(configPath, JSON.stringify(config, null, 2) + '\n');
-console.log('OK: ' + added + '/5 servers installed to ' + configPath);
-" "$CONFIG_PATH" "$SERVER_DIR"
-```
-
-#### Step 3e: Report result
-
-If the Node.js script printed "OK":
+Tell the user to download and double-click the `.mcpb` bundle files. Each file auto-registers one MCP server in Claude Desktop — no terminal or config editing required.
 
 ```
-Desktop MCP servers installed successfully.
+To install the MCP servers, download these 5 files and double-click each one:
 
-Please restart Claude Desktop, then re-run /bettercallclaude:setup to verify all servers connect.
+  https://github.com/fedec65/BetterCallClaude_Marketplace/releases/latest
+
+Download all 5 .mcpb files from the release:
+  - bettercallclaude-entscheidsuche.mcpb
+  - bettercallclaude-bge-search.mcpb
+  - bettercallclaude-legal-citations.mcpb
+  - bettercallclaude-fedlex-sparql.mcpb
+  - bettercallclaude-onlinekommentar.mcpb
+
+Double-click each .mcpb file — Claude Desktop will install the server automatically.
+After installing all 5, restart Claude Desktop, then re-run /bettercallclaude:setup to verify.
 ```
 
-If the script failed or printed warnings, show the error output and fall back to manual instructions:
+#### Step 3b: Fallback — manual config (if MCPB doesn't work)
+
+If the user cannot use MCPB files, provide these alternative options:
+
+**Option 1**: Run the install script from a Mac Terminal (outside Cowork):
 
 ```
-Auto-install encountered an issue. You can install manually:
+git clone https://github.com/fedec65/BetterCallClaude_Marketplace.git
+cd BetterCallClaude_Marketplace
+bash scripts/install-claude-desktop.sh
+```
 
-1. Clone the repo:   git clone https://github.com/fedec65/BetterCallClaude_Marketplace.git
-2. Run installer:    cd BetterCallClaude_Marketplace && bash scripts/install-claude-desktop.sh
-
-Or manually add servers to your Claude Desktop config:
-  macOS: ~/Library/Application Support/Claude/claude_desktop_config.json
-  Linux: ~/.config/Claude/claude_desktop_config.json
+**Option 2**: Manually add servers to Claude Desktop's config file:
+- macOS: `~/Library/Application Support/Claude/claude_desktop_config.json`
+- Linux: `~/.config/Claude/claude_desktop_config.json`
 
 See the CONNECTORS.md file in the plugin for the full JSON configuration.
-```
 
 ## Step 4: CLI-Specific Guidance
 
