@@ -94,13 +94,14 @@ async function initializeInfrastructure() {
 }
 
 /**
- * Search BGE decisions with cache-first strategy
+ * Search BGE decisions with cache-first, API, then database fallback strategy
  */
 async function searchBGE(params: SearchParams): Promise<{
   decisions: BundesgerichtDecision[];
   totalResults: number;
   searchTimeMs: number;
   fromCache: boolean;
+  source: string;
 }> {
   const startTime = Date.now();
 
@@ -117,10 +118,11 @@ async function searchBGE(params: SearchParams): Promise<{
         ...cachedResult,
         searchTimeMs: Date.now() - startTime,
         fromCache: true,
+        source: "cache",
       };
     }
 
-    logger.info("Cache miss - fetching from API", { cacheKey });
+    logger.info("Cache miss - trying API then database fallback", { cacheKey });
 
     // Convert MCP params to API filters
     const filters: BundesgerichtSearchFilters = {
@@ -133,48 +135,99 @@ async function searchBGE(params: SearchParams): Promise<{
       limit: params.limit || 10,
     };
 
-    // Search via API
-    const apiResult = await bundesgerichtClient.searchDecisions(filters);
+    // Try API first, fall back to local database
+    try {
+      const apiResult = await bundesgerichtClient.searchDecisions(filters);
 
-    // Store decisions in database
-    if (apiResult.decisions.length > 0) {
-      await Promise.all(
-        apiResult.decisions.map(async (decision: BundesgerichtDecision) => {
-          await decisionRepo.upsert({
-            decisionId: decision.decisionId,
-            courtLevel: "federal" as const,
-            title: decision.title,
-            summary: decision.summary,
-            decisionDate: new Date(decision.decisionDate),
-            language: decision.language,
-            legalAreas: decision.legalAreas,
-            fullText: decision.fullText,
-            relatedDecisions: decision.relatedDecisions,
-            metadata: decision.metadata,
-            chamber: decision.chamber,
-            bgeReference: decision.bgeReference,
-            sourceUrl: decision.sourceUrl,
-            lastFetchedAt: new Date(),
-          });
-        })
-      );
-      logger.info("Stored decisions in database", {
-        count: apiResult.decisions.length,
+      // Store decisions in database for future fallback
+      if (apiResult.decisions.length > 0) {
+        await Promise.all(
+          apiResult.decisions.map(async (decision: BundesgerichtDecision) => {
+            await decisionRepo.upsert({
+              decisionId: decision.decisionId,
+              courtLevel: "federal" as const,
+              title: decision.title,
+              summary: decision.summary,
+              decisionDate: new Date(decision.decisionDate),
+              language: decision.language,
+              legalAreas: decision.legalAreas,
+              fullText: decision.fullText,
+              relatedDecisions: decision.relatedDecisions,
+              metadata: decision.metadata,
+              chamber: decision.chamber,
+              bgeReference: decision.bgeReference,
+              sourceUrl: decision.sourceUrl,
+              lastFetchedAt: new Date(),
+            });
+          })
+        );
+        logger.info("Stored decisions in database", {
+          count: apiResult.decisions.length,
+        });
+      }
+
+      const result = {
+        decisions: apiResult.decisions,
+        totalResults: apiResult.total,
+      };
+      await cacheRepo.set(cacheKey, JSON.stringify(result), 3600);
+
+      return {
+        ...result,
+        searchTimeMs: Date.now() - startTime,
+        fromCache: false,
+        source: "api",
+      };
+    } catch (apiError) {
+      // API failed - fall back to local database
+      logger.info("API unavailable, falling back to local database", {
+        error: (apiError as Error).message,
       });
+
+      const dbResults = await decisionRepo.search({
+        query: params.query,
+        courtLevel: "federal" as any,
+        language: params.language as any,
+        chamber: params.chambers?.[0],
+        legalAreas: params.legalAreas,
+        dateFrom: params.dateFrom ? new Date(params.dateFrom) : undefined,
+        dateTo: params.dateTo ? new Date(params.dateTo) : undefined,
+        limit: params.limit || 10,
+      });
+
+      const decisions = dbResults.map((d) => ({
+        decisionId: d.decisionId,
+        title: d.title || "",
+        summary: d.summary || "",
+        decisionDate: d.decisionDate instanceof Date
+          ? d.decisionDate.toISOString().split("T")[0]
+          : String(d.decisionDate),
+        language: d.language || "de",
+        legalAreas: d.legalAreas || [],
+        fullText: d.fullText,
+        relatedDecisions: d.relatedDecisions || [],
+        metadata: d.metadata || {},
+        chamber: d.chamber,
+        bgeReference: (d as any).bgeReference,
+        sourceUrl: (d as any).sourceUrl,
+      })) as unknown as BundesgerichtDecision[];
+
+      const result = {
+        decisions,
+        totalResults: decisions.length,
+      };
+
+      if (decisions.length > 0) {
+        await cacheRepo.set(cacheKey, JSON.stringify(result), 1800);
+      }
+
+      return {
+        ...result,
+        searchTimeMs: Date.now() - startTime,
+        fromCache: false,
+        source: "database",
+      };
     }
-
-    // Cache the results (TTL: 1 hour)
-    const result = {
-      decisions: apiResult.decisions,
-      totalResults: apiResult.total,
-    };
-    await cacheRepo.set(cacheKey, JSON.stringify(result), 3600);
-
-    return {
-      ...result,
-      searchTimeMs: Date.now() - startTime,
-      fromCache: false,
-    };
   } catch (error) {
     logger.error("BGE search failed", error as Error, { params });
     throw error;
@@ -182,12 +235,13 @@ async function searchBGE(params: SearchParams): Promise<{
 }
 
 /**
- * Get specific BGE decision by citation with cache-first strategy
+ * Get specific BGE decision by citation with cache-first, API, then database fallback
  */
 async function getBGEDecision(citation: string): Promise<{
   found: boolean;
   decision?: BundesgerichtDecision;
   fromCache: boolean;
+  source?: string;
 }> {
   try {
     // Validate citation first
@@ -210,47 +264,93 @@ async function getBGEDecision(citation: string): Promise<{
         found: true,
         decision: JSON.parse(cached),
         fromCache: true,
+        source: "cache",
       };
     }
 
-    logger.info("Cache miss - fetching decision from API", { citation });
+    logger.info("Cache miss - trying API then database fallback", { citation });
 
-    // Fetch from API
-    const decision = await bundesgerichtClient.getDecisionByCitation(citation);
+    // Try API first, fall back to database
+    try {
+      const decision = await bundesgerichtClient.getDecisionByCitation(citation);
 
-    if (!decision) {
+      if (!decision) {
+        // API returned no result - try database before giving up
+        const dbDecision = await decisionRepo.findByDecisionId(citation);
+        if (dbDecision) {
+          return {
+            found: true,
+            decision: dbDecision as unknown as BundesgerichtDecision,
+            fromCache: false,
+            source: "database",
+          };
+        }
+        return { found: false, fromCache: false };
+      }
+
+      // Store in database
+      await decisionRepo.upsert({
+        decisionId: decision.decisionId,
+        courtLevel: "federal" as const,
+        title: decision.title,
+        summary: decision.summary,
+        decisionDate: new Date(decision.decisionDate),
+        language: decision.language,
+        legalAreas: decision.legalAreas,
+        fullText: decision.fullText,
+        relatedDecisions: decision.relatedDecisions,
+        metadata: decision.metadata,
+        chamber: decision.chamber,
+        bgeReference: decision.bgeReference,
+        sourceUrl: decision.sourceUrl,
+        lastFetchedAt: new Date(),
+      });
+
+      await cacheRepo.set(cacheKey, JSON.stringify(decision), 86400);
+
       return {
-        found: false,
+        found: true,
+        decision,
         fromCache: false,
+        source: "api",
       };
+    } catch (apiError) {
+      // API failed - fall back to local database
+      logger.info("API unavailable, falling back to local database for citation lookup", {
+        citation,
+        error: (apiError as Error).message,
+      });
+
+      const dbDecision = await decisionRepo.findByDecisionId(citation);
+      if (dbDecision) {
+        return {
+          found: true,
+          decision: dbDecision as unknown as BundesgerichtDecision,
+          fromCache: false,
+          source: "database",
+        };
+      }
+
+      // Also try searching by BGE reference pattern in the query
+      const parsed = bundesgerichtClient.parseCitation(citation);
+      if (parsed) {
+        const searchResults = await decisionRepo.search({
+          query: parsed.formatted || citation,
+          courtLevel: "federal" as any,
+          limit: 1,
+        });
+        if (searchResults.length > 0) {
+          return {
+            found: true,
+            decision: searchResults[0] as unknown as BundesgerichtDecision,
+            fromCache: false,
+            source: "database",
+          };
+        }
+      }
+
+      return { found: false, fromCache: false };
     }
-
-    // Store in database
-    await decisionRepo.upsert({
-      decisionId: decision.decisionId,
-      courtLevel: "federal" as const,
-      title: decision.title,
-      summary: decision.summary,
-      decisionDate: new Date(decision.decisionDate),
-      language: decision.language,
-      legalAreas: decision.legalAreas,
-      fullText: decision.fullText,
-      relatedDecisions: decision.relatedDecisions,
-      metadata: decision.metadata,
-      chamber: decision.chamber,
-      bgeReference: decision.bgeReference,
-      sourceUrl: decision.sourceUrl,
-      lastFetchedAt: new Date(),
-    });
-
-    // Cache the result (TTL: 24 hours)
-    await cacheRepo.set(cacheKey, JSON.stringify(decision), 86400);
-
-    return {
-      found: true,
-      decision,
-      fromCache: false,
-    };
   } catch (error) {
     logger.error("Get BGE decision failed", error as Error, { citation });
     throw error;
@@ -322,7 +422,7 @@ async function main() {
         {
           name: "search_bge",
           description:
-            "Search Swiss Federal Supreme Court (BGE) decisions by query, date range, chamber, and legal area. Uses real Bundesgericht API with database caching.",
+            "Search Swiss Federal Supreme Court (BGE) decisions by query, date range, chamber, and legal area. Uses cache-first strategy with API and local database fallback.",
           inputSchema: {
             type: "object",
             properties: {
@@ -375,7 +475,7 @@ async function main() {
         {
           name: "get_bge_decision",
           description:
-            "Retrieve a specific BGE decision by citation. Uses cache-first strategy with 24-hour TTL.",
+            "Retrieve a specific BGE decision by citation. Uses cache-first strategy with API and local database fallback.",
           inputSchema: {
             type: "object",
             properties: {

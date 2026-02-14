@@ -40,8 +40,8 @@ export class Citation {
   citedDecision!: Decision;
 
   @Column({
-    type: 'enum',
-    enum: ['reference', 'precedent', 'overruled', 'distinguished', 'applied'],
+    type: 'varchar',
+    length: 20,
     default: 'reference',
   })
   citationType!: CitationType;

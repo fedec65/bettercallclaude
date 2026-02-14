@@ -19,7 +19,7 @@ export type Chamber = 'I' | 'II' | 'III' | 'IV' | 'V';
 @Entity('decisions')
 @Index(['courtLevel', 'canton'])
 @Index(['decisionDate'])
-@Index(['legalAreas'], { fulltext: true })
+@Index(['legalAreas'])
 export class Decision {
   @PrimaryGeneratedColumn('uuid')
   id!: string;
@@ -29,8 +29,8 @@ export class Decision {
   decisionId!: string;
 
   @Column({
-    type: 'enum',
-    enum: ['federal', 'cantonal'],
+    type: 'varchar',
+    length: 10,
   })
   courtLevel!: CourtLevel;
 
@@ -48,8 +48,8 @@ export class Decision {
   decisionDate!: Date;
 
   @Column({
-    type: 'enum',
-    enum: ['de', 'fr', 'it', 'en'],
+    type: 'varchar',
+    length: 2,
   })
   language!: Language;
 
@@ -67,8 +67,8 @@ export class Decision {
 
   // Federal-specific fields
   @Column({
-    type: 'enum',
-    enum: ['I', 'II', 'III', 'IV', 'V'],
+    type: 'varchar',
+    length: 5,
     nullable: true,
   })
   chamber?: Chamber;
@@ -80,7 +80,7 @@ export class Decision {
   @Column()
   sourceUrl!: string;
 
-  @Column({ type: 'timestamp' })
+  @Column({ type: 'datetime' })
   lastFetchedAt!: Date;
 
   @CreateDateColumn()

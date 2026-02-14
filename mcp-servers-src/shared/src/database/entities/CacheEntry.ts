@@ -26,14 +26,14 @@ export class CacheEntry {
   @Column({ type: 'text' })
   value!: string;
 
-  @Column({ type: 'timestamp' })
+  @Column({ type: 'datetime' })
   @Index()
   expiresAt!: Date;
 
   @Column({ type: 'integer', default: 0 })
   hitCount!: number;
 
-  @Column({ type: 'timestamp', nullable: true })
+  @Column({ type: 'datetime', nullable: true })
   lastAccessedAt?: Date;
 
   @Column({ type: 'simple-json', nullable: true })
