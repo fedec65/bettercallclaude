@@ -1,0 +1,46 @@
+name: Release
+
+on:
+  push:
+    tags:
+      - 'v*'
+
+permissions:
+  contents: write
+
+jobs:
+  build-and-release:
+    name: Build and Release
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Use Node.js 20
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+
+      - name: Install dependencies
+        working-directory: mcp-servers-src
+        run: npm ci
+
+      - name: Build MCP servers
+        working-directory: mcp-servers-src
+        run: npm run build
+
+      - name: Build MCPB bundles
+        run: bash scripts/build-mcpb.sh
+
+      - name: Package plugin
+        run: bash scripts/package-plugin.sh
+
+      - name: Create GitHub Release
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          TAG_NAME: ${{ github.ref_name }}
+        run: |
+          gh release create "$TAG_NAME" \
+            dist/mcpb/*.mcpb \
+            dist/*.zip \
+            --title "$TAG_NAME" \
+            --generate-notes

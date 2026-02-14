@@ -1,10 +1,25 @@
 # Dependencies
 node_modules/
 
-# Build artifacts (source MCP servers keep dist/ checked in as pre-compiled)
+# TypeScript build intermediates
 *.tsbuildinfo
+
+# MCP server source build outputs (intermediate — NOT the checked-in compiled bundles)
+mcp-servers-src/*/dist/
+mcp-servers-src/*/node_modules/
+mcp-servers-src/*/coverage/
+mcp-servers-src/*/.env
+
+# NOTE: mcp-servers/*/dist/ is NOT ignored — compiled bundles are checked into git
+# so end users don't need a build step
+
+# Runtime data (SQLite databases created at runtime)
+mcp-servers/*/data/
+
+# Package outputs
 dist/mcpb/
 dist/mcpb-staging/
+dist/*.zip
 
 # OS files
 .DS_Store
@@ -25,6 +40,8 @@ Thumbs.db
 # Logs
 *.log
 npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
 
 # Temporary files
 tmp/
@@ -33,3 +50,25 @@ temp/
 
 # Project instructions (local only)
 CLAUDE.md
+
+# Python (for development tooling)
+__pycache__/
+*.py[cod]
+*$py.class
+.venv/
+venv/
+.pytest_cache/
+.coverage
+htmlcov/
+.mypy_cache/
+
+# Test coverage
+coverage/
+
+# Development artifacts
+claudedocs/
+.serena/
+
+# Generated installation metadata
+manifest.json
+version.txt

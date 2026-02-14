@@ -1,0 +1,35 @@
+{
+  "name": "@bettercallclaude/onlinekommentar",
+  "version": "1.0.0",
+  "description": "MCP server for Swiss legal doctrine (OnlineKommentar) - completes the Research Trinity",
+  "type": "module",
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "scripts": {
+    "build": "npx tsc",
+    "watch": "npx tsc --watch",
+    "dev": "npx tsx watch src/index.ts",
+    "lint": "eslint src/**/*.ts",
+    "test": "vitest run",
+    "test:watch": "vitest",
+    "test:coverage": "vitest run --coverage",
+    "clean": "rm -rf dist"
+  },
+  "keywords": [
+    "mcp",
+    "swiss-law",
+    "doctrine",
+    "onlinekommentar",
+    "legal-research",
+    "commentaries"
+  ],
+  "dependencies": {
+    "@modelcontextprotocol/sdk": "^1.24.0"
+  },
+  "devDependencies": {
+    "@types/node": "^22.10.2",
+    "tsx": "^4.19.2",
+    "typescript": "^5.7.2",
+    "vitest": "^4.0.15"
+  }
+}

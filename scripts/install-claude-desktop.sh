@@ -46,7 +46,7 @@ echo "Claude Desktop config: $CONFIG_PATH"
 # --- Detect MCP server directory ---
 detect_server_dir() {
   # Priority 1: Relative to this script (repo clone)
-  local repo_servers="$SCRIPT_DIR/../plugins/bettercallclaude/mcp-servers"
+  local repo_servers="$SCRIPT_DIR/../mcp-servers"
   if [ -d "$repo_servers/entscheidsuche/dist" ]; then
     echo "$(cd "$repo_servers" && pwd)"
     return
@@ -81,7 +81,7 @@ if [ -z "$SERVER_DIR" ]; then
   echo ""
   echo "Please provide the path to the bettercallclaude plugin's mcp-servers/ directory."
   echo "If you cloned the repo, this is typically:"
-  echo "  /path/to/BetterCallClaude_Marketplace/plugins/bettercallclaude/mcp-servers"
+  echo "  /path/to/bettercallclaude/mcp-servers"
   echo ""
   read -r -p "MCP servers path: " SERVER_DIR
 

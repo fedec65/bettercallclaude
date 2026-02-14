@@ -4,7 +4,7 @@ BetterCallClaude is a plugin for legal professionals working in Cowork or Claude
 
 The plugin covers the full spectrum of Swiss legal work: BGE/ATF/DTF precedent research, case strategy development with risk assessment, adversarial legal analysis, compliance and data protection advisory, fiscal and corporate law expertise, real estate law, legal drafting with jurisdiction-aware templates, legal translation, and citation verification across all 26 Swiss cantons. Privacy compliance with Anwaltsgeheimnis (Art. 321 StGB) is enforced automatically through a pre-tool-use hook that detects privileged content before it leaves the local environment.
 
-**Version**: 2.2.4 -- 17 agents, 15 commands, 9 skills, 5 MCP servers.
+**Version**: 3.0.0 -- 17 agents, 16 commands, 9 skills, 5 MCP servers.
 
 ---
 
@@ -18,21 +18,20 @@ Visit the installation page at **[bettercallclaude.ch/marketplace](https://bette
 
 ### From GitHub (Claude Code CLI)
 
-Register the marketplace and install the plugin from the Claude Code CLI:
+Install the plugin directly from GitHub:
 
 ```
-/plugin marketplace add fedec65/BetterCallClaude_Marketplace
-/plugin install bettercallclaude@bettercallclaude-marketplace
+claude plugin add fedec65/bettercallclaude
 ```
 
 ### Manual Installation (Claude Code CLI)
 
-Clone the repository and point Claude Code to the plugin directory:
+Clone the repository and point Claude Code to the repo root:
 
 ```bash
-git clone https://github.com/fedec65/BetterCallClaude_Marketplace.git
-cd BetterCallClaude_Marketplace
-claude --plugin-dir ./plugins/bettercallclaude
+git clone https://github.com/fedec65/bettercallclaude.git
+cd bettercallclaude
+claude --plugin-dir .
 ```
 
 ---
@@ -260,7 +259,7 @@ The plugin includes five pre-compiled MCP servers that provide direct integratio
 
 MCP servers are pre-compiled and included in the plugin. No build step is required for end users. All server paths are configured in `.mcp.json` using the `${CLAUDE_PLUGIN_ROOT}` variable for portability.
 
-**Cowork users**: Cowork runs in a sandboxed VM, so 4 of 5 MCP servers cannot reach external APIs from inside Cowork. To get full MCP server access, install the servers at the Claude Desktop level using `bash scripts/install-claude-desktop.sh` (requires cloning this repo on your host machine first). See the plugin's [README](plugins/bettercallclaude/README.md#cowork-desktop) for detailed instructions.
+**Cowork users**: Cowork runs in a sandboxed VM, so 4 of 5 MCP servers cannot reach external APIs from inside Cowork. To get full MCP server access, install the servers at the Claude Desktop level using `bash scripts/install-claude-desktop.sh` (requires cloning this repo on your host machine first). Run `/bettercallclaude:setup` for guided configuration.
 
 ---
 
@@ -293,13 +292,60 @@ The privacy system supports three modes:
 
 Federico Cesconi
 
-GitHub: [fedec65/BetterCallClaude_Marketplace](https://github.com/fedec65/BetterCallClaude_Marketplace)
+GitHub: [fedec65/bettercallclaude](https://github.com/fedec65/bettercallclaude)
 
 ---
 
 ## License
 
-AGPL-3.0 -- See [LICENSE](../LICENSE) for full terms.
+AGPL-3.0 -- See [LICENSE](LICENSE) for full terms.
+
+---
+
+## For Developers
+
+The `mcp-servers-src/` directory contains the TypeScript source code for all five MCP servers. To build from source:
+
+```bash
+# Install dependencies and compile TypeScript
+npm run build
+
+# Build single-file bundles into mcp-servers/*/dist/
+npm run build:bundle
+
+# Run tests
+npm test
+
+# Create distributable plugin zip
+npm run package
+
+# Create .mcpb bundles for Claude Desktop
+npm run build:mcpb
+```
+
+### Repository Structure
+
+```
+.claude-plugin/plugin.json   Plugin manifest
+.mcp.json                    MCP server configuration
+agents/                      17 agent definitions (markdown)
+commands/                    16 slash commands (markdown)
+skills/                      9 auto-activated skills (markdown)
+hooks/                       Privacy detection hook
+mcp-servers/                 Pre-compiled MCP server bundles (checked into git)
+mcp-servers-src/             TypeScript source for MCP servers
+  shared/                    Shared infrastructure (database, HTTP, NLP)
+  entscheidsuche/            Swiss court decision search
+  bge-search/                Federal Supreme Court search
+  legal-citations/           Citation verification and formatting
+  fedlex-sparql/             Federal legislation via SPARQL
+  onlinekommentar/           Legal commentaries
+  integration-tests/         Cross-server integration tests
+scripts/                     Build and installation scripts
+docs/                        Documentation
+```
+
+Compiled bundles in `mcp-servers/*/dist/` are checked into git so end users don't need Node.js build tooling. After modifying server source, run `npm run build:bundle` and commit the updated dist files.
 
 ---
 

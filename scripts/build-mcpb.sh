@@ -11,7 +11,7 @@ set -euo pipefail
 
 SCRIPT_DIR="$(cd "$(dirname "$0")" && pwd)"
 REPO_ROOT="$(cd "$SCRIPT_DIR/.." && pwd)"
-MCP_SERVERS_DIR="$REPO_ROOT/plugins/bettercallclaude/mcp-servers"
+MCP_SERVERS_DIR="$REPO_ROOT/mcp-servers"
 MANIFESTS_DIR="$REPO_ROOT/mcpb/manifests"
 OUTPUT_DIR="$REPO_ROOT/dist/mcpb"
 STAGING_DIR="$REPO_ROOT/dist/mcpb-staging"

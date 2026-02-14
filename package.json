@@ -1,0 +1,22 @@
+{
+  "name": "bettercallclaude",
+  "version": "3.0.0",
+  "private": true,
+  "description": "Swiss Legal Intelligence Plugin for Claude",
+  "scripts": {
+    "build": "cd mcp-servers-src && npm ci && npm run build",
+    "build:bundle": "bash scripts/build-servers.sh",
+    "build:mcpb": "bash scripts/build-mcpb.sh",
+    "test": "cd mcp-servers-src && npm test",
+    "package": "bash scripts/package-plugin.sh"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/fedec65/bettercallclaude"
+  },
+  "author": "Federico Cesconi",
+  "license": "AGPL-3.0",
+  "engines": {
+    "node": ">=18.0.0"
+  }
+}

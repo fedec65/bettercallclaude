@@ -1,0 +1,32 @@
+{
+  "name": "@bettercallclaude/legal-citations",
+  "version": "1.0.0",
+  "description": "Legal citation verification and multi-lingual formatting MCP server for Swiss law",
+  "type": "module",
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "scripts": {
+    "build": "npx tsc",
+    "watch": "npx tsc --watch",
+    "dev": "npx tsx watch src/index.ts",
+    "lint": "echo 'No linting configured for legal-citations'",
+    "test": "vitest --run",
+    "test:coverage": "vitest --coverage"
+  },
+  "keywords": [
+    "mcp",
+    "legal",
+    "citations",
+    "swiss-law",
+    "multi-lingual"
+  ],
+  "dependencies": {
+    "@modelcontextprotocol/sdk": "^1.24.0"
+  },
+  "devDependencies": {
+    "@types/node": "^22.10.2",
+    "tsx": "^4.19.2",
+    "typescript": "^5.7.2",
+    "vitest": "^4.0.15"
+  }
+}
