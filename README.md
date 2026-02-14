@@ -1,4 +1,5 @@
-# BetterCallClaude -- Swiss Legal Intelligence Plugin for Cowork and Claude Code
+# BetterCallClaude
+Swiss Legal Intelligence Plugin for Cowork and Claude Code
 
 BetterCallClaude is a plugin for legal professionals working in Cowork or Claude Code. It transforms legal research, case strategy, and document drafting for Swiss lawyers by providing deep integration with Swiss legal databases, multi-lingual analysis across German, French, Italian, and English, and built-in privacy protection for attorney-client privilege.
 
