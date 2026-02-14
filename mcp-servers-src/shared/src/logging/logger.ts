@@ -12,6 +12,9 @@ import { LoggingConfig } from '../config/config';
 export function createLogger(config: LoggingConfig): winston.Logger {
   const transports: winston.transport[] = [
     new winston.transports.Console({
+      // CRITICAL: Write ALL levels to stderr, not stdout.
+      // MCP servers use stdio transport — stdout is reserved for JSON-RPC.
+      stderrLevels: ['error', 'warn', 'info', 'http', 'verbose', 'debug', 'silly'],
       format: config.format === 'json'
         ? winston.format.json()
         : winston.format.combine(
@@ -42,11 +45,11 @@ export function createLogger(config: LoggingConfig): winston.Logger {
     level: config.level,
     transports,
     exceptionHandlers: [
-      new winston.transports.Console(),
+      new winston.transports.Console({ stderrLevels: ['error', 'warn', 'info', 'http', 'verbose', 'debug', 'silly'] }),
       ...(config.file ? [new winston.transports.File({ filename: config.file })] : []),
     ],
     rejectionHandlers: [
-      new winston.transports.Console(),
+      new winston.transports.Console({ stderrLevels: ['error', 'warn', 'info', 'http', 'verbose', 'debug', 'silly'] }),
       ...(config.file ? [new winston.transports.File({ filename: config.file })] : []),
     ],
   });
