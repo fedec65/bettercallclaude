@@ -1,0 +1,23 @@
+{
+  "$schema": "https://anthropic.com/claude-code/marketplace.schema.json",
+  "name": "bettercallclaude-marketplace",
+  "metadata": {
+    "description": "Swiss Legal Intelligence plugin for Claude -- BGE/ATF/DTF precedent research, multi-lingual legal analysis, and citation verification for all 26 Swiss cantons",
+    "version": "3.0.0"
+  },
+  "owner": {
+    "name": "Federico Cesconi"
+  },
+  "plugins": [
+    {
+      "name": "bettercallclaude",
+      "description": "Swiss Legal Intelligence -- BGE/ATF/DTF precedent research, case strategy, legal drafting, and citation verification across all 26 Swiss cantons with Anwaltsgeheimnis privacy protection.",
+      "author": {
+        "name": "Federico Cesconi"
+      },
+      "source": ".",
+      "category": "legal",
+      "homepage": "https://bettercallclaude.ch"
+    }
+  ]
+}
