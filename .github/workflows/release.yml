@@ -22,7 +22,7 @@ jobs:
 
       - name: Install dependencies
         working-directory: mcp-servers-src
-        run: npm install
+        run: npm ci
 
       - name: Build MCP servers
         working-directory: mcp-servers-src
