@@ -52,51 +52,48 @@ Skip to Step 5 (Requirements Check).
 
 ### If any servers are missing:
 
-Install the MCP servers at the Claude Desktop level so they run on the host OS with full network access.
+**YOU MUST EXECUTE Steps 3a, 3b, and 3c below using the Bash tool. DO NOT skip ahead to the fallback section. DO NOT just show the user text instructions. You must RUN the commands yourself to generate the installer file.**
 
-**Important background**: When running inside Cowork Desktop, MCP servers execute in a sandboxed VM with restricted network access. 4 of 5 servers require external API calls (bger.ch, fedlex.data.admin.ch, onlinekommentar.ch) and will fail in the sandbox. Desktop-level installation solves this because those servers run on the host machine.
+Background: MCP servers in Cowork Desktop run in a sandboxed VM without network access. The solution is to generate a `.command` installer script that the user runs on their host Mac (outside Cowork). The `~/.claude/` directory is shared between the VM and the host, so you can write the file here and the user can execute it there.
 
-#### Step 3a: Locate the plugin's MCP server directory
+#### Step 3a: Locate the MCP server directory (EXECUTE NOW)
 
-Find the absolute path to the `mcp-servers` directory within the installed plugin. Try these locations in order:
-
-1. Check if the plugin is installed via Cowork/marketplace cache:
-   ```bash
-   find ~/.claude/plugins -type d -name "mcp-servers" 2>/dev/null | head -1
-   ```
-
-2. Check the current working directory (if running from a cloned repo):
-   ```bash
-   ls ./mcp-servers/entscheidsuche/dist/index.js 2>/dev/null && pwd
-   ```
-
-3. Check common manual install locations:
-   ```bash
-   ls ~/Dev/BetterCallClaude_Marketplace/mcp-servers/entscheidsuche/dist/index.js 2>/dev/null
-   ```
-
-Verify the found directory contains all 5 servers by checking for:
-- `<SERVER_DIR>/entscheidsuche/dist/index.js`
-- `<SERVER_DIR>/bge-search/dist/index.js`
-- `<SERVER_DIR>/legal-citations/dist/index.js`
-- `<SERVER_DIR>/fedlex-sparql/dist/index.js`
-- `<SERVER_DIR>/onlinekommentar/dist/index.js`
-
-If none are found, tell the user the plugin may not be fully installed and suggest re-installing.
-
-#### Step 3b: Generate the one-click installer
-
-Using the absolute path found in Step 3a, generate a macOS `.command` script that the user can run on their host machine. Write this file using Bash:
+Run these Bash commands NOW to find the `mcp-servers` directory. Do not skip this step.
 
 ```bash
-cat > ~/.claude/install-bcc-servers.command << 'SCRIPT'
+# Try plugin cache first, then current dir, then common locations
+SERVER_DIR="$(find ~/.claude/plugins -type d -name "mcp-servers" 2>/dev/null | head -1)"
+if [ -z "$SERVER_DIR" ] && [ -f "./mcp-servers/entscheidsuche/dist/index.js" ]; then
+  SERVER_DIR="$(cd ./mcp-servers && pwd)"
+fi
+if [ -z "$SERVER_DIR" ] && [ -f "$HOME/Dev/BetterCallClaude_Marketplace/mcp-servers/entscheidsuche/dist/index.js" ]; then
+  SERVER_DIR="$HOME/Dev/BetterCallClaude_Marketplace/mcp-servers"
+fi
+echo "SERVER_DIR=$SERVER_DIR"
+```
+
+If `SERVER_DIR` is empty, tell the user the plugin may not be fully installed and skip to Step 3d (fallback). Otherwise, verify all 5 servers exist:
+
+```bash
+for s in entscheidsuche bge-search legal-citations fedlex-sparql onlinekommentar; do
+  [ -f "$SERVER_DIR/$s/dist/index.js" ] && echo "OK: $s" || echo "MISSING: $s"
+done
+```
+
+If any are missing, skip to Step 3d. Otherwise proceed to Step 3b.
+
+#### Step 3b: Generate the installer script (EXECUTE NOW)
+
+You MUST run this Bash command to write the `.command` file. Replace `<ACTUAL_SERVER_DIR>` with the absolute path found in Step 3a.
+
+```bash
+cat > ~/.claude/install-bcc-servers.command << 'ENDOFSCRIPT'
 #!/bin/bash
 # BetterCallClaude — Desktop MCP Server Installer
-# Double-click this file or run: open ~/.claude/install-bcc-servers.command
+# Run this on your Mac: open ~/.claude/install-bcc-servers.command
 
 SERVER_DIR="__SERVER_DIR__"
 
-# Detect config path
 if [ "$(uname)" = "Darwin" ]; then
   CONFIG_PATH="$HOME/Library/Application Support/Claude/claude_desktop_config.json"
 else
@@ -111,28 +108,22 @@ echo "Server directory: $SERVER_DIR"
 echo "Config file:      $CONFIG_PATH"
 echo ""
 
-# Verify servers exist
 MISSING=0
 for s in entscheidsuche bge-search legal-citations fedlex-sparql onlinekommentar; do
   if [ ! -f "$SERVER_DIR/$s/dist/index.js" ]; then
-    echo "  MISSING: $s"
-    MISSING=1
+    echo "  MISSING: $s"; MISSING=1
   else
     echo "  Found:   $s"
   fi
 done
 
 if [ "$MISSING" = "1" ]; then
-  echo ""
-  echo "ERROR: Some servers are missing. Re-install the plugin first."
-  read -p "Press Enter to close..."
-  exit 1
+  echo ""; echo "ERROR: Some servers are missing. Re-install the plugin first."
+  read -p "Press Enter to close..."; exit 1
 fi
 
-echo ""
-echo "Installing servers into Claude Desktop config..."
+echo ""; echo "Installing servers into Claude Desktop config..."
 
-# Install using Node.js
 node -e "
 const fs = require('fs');
 const path = require('path');
@@ -152,40 +143,44 @@ fs.writeFileSync(configPath, JSON.stringify(config, null, 2) + '\n');
 console.log('Done! ' + Object.keys(config.mcpServers).filter(k => k.startsWith('bettercallclaude')).length + ' BetterCallClaude servers installed.');
 " "$CONFIG_PATH" "$SERVER_DIR"
 
-echo ""
-echo "Restart Claude Desktop to activate the servers."
-echo "Then run /bettercallclaude:setup to verify."
-echo ""
+echo ""; echo "Restart Claude Desktop to activate the servers."
+echo "Then run /bettercallclaude:setup to verify."; echo ""
 read -p "Press Enter to close..."
-SCRIPT
+ENDOFSCRIPT
 ```
 
-After writing the file, replace the `__SERVER_DIR__` placeholder with the actual absolute path found in Step 3a, and make it executable:
+Then replace the placeholder and make it executable:
 
 ```bash
-sed -i '' "s|__SERVER_DIR__|<ACTUAL_PATH>|" ~/.claude/install-bcc-servers.command
+sed -i '' "s|__SERVER_DIR__|<ACTUAL_SERVER_DIR>|" ~/.claude/install-bcc-servers.command
 chmod +x ~/.claude/install-bcc-servers.command
 ```
 
-#### Step 3c: Tell the user what to do
+Verify the file was written correctly:
 
-Display this message:
+```bash
+head -5 ~/.claude/install-bcc-servers.command
+```
+
+#### Step 3c: Show the user ONE simple instruction
+
+After successfully generating the file, tell the user ONLY this:
 
 ```
-I've created a one-click installer at ~/.claude/install-bcc-servers.command
+I've created a one-click installer for your MCP servers.
 
-To install the MCP servers into Claude Desktop, open Terminal on your Mac and paste:
+Open Terminal on your Mac and paste this single command:
 
   open ~/.claude/install-bcc-servers.command
 
-Or find the file in Finder at ~/.claude/ and double-click it.
-
-After it completes, restart Claude Desktop and re-run /bettercallclaude:setup to verify.
+After it finishes, restart Claude Desktop and re-run /bettercallclaude:setup to verify.
 ```
 
-#### Step 3d: Fallback — MCPB bundles or manual config
+DO NOT show any other installation options at this point. Stop here. Only proceed to Step 3d if the user reports a problem.
 
-If the `.command` approach doesn't work (e.g., user can't locate the file, Node.js not installed on host), provide these alternatives:
+#### Step 3d: Fallback (ONLY if Steps 3a-3c failed)
+
+Only show these alternatives if Step 3a could not find the server directory, or if the user explicitly reports that the `.command` approach did not work:
 
 **Option A — MCPB bundles**: Download and double-click `.mcpb` files from the latest release:
 
