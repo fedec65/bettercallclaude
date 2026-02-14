@@ -74,16 +74,21 @@ jobs:
             console.log('plugin.json OK:', p.name, 'v' + p.version);
           "
 
-      - name: Check plugin symlinks resolve
+      - name: Check plugin subdirectory contents
         run: |
-          for link in agents commands skills hooks mcp-servers scripts .mcp.json; do
-            target="bettercallclaude/$link"
-            if [ ! -e "$target" ]; then
-              echo "FAIL: $target does not exist or symlink broken"
+          for dir in agents commands skills hooks mcp-servers scripts; do
+            target="bettercallclaude/$dir"
+            if [ ! -d "$target" ]; then
+              echo "FAIL: $target directory missing"
               exit 1
             fi
-            echo "OK: $target"
+            echo "OK: $target/"
           done
+          if [ ! -f "bettercallclaude/.mcp.json" ]; then
+            echo "FAIL: bettercallclaude/.mcp.json missing"
+            exit 1
+          fi
+          echo "OK: bettercallclaude/.mcp.json"
 
       - name: Check compiled bundles exist
         run: |
