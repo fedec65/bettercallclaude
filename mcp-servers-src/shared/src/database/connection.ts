@@ -17,12 +17,14 @@ import { dirname } from 'path';
  * Create TypeORM DataSource from configuration
  */
 export function createDataSource(config: DatabaseConfig): DataSource {
+  // SQLite (sqljs) auto-creates tables on first run; PostgreSQL uses migrations
+  const isSqlite = config.type === 'sqlite';
   const baseOptions: Partial<DataSourceOptions> = {
     entities: [Decision, Citation, CacheEntry],
-    synchronize: false, // Use migrations in production
+    synchronize: isSqlite, // Auto-create tables for SQLite; use migrations for PostgreSQL
     logging: ['error', 'warn'],
     migrations: [__dirname + '/migrations/*.{ts,js}'],
-    migrationsRun: false, // Run migrations manually
+    migrationsRun: false,
   };
 
   let options: DataSourceOptions;
