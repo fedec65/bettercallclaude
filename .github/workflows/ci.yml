@@ -23,7 +23,7 @@ jobs:
 
       - name: Install dependencies
         working-directory: mcp-servers-src
-        run: npm ci
+        run: npm install
 
       - name: Lint
         working-directory: mcp-servers-src
