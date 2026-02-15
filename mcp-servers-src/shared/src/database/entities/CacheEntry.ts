@@ -20,14 +20,12 @@ export class CacheEntry {
   id!: string;
 
   @Column({ unique: true })
-  @Index()
   key!: string;
 
   @Column({ type: 'text' })
   value!: string;
 
   @Column({ type: 'datetime' })
-  @Index()
   expiresAt!: Date;
 
   @Column({ type: 'integer', default: 0 })

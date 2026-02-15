@@ -44,7 +44,6 @@ export class Decision {
   summary!: string;
 
   @Column({ type: 'date' })
-  @Index()
   decisionDate!: Date;
 
   @Column({
