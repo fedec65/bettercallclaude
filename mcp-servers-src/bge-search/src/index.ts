@@ -58,40 +58,10 @@ let cacheRepo: CacheRepository;
 let logger: Logger;
 
 /**
- * Initialize infrastructure components
+ * Degradation state flags
  */
-async function initializeInfrastructure() {
-  // Load configuration
-  const config = getConfig();
-  const winstonLogger = getLogger(config.logging);
-  logger = new Logger(winstonLogger);
-
-  logger.info("Initializing BGE Search MCP server", {
-    version: "2.0.0",
-    environment: config.environment,
-  });
-
-  // Initialize database connection
-  const dataSource = await getDataSource(config.database);
-  logger.info("Database connection established", {
-    type: config.database.type,
-  });
-
-  // Initialize repositories
-  decisionRepo = new DecisionRepository(dataSource);
-  cacheRepo = new CacheRepository(dataSource);
-  logger.info("Repositories initialized");
-
-  // Initialize Bundesgericht API client
-  bundesgerichtClient = new BundesgerichtClient({
-    config: config.apis.bundesgericht,
-    logger,
-    serviceName: "bundesgericht",
-  });
-  logger.info("Bundesgericht API client initialized", {
-    baseUrl: config.apis.bundesgericht.baseUrl,
-  });
-}
+let configReady = false;
+let databaseReady = false;
 
 /**
  * Search BGE decisions with cache-first, API, then database fallback strategy
@@ -103,26 +73,32 @@ async function searchBGE(params: SearchParams): Promise<{
   fromCache: boolean;
   source: string;
 }> {
+  if (!configReady) {
+    throw new Error("Server running in degraded mode: configuration/API clients not initialized. Database or network initialization failed at startup.");
+  }
+
   const startTime = Date.now();
 
   try {
     // Create cache key from search parameters
     const cacheKey = `bge_search:${JSON.stringify(params)}`;
 
-    // Check cache first
-    const cached = await cacheRepo.get(cacheKey);
-    if (cached) {
-      logger.info("Cache hit for BGE search", { cacheKey });
-      const cachedResult = JSON.parse(cached);
-      return {
-        ...cachedResult,
-        searchTimeMs: Date.now() - startTime,
-        fromCache: true,
-        source: "cache",
-      };
+    // Check cache first (only if database is available)
+    if (databaseReady) {
+      const cached = await cacheRepo.get(cacheKey);
+      if (cached) {
+        logger.info("Cache hit for BGE search", { cacheKey });
+        const cachedResult = JSON.parse(cached);
+        return {
+          ...cachedResult,
+          searchTimeMs: Date.now() - startTime,
+          fromCache: true,
+          source: "cache",
+        };
+      }
     }
 
-    logger.info("Cache miss - trying API then database fallback", { cacheKey });
+    logger.info("Trying API" + (databaseReady ? " then database fallback" : " (no database)"), { });
 
     // Convert MCP params to API filters
     const filters: BundesgerichtSearchFilters = {
@@ -139,8 +115,8 @@ async function searchBGE(params: SearchParams): Promise<{
     try {
       const apiResult = await bundesgerichtClient.searchDecisions(filters);
 
-      // Store decisions in database for future fallback
-      if (apiResult.decisions.length > 0) {
+      // Store decisions in database for future fallback (only if DB available)
+      if (databaseReady && apiResult.decisions.length > 0) {
         await Promise.all(
           apiResult.decisions.map(async (decision: BundesgerichtDecision) => {
             await decisionRepo.upsert({
@@ -170,7 +146,9 @@ async function searchBGE(params: SearchParams): Promise<{
         decisions: apiResult.decisions,
         totalResults: apiResult.total,
       };
-      await cacheRepo.set(cacheKey, JSON.stringify(result), 3600);
+      if (databaseReady) {
+        await cacheRepo.set(cacheKey, JSON.stringify(result), 3600);
+      }
 
       return {
         ...result,
@@ -179,6 +157,10 @@ async function searchBGE(params: SearchParams): Promise<{
         source: "api",
       };
     } catch (apiError) {
+      if (!databaseReady) {
+        throw new Error(`API unavailable and database not initialized: ${(apiError as Error).message}`);
+      }
+
       // API failed - fall back to local database
       logger.info("API unavailable, falling back to local database", {
         error: (apiError as Error).message,
@@ -243,6 +225,10 @@ async function getBGEDecision(citation: string): Promise<{
   fromCache: boolean;
   source?: string;
 }> {
+  if (!configReady) {
+    throw new Error("Server running in degraded mode: configuration/API clients not initialized.");
+  }
+
   try {
     // Validate citation first
     const validation = bundesgerichtClient.validateCitation(citation);
@@ -256,19 +242,21 @@ async function getBGEDecision(citation: string): Promise<{
     // Create cache key
     const cacheKey = `bge_decision:${citation}`;
 
-    // Check cache
-    const cached = await cacheRepo.get(cacheKey);
-    if (cached) {
-      logger.info("Cache hit for BGE decision", { citation });
-      return {
-        found: true,
-        decision: JSON.parse(cached),
-        fromCache: true,
-        source: "cache",
-      };
+    // Check cache (only if database is available)
+    if (databaseReady) {
+      const cached = await cacheRepo.get(cacheKey);
+      if (cached) {
+        logger.info("Cache hit for BGE decision", { citation });
+        return {
+          found: true,
+          decision: JSON.parse(cached),
+          fromCache: true,
+          source: "cache",
+        };
+      }
     }
 
-    logger.info("Cache miss - trying API then database fallback", { citation });
+    logger.info("Trying API" + (databaseReady ? " then database fallback" : " (no database)"), { citation });
 
     // Try API first, fall back to database
     try {
@@ -276,37 +264,41 @@ async function getBGEDecision(citation: string): Promise<{
 
       if (!decision) {
         // API returned no result - try database before giving up
-        const dbDecision = await decisionRepo.findByDecisionId(citation);
-        if (dbDecision) {
-          return {
-            found: true,
-            decision: dbDecision as unknown as BundesgerichtDecision,
-            fromCache: false,
-            source: "database",
-          };
+        if (databaseReady) {
+          const dbDecision = await decisionRepo.findByDecisionId(citation);
+          if (dbDecision) {
+            return {
+              found: true,
+              decision: dbDecision as unknown as BundesgerichtDecision,
+              fromCache: false,
+              source: "database",
+            };
+          }
         }
         return { found: false, fromCache: false };
       }
 
-      // Store in database
-      await decisionRepo.upsert({
-        decisionId: decision.decisionId,
-        courtLevel: "federal" as const,
-        title: decision.title,
-        summary: decision.summary,
-        decisionDate: new Date(decision.decisionDate),
-        language: decision.language,
-        legalAreas: decision.legalAreas,
-        fullText: decision.fullText,
-        relatedDecisions: decision.relatedDecisions,
-        metadata: decision.metadata,
-        chamber: decision.chamber,
-        bgeReference: decision.bgeReference,
-        sourceUrl: decision.sourceUrl,
-        lastFetchedAt: new Date(),
-      });
+      // Store in database (only if DB available)
+      if (databaseReady) {
+        await decisionRepo.upsert({
+          decisionId: decision.decisionId,
+          courtLevel: "federal" as const,
+          title: decision.title,
+          summary: decision.summary,
+          decisionDate: new Date(decision.decisionDate),
+          language: decision.language,
+          legalAreas: decision.legalAreas,
+          fullText: decision.fullText,
+          relatedDecisions: decision.relatedDecisions,
+          metadata: decision.metadata,
+          chamber: decision.chamber,
+          bgeReference: decision.bgeReference,
+          sourceUrl: decision.sourceUrl,
+          lastFetchedAt: new Date(),
+        });
 
-      await cacheRepo.set(cacheKey, JSON.stringify(decision), 86400);
+        await cacheRepo.set(cacheKey, JSON.stringify(decision), 86400);
+      }
 
       return {
         found: true,
@@ -315,6 +307,10 @@ async function getBGEDecision(citation: string): Promise<{
         source: "api",
       };
     } catch (apiError) {
+      if (!databaseReady) {
+        throw new Error(`API unavailable and database not initialized: ${(apiError as Error).message}`);
+      }
+
       // API failed - fall back to local database
       logger.info("API unavailable, falling back to local database for citation lookup", {
         citation,
@@ -368,6 +364,13 @@ function validateCitation(citation: string): {
   normalized?: string;
   error?: string;
 } {
+  if (!configReady) {
+    return {
+      valid: false,
+      error: "Server running in degraded mode: configuration/API clients not initialized.",
+    };
+  }
+
   try {
     const validation = bundesgerichtClient.validateCitation(citation);
 
@@ -400,9 +403,11 @@ function validateCitation(citation: string): {
  * Main server setup
  */
 async function main() {
-  // Initialize infrastructure
-  await initializeInfrastructure();
+  // 1. Minimal logger (works without config)
+  const minLogger = getLogger();
+  logger = new Logger(minLogger);
 
+  // 2. Register MCP server and tools FIRST (always succeeds)
   const server = new Server(
     {
       name: "bge-search",
@@ -570,9 +575,44 @@ async function main() {
   // Start server with stdio transport
   const transport = new StdioServerTransport();
   await server.connect(transport);
-
-  logger.info("BGE Search MCP server running on stdio");
   console.error("BGE Search MCP server running on stdio");
+
+  // 3. Try config + API clients (non-fatal)
+  try {
+    const config = getConfig();
+    logger = new Logger(getLogger(config.logging));
+    bundesgerichtClient = new BundesgerichtClient({
+      config: config.apis.bundesgericht,
+      logger,
+      serviceName: "bundesgericht",
+    });
+    configReady = true;
+    logger.info("Config and API clients initialized");
+  } catch (error) {
+    console.error(`[WARN] Config/API init failed, running in degraded mode: ${(error as Error).message}`);
+  }
+
+  // 4. Try database (non-fatal, expected to fail in sandboxed VMs)
+  if (configReady) {
+    try {
+      const config = getConfig();
+      const dataSource = await getDataSource(config.database);
+      decisionRepo = new DecisionRepository(dataSource);
+      cacheRepo = new CacheRepository(dataSource);
+      databaseReady = true;
+      logger.info("Database initialized", { type: config.database.type });
+    } catch (error) {
+      logger.warn("Database init failed, running without cache/persistence", {
+        error: (error as Error).message,
+      });
+    }
+  }
+
+  logger.info("BGE Search MCP server ready", {
+    configReady,
+    databaseReady,
+    mode: configReady ? (databaseReady ? "full" : "api-only") : "degraded",
+  });
 }
 
 main().catch((error) => {

@@ -62,14 +62,39 @@ Run these Bash commands NOW to find the `mcp-servers` directory. Do not skip thi
 
 ```bash
 # Try plugin cache first, then current dir, then common locations
-SERVER_DIR="$(find ~/.claude/plugins -type d -name "mcp-servers" 2>/dev/null | head -1)"
-if [ -z "$SERVER_DIR" ] && [ -f "./mcp-servers/entscheidsuche/dist/index.js" ]; then
-  SERVER_DIR="$(cd ./mcp-servers && pwd)"
+SERVER_DIR=""
+for candidate in \
+  "${CLAUDE_PLUGIN_ROOT:-}/mcp-servers" \
+  "$(find ~/.claude/plugins -type d -name 'mcp-servers' 2>/dev/null | head -1)" \
+  "./mcp-servers" \
+  "$HOME/Dev/BetterCallClaude_Marketplace/mcp-servers"; do
+  if [ -n "$candidate" ] && [ -f "$candidate/entscheidsuche/dist/index.js" ]; then
+    SERVER_DIR="$candidate"
+    break
+  fi
+done
+
+# Detect Cowork VM (paths contain /sessions/ or .local-plugins)
+IS_COWORK=false
+if echo "$SERVER_DIR" | grep -qE '(/sessions/|\.local-plugins)'; then
+  IS_COWORK=true
 fi
-if [ -z "$SERVER_DIR" ] && [ -f "$HOME/Dev/BetterCallClaude_Marketplace/mcp-servers/entscheidsuche/dist/index.js" ]; then
-  SERVER_DIR="$HOME/Dev/BetterCallClaude_Marketplace/mcp-servers"
+
+# If Cowork: copy servers to ~/.claude/ (shared between VM and host)
+if [ "$IS_COWORK" = "true" ] && [ -n "$SERVER_DIR" ]; then
+  HOST_DIR="$HOME/.claude/bettercallclaude-servers"
+  mkdir -p "$HOST_DIR"
+  for s in entscheidsuche bge-search legal-citations fedlex-sparql onlinekommentar; do
+    mkdir -p "$HOST_DIR/$s/dist"
+    for f in "$SERVER_DIR/$s/dist/"*; do
+      [ -f "$f" ] && cp "$f" "$HOST_DIR/$s/dist/"
+    done
+  done
+  SERVER_DIR="$HOST_DIR"
 fi
+
 echo "SERVER_DIR=$SERVER_DIR"
+echo "IS_COWORK=$IS_COWORK"
 ```
 
 If `SERVER_DIR` is empty, tell the user the plugin may not be fully installed and skip to Step 3d (fallback). Otherwise, verify all 5 servers exist:
@@ -149,10 +174,16 @@ read -p "Press Enter to close..."
 ENDOFSCRIPT
 ```
 
-Then replace the placeholder and make it executable:
+Then replace the placeholder and make it executable. **Important**: If running in Cowork, use `$HOME/.claude/bettercallclaude-servers` as a literal string (single-quoted) so it expands on the host Mac, not inside the VM:
 
 ```bash
-sed -i '' "s|__SERVER_DIR__|<ACTUAL_SERVER_DIR>|" ~/.claude/install-bcc-servers.command
+if [ "$IS_COWORK" = "true" ]; then
+  # Single-quoted: $HOME stays literal, expands when user runs installer on host
+  sed -i '' 's|__SERVER_DIR__|$HOME/.claude/bettercallclaude-servers|' ~/.claude/install-bcc-servers.command
+else
+  # Double-quoted: expand SERVER_DIR now (host path is already correct)
+  sed -i '' "s|__SERVER_DIR__|<ACTUAL_SERVER_DIR>|" ~/.claude/install-bcc-servers.command
+fi
 chmod +x ~/.claude/install-bcc-servers.command
 ```
 

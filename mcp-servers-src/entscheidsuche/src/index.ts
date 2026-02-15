@@ -79,62 +79,10 @@ let cacheRepo: CacheRepository;
 let logger: Logger;
 
 /**
- * Initialize infrastructure components
+ * Degradation state flags
  */
-async function initializeInfrastructure() {
-  // Load configuration
-  const config = getConfig();
-  const winstonLogger = getLogger(config.logging);
-  logger = new Logger(winstonLogger);
-
-  logger.info("Initializing Entscheidsuche MCP server", {
-    version: "2.0.0",
-    environment: config.environment,
-  });
-
-  // Initialize database connection
-  const dataSource = await getDataSource(config.database);
-  logger.info("Database connection established", {
-    type: config.database.type,
-  });
-
-  // Initialize repositories
-  decisionRepo = new DecisionRepository(dataSource);
-  cacheRepo = new CacheRepository(dataSource);
-  logger.info("Repositories initialized");
-
-  // Initialize Bundesgericht API client
-  bundesgerichtClient = new BundesgerichtClient({
-    config: config.apis.bundesgericht,
-    logger,
-    serviceName: "bundesgericht",
-  });
-  logger.info("Bundesgericht API client initialized", {
-    baseUrl: config.apis.bundesgericht.baseUrl,
-  });
-
-  // Initialize cantonal clients for all configured cantons
-  const cantonConfigs: Record<Canton, APIClientOptions> = {} as Record<Canton, APIClientOptions>;
-  const availableCantons: Canton[] = ['ZH', 'BE', 'GE', 'BS', 'VD', 'TI'];
-
-  for (const canton of availableCantons) {
-    if (config.apis.cantons[canton]) {
-      cantonConfigs[canton] = {
-        config: config.apis.cantons[canton],
-        logger,
-        serviceName: `cantonal-${canton.toLowerCase()}`,
-      };
-    }
-  }
-
-  cantonalClients = CantonalClientFactory.createClients(
-    cantonConfigs,
-    logger
-  );
-  logger.info("Cantonal API clients initialized", {
-    cantons: Object.keys(cantonalClients),
-  });
-}
+let configReady = false;
+let databaseReady = false;
 
 /**
  * Unified search across federal and cantonal courts with cache-first strategy
@@ -149,25 +97,31 @@ async function searchDecisions(params: SearchParams): Promise<{
     byCanton: Record<string, number>;
   };
 }> {
+  if (!configReady) {
+    throw new Error("Server running in degraded mode: configuration/API clients not initialized. Database or network initialization failed at startup.");
+  }
+
   const startTime = Date.now();
 
   try {
     // Create cache key from search parameters
     const cacheKey = `unified_search:${JSON.stringify(params)}`;
 
-    // Check cache first
-    const cached = await cacheRepo.get(cacheKey);
-    if (cached) {
-      logger.info("Cache hit for unified search", { cacheKey });
-      const cachedResult = JSON.parse(cached);
-      return {
-        ...cachedResult,
-        searchTimeMs: Date.now() - startTime,
-        fromCache: true,
-      };
+    // Check cache first (only if database is available)
+    if (databaseReady) {
+      const cached = await cacheRepo.get(cacheKey);
+      if (cached) {
+        logger.info("Cache hit for unified search", { cacheKey });
+        const cachedResult = JSON.parse(cached);
+        return {
+          ...cachedResult,
+          searchTimeMs: Date.now() - startTime,
+          fromCache: true,
+        };
+      }
     }
 
-    logger.info("Cache miss - fetching from APIs", { cacheKey });
+    logger.info("Fetching from APIs" + (databaseReady ? " with database fallback" : " (no database)"), { });
 
     const allDecisions: Array<BundesgerichtDecision | CantonalDecision> = [];
 
@@ -184,8 +138,8 @@ async function searchDecisions(params: SearchParams): Promise<{
 
       const federalResult = await bundesgerichtClient.searchDecisions(federalFilters);
 
-      // Store federal decisions in database
-      if (federalResult.decisions.length > 0) {
+      // Store federal decisions in database (only if DB available)
+      if (databaseReady && federalResult.decisions.length > 0) {
         await Promise.all(
           federalResult.decisions.map(async (decision: BundesgerichtDecision) => {
             await decisionRepo.upsert({
@@ -238,8 +192,8 @@ async function searchDecisions(params: SearchParams): Promise<{
         cantonalFilters
       );
 
-      // Store cantonal decisions in database
-      if (cantonalResult.decisions.length > 0) {
+      // Store cantonal decisions in database (only if DB available)
+      if (databaseReady && cantonalResult.decisions.length > 0) {
         await Promise.all(
           cantonalResult.decisions.map(async (decision: CantonalDecision) => {
             await decisionRepo.upsert({
@@ -293,7 +247,9 @@ async function searchDecisions(params: SearchParams): Promise<{
       totalResults: allDecisions.length,
       facets,
     };
-    await cacheRepo.set(cacheKey, JSON.stringify(result), 3600);
+    if (databaseReady) {
+      await cacheRepo.set(cacheKey, JSON.stringify(result), 3600);
+    }
 
     return {
       ...result,
@@ -316,25 +272,31 @@ async function searchCanton(params: CantonSearchParams): Promise<{
   fromCache: boolean;
   byCanton: Record<Canton, number>;
 }> {
+  if (!configReady) {
+    throw new Error("Server running in degraded mode: configuration/API clients not initialized.");
+  }
+
   const startTime = Date.now();
 
   try {
     // Create cache key from search parameters
     const cacheKey = `canton_search:${JSON.stringify(params)}`;
 
-    // Check cache first
-    const cached = await cacheRepo.get(cacheKey);
-    if (cached) {
-      logger.info("Cache hit for canton search", { cacheKey });
-      const cachedResult = JSON.parse(cached);
-      return {
-        ...cachedResult,
-        searchTimeMs: Date.now() - startTime,
-        fromCache: true,
-      };
+    // Check cache first (only if database is available)
+    if (databaseReady) {
+      const cached = await cacheRepo.get(cacheKey);
+      if (cached) {
+        logger.info("Cache hit for canton search", { cacheKey });
+        const cachedResult = JSON.parse(cached);
+        return {
+          ...cachedResult,
+          searchTimeMs: Date.now() - startTime,
+          fromCache: true,
+        };
+      }
     }
 
-    logger.info("Cache miss - fetching from cantonal APIs", { cacheKey });
+    logger.info("Fetching from cantonal APIs" + (databaseReady ? "" : " (no database)"), { });
 
     const filters: CantonalSearchFilters = {
       query: params.query,
@@ -356,8 +318,8 @@ async function searchCanton(params: CantonSearchParams): Promise<{
       filters
     );
 
-    // Store cantonal decisions in database
-    if (cantonalResult.decisions.length > 0) {
+    // Store cantonal decisions in database (only if DB available)
+    if (databaseReady && cantonalResult.decisions.length > 0) {
       await Promise.all(
         cantonalResult.decisions.map(async (decision: CantonalDecision) => {
           await decisionRepo.upsert({
@@ -389,7 +351,9 @@ async function searchCanton(params: CantonSearchParams): Promise<{
       totalResults: cantonalResult.total,
       byCanton: cantonalResult.byCanton,
     };
-    await cacheRepo.set(cacheKey, JSON.stringify(result), 3600);
+    if (databaseReady) {
+      await cacheRepo.set(cacheKey, JSON.stringify(result), 3600);
+    }
 
     return {
       ...result,
@@ -410,6 +374,10 @@ async function getRelatedDecisions(decisionId: string, limit: number = 5): Promi
   relatedDecisions: Array<BundesgerichtDecision | CantonalDecision>;
   fromCache: boolean;
 }> {
+  if (!databaseReady) {
+    throw new Error("Database not available: this tool requires database access for citation graph queries.");
+  }
+
   try {
     // Create cache key
     const cacheKey = `related:${decisionId}:${limit}`;
@@ -469,6 +437,10 @@ async function getDecisionDetails(decisionId: string): Promise<{
   decision?: BundesgerichtDecision | CantonalDecision;
   fromCache: boolean;
 }> {
+  if (!databaseReady) {
+    throw new Error("Database not available: this tool requires database access for decision lookup.");
+  }
+
   try {
     // Create cache key
     const cacheKey = `decision:${decisionId}`;
@@ -561,10 +533,14 @@ async function analyzePrecedentSuccessRate(params: PrecedentAnalysisParams): Pro
   };
   fromCache: boolean;
 }> {
+  if (!configReady) {
+    throw new Error("Server running in degraded mode: configuration/API clients not initialized.");
+  }
+
   try {
     const cacheKey = `precedent_analysis:${JSON.stringify(params)}`;
 
-    const cached = await cacheRepo.get(cacheKey);
+    const cached = databaseReady ? await cacheRepo.get(cacheKey) : null;
     if (cached) {
       logger.info("Cache hit for precedent analysis", { cacheKey });
       return {
@@ -660,7 +636,9 @@ async function analyzePrecedentSuccessRate(params: PrecedentAnalysisParams): Pro
     };
 
     const result = { success: true, analysis };
-    await cacheRepo.set(cacheKey, JSON.stringify(result), 3600);
+    if (databaseReady) {
+      await cacheRepo.set(cacheKey, JSON.stringify(result), 3600);
+    }
 
     return { ...result, fromCache: false };
   } catch (error) {
@@ -790,10 +768,14 @@ async function findSimilarCases(params: SimilarCasesParams): Promise<{
   totalFound: number;
   fromCache: boolean;
 }> {
+  if (!configReady) {
+    throw new Error("Server running in degraded mode: configuration/API clients not initialized.");
+  }
+
   try {
     const cacheKey = `similar_cases:${JSON.stringify(params)}`;
 
-    const cached = await cacheRepo.get(cacheKey);
+    const cached = databaseReady ? await cacheRepo.get(cacheKey) : null;
     if (cached) {
       logger.info("Cache hit for similar cases", { cacheKey });
       return {
@@ -874,7 +856,9 @@ async function findSimilarCases(params: SimilarCasesParams): Promise<{
       totalFound: similarCases.length,
     };
 
-    await cacheRepo.set(cacheKey, JSON.stringify(result), 3600);
+    if (databaseReady) {
+      await cacheRepo.set(cacheKey, JSON.stringify(result), 3600);
+    }
 
     return { ...result, fromCache: false };
   } catch (error) {
@@ -968,10 +952,14 @@ async function getLegalProvisionInterpretation(params: ProvisionInterpretationPa
   totalFound: number;
   fromCache: boolean;
 }> {
+  if (!configReady) {
+    throw new Error("Server running in degraded mode: configuration/API clients not initialized.");
+  }
+
   try {
     const cacheKey = `provision_interpretation:${JSON.stringify(params)}`;
 
-    const cached = await cacheRepo.get(cacheKey);
+    const cached = databaseReady ? await cacheRepo.get(cacheKey) : null;
     if (cached) {
       logger.info("Cache hit for provision interpretation", { cacheKey });
       return {
@@ -1042,7 +1030,9 @@ async function getLegalProvisionInterpretation(params: ProvisionInterpretationPa
       totalFound: interpretations.length,
     };
 
-    await cacheRepo.set(cacheKey, JSON.stringify(result), 3600);
+    if (databaseReady) {
+      await cacheRepo.set(cacheKey, JSON.stringify(result), 3600);
+    }
 
     return { ...result, fromCache: false };
   } catch (error) {
@@ -1094,9 +1084,11 @@ function extractInterpretation(
  * Main server setup
  */
 async function main() {
-  // Initialize infrastructure
-  await initializeInfrastructure();
+  // 1. Minimal logger (works without config)
+  const minLogger = getLogger();
+  logger = new Logger(minLogger);
 
+  // 2. Register MCP server and tools FIRST (always succeeds)
   const server = new Server(
     {
       name: "entscheidsuche",
@@ -1502,9 +1494,64 @@ async function main() {
   // Start server with stdio transport
   const transport = new StdioServerTransport();
   await server.connect(transport);
-
-  logger.info("Entscheidsuche MCP server running on stdio");
   console.error("Entscheidsuche MCP server running on stdio");
+
+  // 3. Try config + API clients (non-fatal)
+  try {
+    const config = getConfig();
+    logger = new Logger(getLogger(config.logging));
+
+    // Initialize Bundesgericht API client
+    bundesgerichtClient = new BundesgerichtClient({
+      config: config.apis.bundesgericht,
+      logger,
+      serviceName: "bundesgericht",
+    });
+
+    // Initialize cantonal clients
+    const cantonConfigs: Record<Canton, APIClientOptions> = {} as Record<Canton, APIClientOptions>;
+    const availableCantons: Canton[] = ['ZH', 'BE', 'GE', 'BS', 'VD', 'TI'];
+
+    for (const canton of availableCantons) {
+      if (config.apis.cantons[canton]) {
+        cantonConfigs[canton] = {
+          config: config.apis.cantons[canton],
+          logger,
+          serviceName: `cantonal-${canton.toLowerCase()}`,
+        };
+      }
+    }
+
+    cantonalClients = CantonalClientFactory.createClients(cantonConfigs, logger);
+    configReady = true;
+    logger.info("Config and API clients initialized", {
+      cantons: Object.keys(cantonalClients),
+    });
+  } catch (error) {
+    console.error(`[WARN] Config/API init failed, running in degraded mode: ${(error as Error).message}`);
+  }
+
+  // 4. Try database (non-fatal, expected to fail in sandboxed VMs)
+  if (configReady) {
+    try {
+      const config = getConfig();
+      const dataSource = await getDataSource(config.database);
+      decisionRepo = new DecisionRepository(dataSource);
+      cacheRepo = new CacheRepository(dataSource);
+      databaseReady = true;
+      logger.info("Database initialized", { type: config.database.type });
+    } catch (error) {
+      logger.warn("Database init failed, running without cache/persistence", {
+        error: (error as Error).message,
+      });
+    }
+  }
+
+  logger.info("Entscheidsuche MCP server ready", {
+    configReady,
+    databaseReady,
+    mode: configReady ? (databaseReady ? "full" : "api-only") : "degraded",
+  });
 }
 
 main().catch((error) => {

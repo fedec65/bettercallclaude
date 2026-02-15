@@ -224,7 +224,11 @@ let configInstance: AppConfig | null = null;
 export function getConfig(): AppConfig {
   if (!configInstance) {
     configInstance = loadConfig();
-    validateConfig(configInstance);
+    try {
+      validateConfig(configInstance);
+    } catch (error) {
+      console.error(`[WARN] Config validation: ${(error as Error).message}`);
+    }
   }
   return configInstance;
 }

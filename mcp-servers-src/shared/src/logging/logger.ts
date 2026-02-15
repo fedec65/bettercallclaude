@@ -63,7 +63,16 @@ let loggerInstance: winston.Logger | null = null;
 export function getLogger(config?: LoggingConfig): winston.Logger {
   if (!loggerInstance) {
     if (!config) {
-      throw new Error('Logger not initialized. Call getLogger with config first.');
+      // Return minimal stderr-only logger for pre-config startup
+      loggerInstance = winston.createLogger({
+        level: 'info',
+        transports: [
+          new winston.transports.Console({
+            stderrLevels: ['error', 'warn', 'info', 'http', 'verbose', 'debug', 'silly'],
+          }),
+        ],
+      });
+      return loggerInstance;
     }
     loggerInstance = createLogger(config);
   }
