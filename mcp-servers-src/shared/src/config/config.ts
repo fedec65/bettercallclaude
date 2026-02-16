@@ -45,6 +45,7 @@ export interface AppConfig {
   apis: {
     bundesgericht: APIConfig;
     cantons: Record<string, APIConfig>;
+    entscheidsuche: APIConfig;
   };
   cache: CacheConfig;
   logging: LoggingConfig;
@@ -91,6 +92,13 @@ const configSchema = Joi.object<AppConfig>({
       apiKey: Joi.string().optional(),
       rateLimit: Joi.number().integer().min(1).max(100).default(10),
       timeout: Joi.number().integer().min(1000).max(60000).default(10000),
+    }).required(),
+
+    entscheidsuche: Joi.object({
+      baseUrl: Joi.string().uri().required(),
+      apiKey: Joi.string().optional(),
+      rateLimit: Joi.number().integer().min(1).max(100).default(10),
+      timeout: Joi.number().integer().min(1000).max(60000).default(15000),
     }).required(),
 
     cantons: Joi.object().pattern(
@@ -144,6 +152,17 @@ export function loadConfig(): AppConfig {
         timeout: process.env.BUNDESGERICHT_TIMEOUT
           ? parseInt(process.env.BUNDESGERICHT_TIMEOUT)
           : 10000,
+      },
+
+      entscheidsuche: {
+        baseUrl: process.env.ENTSCHEIDSUCHE_API_URL || 'https://entscheidsuche.ch',
+        apiKey: process.env.ENTSCHEIDSUCHE_API_KEY,
+        rateLimit: process.env.ENTSCHEIDSUCHE_RATE_LIMIT
+          ? parseInt(process.env.ENTSCHEIDSUCHE_RATE_LIMIT)
+          : 10,
+        timeout: process.env.ENTSCHEIDSUCHE_TIMEOUT
+          ? parseInt(process.env.ENTSCHEIDSUCHE_TIMEOUT)
+          : 15000,
       },
 
       cantons: {

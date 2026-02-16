@@ -54,6 +54,8 @@ import {
   LEGAL_DOMAINS,
 } from './queries/index.js';
 
+import { lookupSRByAbbreviation } from './abbreviation-map.js';
+
 import type {
   Language,
   LegalAct,
@@ -109,8 +111,17 @@ async function lookupStatute(input: LookupStatuteInput): Promise<LookupStatuteRe
       searchType = 'srNumber';
     } else {
       // Likely abbreviation (e.g., "OR", "ZGB")
-      query = buildLookupByAbbreviationQuery(input.identifier, input.language);
-      searchType = 'abbreviation';
+      // Try local abbreviation map first (SPARQL abbreviation query is unreliable)
+      const srNumber = lookupSRByAbbreviation(input.identifier);
+      if (srNumber) {
+        console.error(`Abbreviation "${input.identifier}" resolved to SR ${srNumber} via local map`);
+        query = buildLookupStatuteQuery(srNumber, input.language);
+        searchType = 'abbreviation';
+      } else {
+        // Fall back to SPARQL abbreviation query for unknown abbreviations
+        query = buildLookupByAbbreviationQuery(input.identifier, input.language);
+        searchType = 'abbreviation';
+      }
     }
 
     const result = await sparqlClient.query(query);

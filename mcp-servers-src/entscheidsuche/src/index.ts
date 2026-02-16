@@ -33,17 +33,12 @@ import {
   getLogger,
   Logger,
   getDataSource,
-  BundesgerichtClient,
-  CantonalClient,
-  CantonalClientFactory,
+  EntscheidSucheClient,
   DecisionRepository,
   CacheRepository,
   type Canton,
-  type BundesgerichtSearchFilters,
-  type CantonalSearchFilters,
-  type BundesgerichtDecision,
-  type CantonalDecision,
-  type APIClientOptions,
+  type EntscheidSucheDecision,
+  type EntscheidSucheSearchFilters,
 } from "@bettercallclaude/shared";
 
 // Unified search parameters interface (MCP tool input)
@@ -72,8 +67,7 @@ interface CantonSearchParams {
 /**
  * Global instances
  */
-let bundesgerichtClient: BundesgerichtClient;
-let cantonalClients: Record<Canton, CantonalClient>;
+let entscheidSucheClient: EntscheidSucheClient;
 let decisionRepo: DecisionRepository;
 let cacheRepo: CacheRepository;
 let logger: Logger;
@@ -88,7 +82,7 @@ let databaseReady = false;
  * Unified search across federal and cantonal courts with cache-first strategy
  */
 async function searchDecisions(params: SearchParams): Promise<{
-  decisions: Array<BundesgerichtDecision | CantonalDecision>;
+  decisions: EntscheidSucheDecision[];
   totalResults: number;
   searchTimeMs: number;
   fromCache: boolean;
@@ -121,130 +115,76 @@ async function searchDecisions(params: SearchParams): Promise<{
       }
     }
 
-    logger.info("Fetching from APIs" + (databaseReady ? " with database fallback" : " (no database)"), { });
+    logger.info("Fetching from entscheidsuche.ch API" + (databaseReady ? " with database fallback" : " (no database)"), { });
 
-    const allDecisions: Array<BundesgerichtDecision | CantonalDecision> = [];
-
-    // Search federal court if requested
-    if (!params.courtLevel || params.courtLevel === "federal" || params.courtLevel === "all") {
-      const federalFilters: BundesgerichtSearchFilters = {
-        query: params.query,
-        language: params.language as "de" | "fr" | "it" | undefined,
-        legalArea: params.legalAreas?.[0],
-        dateFrom: params.dateFrom,
-        dateTo: params.dateTo,
-        limit: params.limit || 10,
-      };
-
-      const federalResult = await bundesgerichtClient.searchDecisions(federalFilters);
-
-      // Store federal decisions in database (only if DB available)
-      if (databaseReady && federalResult.decisions.length > 0) {
-        await Promise.all(
-          federalResult.decisions.map(async (decision: BundesgerichtDecision) => {
-            await decisionRepo.upsert({
-              decisionId: decision.decisionId,
-              courtLevel: "federal" as const,
-              title: decision.title,
-              summary: decision.summary,
-              decisionDate: new Date(decision.decisionDate),
-              language: decision.language,
-              legalAreas: decision.legalAreas,
-              fullText: decision.fullText,
-              relatedDecisions: decision.relatedDecisions,
-              metadata: decision.metadata,
-              chamber: decision.chamber,
-              bgeReference: decision.bgeReference,
-              sourceUrl: decision.sourceUrl,
-              lastFetchedAt: new Date(),
-            });
-          })
-        );
-        logger.info("Stored federal decisions in database", {
-          count: federalResult.decisions.length,
-        });
-      }
-
-      allDecisions.push(...federalResult.decisions);
+    // Map court level to spider names for filtering
+    let courts: string[] | undefined;
+    if (params.courtLevel === "federal") {
+      courts = ['CH_BGer', 'CH_BGE', 'CH_BVGer', 'CH_BPatGer', 'CH_BStGer'];
     }
+    // Canton filter handled by EntscheidSucheClient via cantons param
 
-    // Search cantonal courts if requested
-    if (!params.courtLevel || params.courtLevel === "cantonal" || params.courtLevel === "all") {
-      const cantonalFilters: CantonalSearchFilters = {
-        query: params.query,
-        language: params.language as "de" | "fr" | "it" | undefined,
-        legalArea: params.legalAreas?.[0],
-        dateFrom: params.dateFrom,
-        dateTo: params.dateTo,
-        limit: params.limit || 10,
-      };
+    // Build EntscheidSuche search filters
+    const filters: EntscheidSucheSearchFilters = {
+      query: params.query,
+      courts: courts,
+      cantons: params.cantons,
+      language: params.language as 'de' | 'fr' | 'it' | undefined,
+      dateFrom: params.dateFrom,
+      dateTo: params.dateTo,
+      size: params.limit || 10,
+    };
 
-      // If specific cantons requested, filter clients
-      const clientsToUse = params.cantons
-        ? Object.fromEntries(
-            params.cantons.map(canton => [canton, cantonalClients[canton]])
-          )
-        : cantonalClients;
+    const apiResult = await entscheidSucheClient.searchDecisions(filters);
+    const allDecisions = apiResult.decisions;
 
-      // Search across cantons in parallel
-      const cantonalResult = await CantonalClientFactory.searchAcrossCantons(
-        clientsToUse as Record<Canton, CantonalClient>,
-        cantonalFilters
+    // Store decisions in database (only if DB available)
+    if (databaseReady && allDecisions.length > 0) {
+      await Promise.all(
+        allDecisions.map(async (decision) => {
+          await decisionRepo.upsert({
+            decisionId: decision.decisionId,
+            courtLevel: decision.courtLevel,
+            canton: decision.canton,
+            title: decision.title,
+            summary: decision.summary,
+            decisionDate: new Date(decision.decisionDate),
+            language: decision.language,
+            legalAreas: decision.legalAreas,
+            fullText: decision.fullText,
+            relatedDecisions: decision.relatedDecisions,
+            metadata: decision.metadata,
+            chamber: decision.chamber as 'I' | 'II' | 'III' | 'IV' | 'V' | undefined,
+            bgeReference: decision.bgeReference,
+            sourceUrl: decision.sourceUrl,
+            lastFetchedAt: new Date(),
+          });
+        })
       );
-
-      // Store cantonal decisions in database (only if DB available)
-      if (databaseReady && cantonalResult.decisions.length > 0) {
-        await Promise.all(
-          cantonalResult.decisions.map(async (decision: CantonalDecision) => {
-            await decisionRepo.upsert({
-              decisionId: decision.decisionId,
-              courtLevel: "cantonal" as const,
-              canton: decision.canton,
-              title: decision.title,
-              summary: decision.summary,
-              decisionDate: new Date(decision.decisionDate),
-              language: decision.language,
-              legalAreas: decision.legalAreas,
-              fullText: decision.fullText,
-              relatedDecisions: decision.relatedDecisions,
-              metadata: decision.metadata,
-              sourceUrl: decision.sourceUrl,
-              lastFetchedAt: new Date(),
-            });
-          })
-        );
-        logger.info("Stored cantonal decisions in database", {
-          count: cantonalResult.decisions.length,
-          byCanton: cantonalResult.byCanton,
-        });
-      }
-
-      allDecisions.push(...cantonalResult.decisions);
+      logger.info("Stored decisions in database", {
+        count: allDecisions.length,
+      });
     }
-
-    // Sort all decisions by date (most recent first)
-    allDecisions.sort((a, b) =>
-      new Date(b.decisionDate).getTime() - new Date(a.decisionDate).getTime()
-    );
 
     // Calculate facets
     const facets = {
       byCourtLevel: {
-        federal: allDecisions.filter(d => "bgeReference" in d).length,
-        cantonal: allDecisions.filter(d => "canton" in d).length,
+        federal: allDecisions.filter(d => d.courtLevel === 'federal').length,
+        cantonal: allDecisions.filter(d => d.courtLevel === 'cantonal').length,
       },
       byCanton: allDecisions
-        .filter((d): d is CantonalDecision => "canton" in d)
+        .filter(d => d.canton)
         .reduce((acc, d) => {
-          acc[d.canton] = (acc[d.canton] || 0) + 1;
+          const canton = d.canton!;
+          acc[canton] = (acc[canton] || 0) + 1;
           return acc;
         }, {} as Record<string, number>),
     };
 
     // Cache the results (TTL: 1 hour)
     const result = {
-      decisions: allDecisions.slice(0, params.limit || 10),
-      totalResults: allDecisions.length,
+      decisions: allDecisions,
+      totalResults: apiResult.total,
       facets,
     };
     if (databaseReady) {
@@ -266,11 +206,11 @@ async function searchDecisions(params: SearchParams): Promise<{
  * Search specific canton(s) with parallel aggregation
  */
 async function searchCanton(params: CantonSearchParams): Promise<{
-  decisions: CantonalDecision[];
+  decisions: EntscheidSucheDecision[];
   totalResults: number;
   searchTimeMs: number;
   fromCache: boolean;
-  byCanton: Record<Canton, number>;
+  byCanton: Record<string, number>;
 }> {
   if (!configReady) {
     throw new Error("Server running in degraded mode: configuration/API clients not initialized.");
@@ -296,35 +236,28 @@ async function searchCanton(params: CantonSearchParams): Promise<{
       }
     }
 
-    logger.info("Fetching from cantonal APIs" + (databaseReady ? "" : " (no database)"), { });
+    logger.info("Fetching from entscheidsuche.ch API for cantons" + (databaseReady ? "" : " (no database)"), { });
 
-    const filters: CantonalSearchFilters = {
+    // Build search filters with canton restriction
+    const filters: EntscheidSucheSearchFilters = {
       query: params.query,
-      language: params.language as "de" | "fr" | "it" | undefined,
-      legalArea: params.legalAreas?.[0],
+      cantons: params.cantons,
+      language: params.language as 'de' | 'fr' | 'it' | undefined,
       dateFrom: params.dateFrom,
       dateTo: params.dateTo,
-      limit: params.limit || 10,
+      size: params.limit || 10,
     };
 
-    // Filter clients to only requested cantons
-    const clientsToUse = Object.fromEntries(
-      params.cantons.map(canton => [canton, cantonalClients[canton]])
-    );
+    const apiResult = await entscheidSucheClient.searchDecisions(filters);
+    const decisions = apiResult.decisions;
 
-    // Search across cantons in parallel
-    const cantonalResult = await CantonalClientFactory.searchAcrossCantons(
-      clientsToUse as Record<Canton, CantonalClient>,
-      filters
-    );
-
-    // Store cantonal decisions in database (only if DB available)
-    if (databaseReady && cantonalResult.decisions.length > 0) {
+    // Store decisions in database (only if DB available)
+    if (databaseReady && decisions.length > 0) {
       await Promise.all(
-        cantonalResult.decisions.map(async (decision: CantonalDecision) => {
+        decisions.map(async (decision) => {
           await decisionRepo.upsert({
             decisionId: decision.decisionId,
-            courtLevel: "cantonal" as const,
+            courtLevel: decision.courtLevel,
             canton: decision.canton,
             title: decision.title,
             summary: decision.summary,
@@ -340,16 +273,24 @@ async function searchCanton(params: CantonSearchParams): Promise<{
         })
       );
       logger.info("Stored cantonal decisions in database", {
-        count: cantonalResult.decisions.length,
-        byCanton: cantonalResult.byCanton,
+        count: decisions.length,
       });
     }
 
+    // Calculate per-canton breakdown
+    const byCanton = decisions
+      .filter(d => d.canton)
+      .reduce((acc, d) => {
+        const canton = d.canton!;
+        acc[canton] = (acc[canton] || 0) + 1;
+        return acc;
+      }, {} as Record<string, number>);
+
     // Cache the results (TTL: 1 hour)
     const result = {
-      decisions: cantonalResult.decisions,
-      totalResults: cantonalResult.total,
-      byCanton: cantonalResult.byCanton,
+      decisions,
+      totalResults: apiResult.total,
+      byCanton,
     };
     if (databaseReady) {
       await cacheRepo.set(cacheKey, JSON.stringify(result), 3600);
@@ -371,7 +312,7 @@ async function searchCanton(params: CantonSearchParams): Promise<{
  */
 async function getRelatedDecisions(decisionId: string, limit: number = 5): Promise<{
   found: boolean;
-  relatedDecisions: Array<BundesgerichtDecision | CantonalDecision>;
+  relatedDecisions: EntscheidSucheDecision[];
   fromCache: boolean;
 }> {
   if (!databaseReady) {
@@ -410,7 +351,10 @@ async function getRelatedDecisions(decisionId: string, limit: number = 5): Promi
     const relatedDecisions = related.map((d: any) => ({
       ...d,
       decisionDate: d.decisionDate.toISOString().split('T')[0],
-    })) as Array<BundesgerichtDecision | CantonalDecision>;
+      signature: d.decisionId,
+      court: d.courtLevel === 'federal' ? 'Bundesgericht' : (d.canton || 'Unknown'),
+      score: 1.0,
+    })) as unknown as EntscheidSucheDecision[];
 
     // Cache the results (TTL: 24 hours)
     const result = {
@@ -434,56 +378,89 @@ async function getRelatedDecisions(decisionId: string, limit: number = 5): Promi
  */
 async function getDecisionDetails(decisionId: string): Promise<{
   found: boolean;
-  decision?: BundesgerichtDecision | CantonalDecision;
+  decision?: EntscheidSucheDecision;
   fromCache: boolean;
+  source?: string;
 }> {
-  if (!databaseReady) {
-    throw new Error("Database not available: this tool requires database access for decision lookup.");
-  }
-
   try {
     // Create cache key
     const cacheKey = `decision:${decisionId}`;
 
-    // Check cache
-    const cached = await cacheRepo.get(cacheKey);
-    if (cached) {
-      logger.info("Cache hit for decision details", { decisionId });
-      return {
-        ...JSON.parse(cached),
-        fromCache: true,
-      };
+    // Check cache first (only if database is available)
+    if (databaseReady) {
+      const cached = await cacheRepo.get(cacheKey);
+      if (cached) {
+        logger.info("Cache hit for decision details", { decisionId });
+        return {
+          ...JSON.parse(cached),
+          fromCache: true,
+          source: "cache",
+        };
+      }
     }
 
     logger.info("Cache miss - fetching decision details", { decisionId });
 
-    // Query database
+    // Try live API first (if config is ready)
+    if (configReady) {
+      try {
+        const liveDecision = await entscheidSucheClient.getDecision(decisionId);
+        if (liveDecision) {
+          // Store in database for future lookups
+          if (databaseReady) {
+            await decisionRepo.upsert({
+              decisionId: liveDecision.decisionId,
+              courtLevel: liveDecision.courtLevel,
+              canton: liveDecision.canton,
+              title: liveDecision.title,
+              summary: liveDecision.summary,
+              decisionDate: new Date(liveDecision.decisionDate),
+              language: liveDecision.language,
+              legalAreas: liveDecision.legalAreas,
+              fullText: liveDecision.fullText,
+              relatedDecisions: liveDecision.relatedDecisions,
+              metadata: liveDecision.metadata,
+              chamber: liveDecision.chamber as 'I' | 'II' | 'III' | 'IV' | 'V' | undefined,
+              bgeReference: liveDecision.bgeReference,
+              sourceUrl: liveDecision.sourceUrl,
+              lastFetchedAt: new Date(),
+            });
+            await cacheRepo.set(cacheKey, JSON.stringify({ found: true, decision: liveDecision }), 86400);
+          }
+          return { found: true, decision: liveDecision, fromCache: false, source: "api" };
+        }
+      } catch (apiError) {
+        logger.warn("Live API fetch failed, trying database fallback", {
+          decisionId,
+          error: (apiError as Error).message,
+        });
+      }
+    }
+
+    // Fall back to database
+    if (!databaseReady) {
+      return { found: false, fromCache: false };
+    }
+
     const decision = await decisionRepo.findById(decisionId);
 
     if (!decision) {
-      return {
-        found: false,
-        fromCache: false,
-      };
+      return { found: false, fromCache: false };
     }
 
     // Convert Decision entity to API format (Date → string)
     const apiDecision = {
       ...decision,
       decisionDate: decision.decisionDate.toISOString().split('T')[0],
-    } as BundesgerichtDecision | CantonalDecision;
+      signature: decision.decisionId,
+      court: decision.courtLevel === 'federal' ? 'Bundesgericht' : (decision.canton || 'Unknown'),
+      score: 1.0,
+    } as unknown as EntscheidSucheDecision;
 
     // Cache the results (TTL: 24 hours)
-    const result = {
-      found: true,
-      decision: apiDecision,
-    };
-    await cacheRepo.set(cacheKey, JSON.stringify(result), 86400);
+    await cacheRepo.set(cacheKey, JSON.stringify({ found: true, decision: apiDecision }), 86400);
 
-    return {
-      ...result,
-      fromCache: false,
-    };
+    return { found: true, decision: apiDecision, fromCache: false, source: "database" };
   } catch (error) {
     logger.error("Get decision details failed", error as Error, { decisionId });
     throw error;
@@ -573,7 +550,7 @@ async function analyzePrecedentSuccessRate(params: PrecedentAnalysisParams): Pro
     for (const decision of decisions) {
       const year = new Date(decision.decisionDate).getFullYear();
       const isSuccess = analyzeDecisionOutcome(decision, params.claimType);
-      const courtLevel = "bgeReference" in decision ? "federal" : "cantonal";
+      const courtLevel = decision.courtLevel || (decision.bgeReference ? "federal" : "cantonal");
 
       // By court level
       if (!byCourtLevel[courtLevel]) {
@@ -583,7 +560,7 @@ async function analyzePrecedentSuccessRate(params: PrecedentAnalysisParams): Pro
       if (isSuccess) byCourtLevel[courtLevel].successful++;
 
       // By canton (for cantonal decisions)
-      if ("canton" in decision && decision.canton) {
+      if (decision.canton) {
         if (!byCanton[decision.canton]) {
           byCanton[decision.canton] = { total: 0, successful: 0, rate: 0 };
         }
@@ -651,7 +628,7 @@ async function analyzePrecedentSuccessRate(params: PrecedentAnalysisParams): Pro
  * Analyze decision outcome based on metadata and summary
  */
 function analyzeDecisionOutcome(
-  decision: BundesgerichtDecision | CantonalDecision,
+  decision: EntscheidSucheDecision,
   _claimType: string
 ): boolean {
   const summary = (decision.summary || "").toLowerCase();
@@ -691,7 +668,7 @@ function analyzeDecisionOutcome(
  * Extract key factors from successful decisions
  */
 function extractKeyFactors(
-  decisions: Array<BundesgerichtDecision | CantonalDecision>,
+  decisions: Array<EntscheidSucheDecision>,
   _claimType: string
 ): string[] {
   const factors: string[] = [];
@@ -761,7 +738,7 @@ function generateRecommendations(
 async function findSimilarCases(params: SimilarCasesParams): Promise<{
   success: boolean;
   similarCases: Array<{
-    decision: BundesgerichtDecision | CantonalDecision;
+    decision: EntscheidSucheDecision;
     similarityScore: number;
     matchingFactors: string[];
   }>;
@@ -786,7 +763,7 @@ async function findSimilarCases(params: SimilarCasesParams): Promise<{
 
     logger.info("Finding similar cases", { params });
 
-    let baseDecision: BundesgerichtDecision | CantonalDecision | undefined;
+    let baseDecision: EntscheidSucheDecision | undefined;
     let searchQuery = params.factPattern || "";
 
     // If decision ID provided, fetch it first
@@ -824,7 +801,7 @@ async function findSimilarCases(params: SimilarCasesParams): Promise<{
 
     // Calculate similarity scores
     const similarCases: Array<{
-      decision: BundesgerichtDecision | CantonalDecision;
+      decision: EntscheidSucheDecision;
       similarityScore: number;
       matchingFactors: string[];
     }> = [];
@@ -871,8 +848,8 @@ async function findSimilarCases(params: SimilarCasesParams): Promise<{
  * Calculate similarity between decisions
  */
 function calculateSimilarity(
-  base: BundesgerichtDecision | CantonalDecision | null,
-  candidate: BundesgerichtDecision | CantonalDecision,
+  base: EntscheidSucheDecision | null,
+  candidate: EntscheidSucheDecision,
   factPattern?: string
 ): { score: number; factors: string[] } {
   let score = 0;
@@ -890,13 +867,13 @@ function calculateSimilarity(
     }
 
     // Chamber match (for BGE)
-    if ("chamber" in base && "chamber" in candidate && base.chamber === candidate.chamber) {
+    if (base.chamber && candidate.chamber && base.chamber === candidate.chamber) {
       score += 0.2;
       factors.push(`Same chamber: ${base.chamber}`);
     }
 
     // Canton match (for cantonal)
-    if ("canton" in base && "canton" in candidate && base.canton === candidate.canton) {
+    if (base.canton && candidate.canton && base.canton === candidate.canton) {
       score += 0.15;
       factors.push(`Same canton: ${base.canton}`);
     }
@@ -944,7 +921,7 @@ async function getLegalProvisionInterpretation(params: ProvisionInterpretationPa
     formatted: string;
   };
   interpretations: Array<{
-    decision: BundesgerichtDecision | CantonalDecision;
+    decision: EntscheidSucheDecision;
     interpretation: string;
     context: string;
     date: string;
@@ -997,7 +974,7 @@ async function getLegalProvisionInterpretation(params: ProvisionInterpretationPa
 
     // Extract interpretations from decisions
     const interpretations: Array<{
-      decision: BundesgerichtDecision | CantonalDecision;
+      decision: EntscheidSucheDecision;
       interpretation: string;
       context: string;
       date: string;
@@ -1045,7 +1022,7 @@ async function getLegalProvisionInterpretation(params: ProvisionInterpretationPa
  * Extract interpretation text from a decision
  */
 function extractInterpretation(
-  decision: BundesgerichtDecision | CantonalDecision,
+  decision: EntscheidSucheDecision,
   statute: string,
   article: number
 ): { text: string; context: string } | null {
@@ -1501,31 +1478,16 @@ async function main() {
     const config = getConfig();
     logger = new Logger(getLogger(config.logging));
 
-    // Initialize Bundesgericht API client
-    bundesgerichtClient = new BundesgerichtClient({
-      config: config.apis.bundesgericht,
+    // Initialize EntscheidSuche API client (unified search via entscheidsuche.ch)
+    entscheidSucheClient = new EntscheidSucheClient({
+      config: config.apis.entscheidsuche,
       logger,
-      serviceName: "bundesgericht",
+      serviceName: "entscheidsuche",
     });
 
-    // Initialize cantonal clients
-    const cantonConfigs: Record<Canton, APIClientOptions> = {} as Record<Canton, APIClientOptions>;
-    const availableCantons: Canton[] = ['ZH', 'BE', 'GE', 'BS', 'VD', 'TI'];
-
-    for (const canton of availableCantons) {
-      if (config.apis.cantons[canton]) {
-        cantonConfigs[canton] = {
-          config: config.apis.cantons[canton],
-          logger,
-          serviceName: `cantonal-${canton.toLowerCase()}`,
-        };
-      }
-    }
-
-    cantonalClients = CantonalClientFactory.createClients(cantonConfigs, logger);
     configReady = true;
-    logger.info("Config and API clients initialized", {
-      cantons: Object.keys(cantonalClients),
+    logger.info("Config and EntscheidSuche API client initialized", {
+      baseUrl: config.apis.entscheidsuche.baseUrl,
     });
   } catch (error) {
     console.error(`[WARN] Config/API init failed, running in degraded mode: ${(error as Error).message}`);

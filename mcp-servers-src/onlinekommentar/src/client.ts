@@ -147,11 +147,51 @@ export class OnlineKommentarClient {
 
     // Handle both wrapped and unwrapped API responses
     if (data.data) {
-      return data.data;
+      return this.validateSearchResult(data.data);
     }
 
     // API returns unwrapped result directly
-    return data as unknown as SearchResult;
+    return this.validateSearchResult(data);
+  }
+
+  /**
+   * Validate and normalize SearchResult to prevent crashes from unexpected API shapes
+   */
+  private validateSearchResult(data: unknown): SearchResult {
+    if (typeof data !== 'object' || data === null) {
+      return { commentaries: [], count: 0, page: 1, total_pages: 0 };
+    }
+    const obj = data as Record<string, unknown>;
+    return {
+      commentaries: Array.isArray(obj.commentaries) ? obj.commentaries : [],
+      count: typeof obj.count === 'number' ? obj.count : 0,
+      page: typeof obj.page === 'number' ? obj.page : 1,
+      total_pages: typeof obj.total_pages === 'number' ? obj.total_pages : 0,
+    };
+  }
+
+  /**
+   * Validate and normalize CommentaryDetail to prevent crashes from unexpected API shapes
+   */
+  private validateCommentaryDetail(data: unknown): CommentaryDetail {
+    if (typeof data !== 'object' || data === null) {
+      throw new Error('Invalid commentary data received from API');
+    }
+    const obj = data as Record<string, unknown>;
+    return {
+      id: (obj.id as string) || '',
+      title: (obj.title as string) || '',
+      authors: Array.isArray(obj.authors) ? obj.authors : [],
+      legislative_act: (obj.legislative_act as CommentaryDetail['legislative_act']) || { id: '', name: '', abbreviation: '' },
+      language: (obj.language as CommentaryDetail['language']) || 'de',
+      updated: (obj.updated as string) || '',
+      url: (obj.url as string) || '',
+      abstract: obj.abstract as string | undefined,
+      content: (obj.content as string) || '',
+      sections: Array.isArray(obj.sections) ? obj.sections : [],
+      citations: Array.isArray(obj.citations) ? obj.citations : [],
+      related_commentaries: Array.isArray(obj.related_commentaries) ? obj.related_commentaries : [],
+    };
   }
 
   /**
@@ -180,10 +220,10 @@ export class OnlineKommentarClient {
 
     // Handle both wrapped and unwrapped API responses
     if (data.data) {
-      return data.data;
+      return this.validateCommentaryDetail(data.data);
     }
 
-    return data as unknown as CommentaryDetail;
+    return this.validateCommentaryDetail(data);
   }
 
   /**

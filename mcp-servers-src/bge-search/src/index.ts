@@ -31,11 +31,11 @@ import {
   getLogger,
   Logger,
   getDataSource,
-  BundesgerichtClient,
+  EntscheidSucheClient,
   DecisionRepository,
   CacheRepository,
-  type BundesgerichtSearchFilters,
-  type BundesgerichtDecision,
+  type EntscheidSucheDecision,
+  type EntscheidSucheSearchFilters,
 } from "@bettercallclaude/shared";
 
 // Search parameters interface (MCP tool input)
@@ -52,7 +52,7 @@ interface SearchParams {
 /**
  * Global instances
  */
-let bundesgerichtClient: BundesgerichtClient;
+let entscheidSucheClient: EntscheidSucheClient;
 let decisionRepo: DecisionRepository;
 let cacheRepo: CacheRepository;
 let logger: Logger;
@@ -67,7 +67,7 @@ let databaseReady = false;
  * Search BGE decisions with cache-first, API, then database fallback strategy
  */
 async function searchBGE(params: SearchParams): Promise<{
-  decisions: BundesgerichtDecision[];
+  decisions: EntscheidSucheDecision[];
   totalResults: number;
   searchTimeMs: number;
   fromCache: boolean;
@@ -98,27 +98,26 @@ async function searchBGE(params: SearchParams): Promise<{
       }
     }
 
-    logger.info("Trying API" + (databaseReady ? " then database fallback" : " (no database)"), { });
+    logger.info("Searching entscheidsuche.ch for BGE decisions" + (databaseReady ? " with database fallback" : " (no database)"), { });
 
-    // Convert MCP params to API filters
-    const filters: BundesgerichtSearchFilters = {
+    // Build EntscheidSuche search filters restricted to federal courts
+    const filters: EntscheidSucheSearchFilters = {
       query: params.query,
-      language: params.language as "de" | "fr" | "it" | undefined,
-      chamber: params.chambers?.[0] as "I" | "II" | "III" | "IV" | "V" | undefined,
-      legalArea: params.legalAreas?.[0],
+      courts: ['CH_BGer', 'CH_BGE'],
+      language: params.language as 'de' | 'fr' | 'it' | undefined,
       dateFrom: params.dateFrom,
       dateTo: params.dateTo,
-      limit: params.limit || 10,
+      size: params.limit || 10,
     };
 
     // Try API first, fall back to local database
     try {
-      const apiResult = await bundesgerichtClient.searchDecisions(filters);
+      const apiResult = await entscheidSucheClient.searchDecisions(filters);
 
       // Store decisions in database for future fallback (only if DB available)
       if (databaseReady && apiResult.decisions.length > 0) {
         await Promise.all(
-          apiResult.decisions.map(async (decision: BundesgerichtDecision) => {
+          apiResult.decisions.map(async (decision) => {
             await decisionRepo.upsert({
               decisionId: decision.decisionId,
               courtLevel: "federal" as const,
@@ -130,14 +129,14 @@ async function searchBGE(params: SearchParams): Promise<{
               fullText: decision.fullText,
               relatedDecisions: decision.relatedDecisions,
               metadata: decision.metadata,
-              chamber: decision.chamber,
+              chamber: decision.chamber as 'I' | 'II' | 'III' | 'IV' | 'V' | undefined,
               bgeReference: decision.bgeReference,
               sourceUrl: decision.sourceUrl,
               lastFetchedAt: new Date(),
             });
           })
         );
-        logger.info("Stored decisions in database", {
+        logger.info("Stored BGE decisions in database", {
           count: apiResult.decisions.length,
         });
       }
@@ -179,20 +178,24 @@ async function searchBGE(params: SearchParams): Promise<{
 
       const decisions = dbResults.map((d) => ({
         decisionId: d.decisionId,
+        signature: d.decisionId,
         title: d.title || "",
         summary: d.summary || "",
         decisionDate: d.decisionDate instanceof Date
           ? d.decisionDate.toISOString().split("T")[0]
           : String(d.decisionDate),
-        language: d.language || "de",
+        language: (d.language || "de") as 'de' | 'fr' | 'it',
+        court: "Bundesgericht",
+        courtLevel: "federal" as const,
         legalAreas: d.legalAreas || [],
         fullText: d.fullText,
         relatedDecisions: d.relatedDecisions || [],
         metadata: d.metadata || {},
         chamber: d.chamber,
         bgeReference: (d as any).bgeReference,
-        sourceUrl: (d as any).sourceUrl,
-      })) as unknown as BundesgerichtDecision[];
+        sourceUrl: (d as any).sourceUrl || "",
+        score: 1.0,
+      })) as EntscheidSucheDecision[];
 
       const result = {
         decisions,
@@ -221,7 +224,7 @@ async function searchBGE(params: SearchParams): Promise<{
  */
 async function getBGEDecision(citation: string): Promise<{
   found: boolean;
-  decision?: BundesgerichtDecision;
+  decision?: EntscheidSucheDecision;
   fromCache: boolean;
   source?: string;
 }> {
@@ -230,13 +233,10 @@ async function getBGEDecision(citation: string): Promise<{
   }
 
   try {
-    // Validate citation first
-    const validation = bundesgerichtClient.validateCitation(citation);
+    // Validate citation format locally
+    const validation = validateCitation(citation);
     if (!validation.valid) {
-      return {
-        found: false,
-        fromCache: false,
-      };
+      return { found: false, fromCache: false };
     }
 
     // Create cache key
@@ -256,20 +256,20 @@ async function getBGEDecision(citation: string): Promise<{
       }
     }
 
-    logger.info("Trying API" + (databaseReady ? " then database fallback" : " (no database)"), { citation });
+    logger.info("Searching entscheidsuche.ch for BGE citation" + (databaseReady ? " with database fallback" : " (no database)"), { citation });
 
-    // Try API first, fall back to database
+    // Try API first using structured BGE search
     try {
-      const decision = await bundesgerichtClient.getDecisionByCitation(citation);
+      const apiResult = await entscheidSucheClient.searchBGE(citation);
 
-      if (!decision) {
+      if (apiResult.decisions.length === 0) {
         // API returned no result - try database before giving up
         if (databaseReady) {
           const dbDecision = await decisionRepo.findByDecisionId(citation);
           if (dbDecision) {
             return {
               found: true,
-              decision: dbDecision as unknown as BundesgerichtDecision,
+              decision: dbDecision as unknown as EntscheidSucheDecision,
               fromCache: false,
               source: "database",
             };
@@ -277,6 +277,8 @@ async function getBGEDecision(citation: string): Promise<{
         }
         return { found: false, fromCache: false };
       }
+
+      const decision = apiResult.decisions[0];
 
       // Store in database (only if DB available)
       if (databaseReady) {
@@ -291,7 +293,7 @@ async function getBGEDecision(citation: string): Promise<{
           fullText: decision.fullText,
           relatedDecisions: decision.relatedDecisions,
           metadata: decision.metadata,
-          chamber: decision.chamber,
+          chamber: decision.chamber as 'I' | 'II' | 'III' | 'IV' | 'V' | undefined,
           bgeReference: decision.bgeReference,
           sourceUrl: decision.sourceUrl,
           lastFetchedAt: new Date(),
@@ -321,28 +323,25 @@ async function getBGEDecision(citation: string): Promise<{
       if (dbDecision) {
         return {
           found: true,
-          decision: dbDecision as unknown as BundesgerichtDecision,
+          decision: dbDecision as unknown as EntscheidSucheDecision,
           fromCache: false,
           source: "database",
         };
       }
 
-      // Also try searching by BGE reference pattern in the query
-      const parsed = bundesgerichtClient.parseCitation(citation);
-      if (parsed) {
-        const searchResults = await decisionRepo.search({
-          query: parsed.formatted || citation,
-          courtLevel: "federal" as any,
-          limit: 1,
-        });
-        if (searchResults.length > 0) {
-          return {
-            found: true,
-            decision: searchResults[0] as unknown as BundesgerichtDecision,
-            fromCache: false,
-            source: "database",
-          };
-        }
+      // Also try searching by citation text in the query
+      const searchResults = await decisionRepo.search({
+        query: citation,
+        courtLevel: "federal" as any,
+        limit: 1,
+      });
+      if (searchResults.length > 0) {
+        return {
+          found: true,
+          decision: searchResults[0] as unknown as EntscheidSucheDecision,
+          fromCache: false,
+          source: "database",
+        };
       }
 
       return { found: false, fromCache: false };
@@ -364,32 +363,29 @@ function validateCitation(citation: string): {
   normalized?: string;
   error?: string;
 } {
-  if (!configReady) {
-    return {
-      valid: false,
-      error: "Server running in degraded mode: configuration/API clients not initialized.",
-    };
-  }
-
   try {
-    const validation = bundesgerichtClient.validateCitation(citation);
+    // Parse BGE citation format: "BGE 145 III 229" or "145 III 229" or "ATF 145 III 229"
+    const match = citation.match(
+      /(?:BGE|ATF|DTF)?\s*(\d{2,3})\s+(I{1,3}|IV|V)\s+(\d+)/i
+    );
 
-    if (!validation.valid) {
+    if (!match) {
       return {
         valid: false,
-        error: validation.error,
+        error: "Invalid BGE citation format. Expected: 'BGE {volume} {chamber} {page}' (e.g., 'BGE 145 III 229')",
       };
     }
 
-    // Parse citation to get components
-    const parsed = bundesgerichtClient.parseCitation(citation);
+    const volume = match[1];
+    const chamber = match[2].toUpperCase();
+    const page = match[3];
 
     return {
       valid: true,
-      volume: parsed.volume.toString(),
-      chamber: parsed.chamber,
-      page: parsed.page.toString(),
-      normalized: parsed.formatted,
+      volume,
+      chamber,
+      page,
+      normalized: `BGE ${volume} ${chamber} ${page}`,
     };
   } catch (error) {
     return {
@@ -581,13 +577,15 @@ async function main() {
   try {
     const config = getConfig();
     logger = new Logger(getLogger(config.logging));
-    bundesgerichtClient = new BundesgerichtClient({
-      config: config.apis.bundesgericht,
+    entscheidSucheClient = new EntscheidSucheClient({
+      config: config.apis.entscheidsuche,
       logger,
-      serviceName: "bundesgericht",
+      serviceName: "entscheidsuche",
     });
     configReady = true;
-    logger.info("Config and API clients initialized");
+    logger.info("Config and EntscheidSuche API client initialized", {
+      baseUrl: config.apis.entscheidsuche.baseUrl,
+    });
   } catch (error) {
     console.error(`[WARN] Config/API init failed, running in degraded mode: ${(error as Error).message}`);
   }

@@ -195,11 +195,11 @@ server.setRequestHandler(CallToolRequestSchema, async (request) => {
                   count: result.count,
                   page: result.page,
                   total_pages: result.total_pages,
-                  commentaries: result.commentaries.map((c) => ({
+                  commentaries: (result.commentaries || []).map((c) => ({
                     id: c.id,
                     title: c.title,
                     authors: c.authors,
-                    legislative_act: c.legislative_act.abbreviation,
+                    legislative_act: c.legislative_act?.abbreviation ?? 'unknown',
                     language: c.language,
                     updated: c.updated,
                     url: c.url,
@@ -292,11 +292,11 @@ server.setRequestHandler(CallToolRequestSchema, async (request) => {
                   count: result.count,
                   page: result.page,
                   total_pages: result.total_pages,
-                  commentaries: result.commentaries.map((c) => ({
+                  commentaries: (result.commentaries || []).map((c) => ({
                     id: c.id,
                     title: c.title,
                     authors: c.authors,
-                    legislative_act: c.legislative_act.abbreviation,
+                    legislative_act: c.legislative_act?.abbreviation ?? 'unknown',
                     language: c.language,
                     updated: c.updated,
                     url: c.url,
@@ -323,7 +323,7 @@ server.setRequestHandler(CallToolRequestSchema, async (request) => {
                 {
                   success: true,
                   count: result.length,
-                  legislative_acts: result.map((act) => ({
+                  legislative_acts: (result || []).map((act) => ({
                     id: act.id,
                     name: act.name,
                     abbreviation: act.abbreviation,
