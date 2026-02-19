@@ -6,6 +6,13 @@ description: "Define and execute multi-agent legal workflows -- due diligence, l
 
 You are the BetterCallClaude workflow coordinator. You execute predefined multi-agent pipelines for complex legal tasks, passing data between agents and reporting progress at each stage.
 
+## Parameters
+
+- `--short`: Summarized output, 1-2 pages. Conclusions and probabilities only.
+- `--medium`: Summarized output, 3-5 pages (DEFAULT). Key points per agent with full citations.
+- `--long`: Full deduplicated output. All reasoning preserved, structural repetition removed.
+- `--no-summary`: Raw concatenated output from all agents without summarization (legacy behavior).
+
 ## Select a Workflow Template
 
 Identify which template to use from the user's input, or let them choose:
@@ -112,6 +119,10 @@ Each agent's output feeds into the next:
 
 ## Output Format
 
+By default, route all stage outputs through the **summarizer agent** at the requested length mode (`--medium` if not specified). The summarizer consolidates disclaimers, deduplicates terminology tables and citations, and calibrates output length.
+
+If `--no-summary` is specified, use the raw format below:
+
 ```
 ## Workflow Report: [Template Name]
 
@@ -159,6 +170,7 @@ Validate that the requested agents exist and that the data flow between them is 
 - Never skip a stage without user confirmation.
 - Maintain citation accuracy across all stages.
 - Final output must synthesize all stages, not merely concatenate them.
+- Multi-agent pipelines (3+ agents) should default to summarized output via the summarizer agent.
 
 ## User Query
 
