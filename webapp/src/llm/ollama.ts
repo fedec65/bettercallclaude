@@ -30,6 +30,8 @@ export async function* streamChat(
   messages: ChatMessage[],
   signal?: AbortSignal
 ): AsyncGenerator<OllamaStreamChunk> {
+  console.log(`[ollama] Sending chat request to ${ollamaUrl}/api/chat (model: ${model}, messages: ${messages.length})`);
+
   const response = await fetch(`${ollamaUrl}/api/chat`, {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
@@ -40,6 +42,8 @@ export async function* streamChat(
     }),
     signal,
   });
+
+  console.log(`[ollama] Got response: ${response.status}`);
 
   if (!response.ok) {
     const body = await response.text();

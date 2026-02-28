@@ -48,10 +48,16 @@ export function createChatRouter(
       Connection: 'keep-alive',
       'X-Accel-Buffering': 'no',
     });
+    res.flushHeaders();
 
     const sendEvent = (event: StreamEvent) => {
       res.write(`data: ${JSON.stringify(event)}\n\n`);
     };
+
+    // Send a keep-alive comment every 15s to prevent connection timeout
+    const heartbeat = setInterval(() => {
+      res.write(': heartbeat\n\n');
+    }, 15000);
 
     try {
       // Resolve agent
@@ -91,11 +97,13 @@ export function createChatRouter(
       if ((err as Error).name === 'AbortError') {
         // Client disconnected — silently end
       } else {
+        console.error('[chat] Error:', (err as Error).message);
         sendEvent({ type: 'error', message: (err as Error).message });
         sendEvent({ type: 'done' });
       }
     }
 
+    clearInterval(heartbeat);
     res.end();
   });
 

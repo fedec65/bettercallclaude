@@ -9,7 +9,7 @@
  * We parse these, execute the tool, and add the result as a user message.
  */
 
-import { streamChat, type ChatMessage, type OllamaStreamChunk } from './ollama.js';
+import { streamChat, type ChatMessage } from './ollama.js';
 import { type Tool, type ToolRegistry } from '../tools/registry.js';
 
 const MAX_REACT_ITERATIONS = 10;
@@ -94,32 +94,12 @@ function parseToolCalls(text: string): ToolCallEvent[] {
 }
 
 /**
- * Extract <think>...</think> blocks from DeepSeek-R1 output.
- * Returns { thinking, response } where response has thinking blocks removed.
- */
-function extractThinking(text: string): { thinking: string; response: string } {
-  const thinkRegex = /<think>([\s\S]*?)<\/think>/g;
-  let thinking = '';
-  let match;
-
-  while ((match = thinkRegex.exec(text)) !== null) {
-    thinking += match[1].trim() + '\n';
-  }
-
-  const response = text.replace(/<think>[\s\S]*?<\/think>/g, '').trim();
-  return { thinking: thinking.trim(), response };
-}
-
-/**
- * Remove tool call tags from text to get the "clean" response.
- */
-function stripToolCalls(text: string): string {
-  return text.replace(/<tool_call>[\s\S]*?<\/tool_call>/g, '').trim();
-}
-
-/**
  * Execute the ReAct tool-calling loop with streaming.
  * Yields StreamEvents as they occur.
+ *
+ * Handles DeepSeek-R1's <think>...</think> blocks by detecting them
+ * in the accumulated response (not per-token), so split tags work correctly.
+ * Streams thinking content progressively so the user sees activity.
  */
 export async function* reactLoop(
   ollamaUrl: string,
@@ -137,59 +117,83 @@ export async function* reactLoop(
   ];
 
   for (let iteration = 0; iteration < MAX_REACT_ITERATIONS; iteration++) {
-    // Collect the full response while streaming tokens
     let fullResponse = '';
-    let inThinkBlock = false;
-    let thinkBuffer = '';
     let totalTokens = 0;
+    let sentThinkingChars = 0;
+    let sentTokenChars = 0;
 
-    for await (const chunk of streamChat(ollamaUrl, model, conversationMessages, signal)) {
-      const content = chunk.message?.content || '';
-      fullResponse += content;
-      totalTokens = chunk.eval_count || totalTokens;
+    console.log(`[reactLoop] Iteration ${iteration + 1}: sending ${conversationMessages.length} messages to Ollama`);
 
-      // Detect <think> blocks for streaming
-      if (content.includes('<think>')) {
-        inThinkBlock = true;
-        thinkBuffer = '';
-        continue;
-      }
-      if (inThinkBlock) {
-        if (content.includes('</think>')) {
-          inThinkBlock = false;
-          yield { type: 'thinking', content: thinkBuffer.trim() };
-          thinkBuffer = '';
-          continue;
+    try {
+      for await (const chunk of streamChat(ollamaUrl, model, conversationMessages, signal)) {
+        const content = chunk.message?.content || '';
+        fullResponse += content;
+        totalTokens = chunk.eval_count || totalTokens;
+
+        // Detect current state from accumulated response (handles split tags)
+        const hasOpenThink = fullResponse.includes('<think>');
+        const thinkOpenCount = (fullResponse.match(/<think>/g) || []).length;
+        const thinkCloseCount = (fullResponse.match(/<\/think>/g) || []).length;
+        const insideThink = hasOpenThink && thinkOpenCount > thinkCloseCount;
+
+        const toolCallOpenCount = (fullResponse.match(/<tool_call>/g) || []).length;
+        const toolCallCloseCount = (fullResponse.match(/<\/tool_call>/g) || []).length;
+        const insideToolCall = toolCallOpenCount > toolCallCloseCount;
+
+        // Stream thinking content progressively
+        if (hasOpenThink) {
+          const thinkStart = fullResponse.indexOf('<think>') + 7;
+          const thinkEnd = fullResponse.lastIndexOf('</think>');
+          const end = thinkEnd > thinkStart ? thinkEnd : fullResponse.length;
+          const thinkContent = fullResponse.substring(thinkStart, end);
+
+          if (thinkContent.length > sentThinkingChars) {
+            const newThinking = thinkContent.substring(sentThinkingChars);
+            sentThinkingChars = thinkContent.length;
+            yield { type: 'thinking', content: newThinking };
+          }
         }
-        thinkBuffer += content;
-        continue;
-      }
 
-      // Don't stream tokens that are part of tool call tags
-      if (!fullResponse.includes('<tool_call>') || fullResponse.includes('</tool_call>')) {
-        const cleanContent = content.replace(/<\/?tool_call>/g, '');
-        if (cleanContent) {
-          yield { type: 'token', content: cleanContent };
+        // Stream response tokens (outside think and tool_call blocks)
+        if (!insideThink && !insideToolCall) {
+          // Get clean response text (after think blocks, without tool_call tags)
+          const afterThink = hasOpenThink
+            ? fullResponse.substring(fullResponse.lastIndexOf('</think>') + 8)
+            : fullResponse;
+          const cleanResponse = afterThink
+            .replace(/<tool_call>[\s\S]*?<\/tool_call>/g, '')
+            .replace(/<\/?tool_call>/g, '');
+
+          if (cleanResponse.length > sentTokenChars) {
+            const newTokens = cleanResponse.substring(sentTokenChars);
+            sentTokenChars = cleanResponse.length;
+            if (newTokens.trim() || newTokens.includes('\n')) {
+              yield { type: 'token', content: newTokens };
+            }
+          }
         }
       }
+    } catch (err) {
+      const errMsg = (err as Error).message;
+      console.error(`[reactLoop] Ollama streaming error:`, errMsg);
+      yield { type: 'error', message: `Ollama error: ${errMsg}` };
+      yield { type: 'done' };
+      return;
     }
 
-    // Check for any remaining think blocks
-    const { thinking } = extractThinking(fullResponse);
-    if (thinking && !thinkBuffer) {
-      // Was already streamed above
-    }
+    console.log(`[reactLoop] Got ${fullResponse.length} chars response`);
 
     // Parse tool calls from the full response
     const toolCalls = parseToolCalls(fullResponse);
 
     if (toolCalls.length === 0) {
-      // No tool calls — this is the final response
       yield { type: 'done', totalTokens };
       return;
     }
 
-    // Execute tool calls and collect results
+    console.log(`[reactLoop] Found ${toolCalls.length} tool calls`);
+
+    // Execute tool calls
     const toolResults: string[] = [];
 
     for (const call of toolCalls) {
@@ -210,7 +214,6 @@ export async function* reactLoop(
 
         yield { type: 'tool_result', data: { name: call.name, result, duration } };
 
-        // Check if the result contains legal documents to show in document viewer
         if (result && typeof result === 'object') {
           const r = result as Record<string, unknown>;
           if (r.decisions || r.articles || r.legislation) {
@@ -218,19 +221,18 @@ export async function* reactLoop(
           }
         }
 
-        // Format result for the model
         const resultStr = typeof result === 'string' ? result : JSON.stringify(result, null, 2);
         toolResults.push(`Tool ${call.name} result:\n${resultStr}`);
       } catch (err) {
         const duration = Date.now() - startTime;
         const errorMsg = (err as Error).message;
+        console.error(`[reactLoop] Tool ${call.name} error:`, errorMsg);
         yield { type: 'error', message: `Tool ${call.name} failed: ${errorMsg}` };
         yield { type: 'tool_result', data: { name: call.name, result: { error: errorMsg }, duration } };
         toolResults.push(`Tool ${call.name}: ERROR — ${errorMsg}`);
       }
     }
 
-    // Add the assistant's response and tool results to conversation
     conversationMessages.push({
       role: 'assistant',
       content: fullResponse,

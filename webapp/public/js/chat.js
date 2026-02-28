@@ -149,7 +149,13 @@ const ChatPanel = {
       }
 
       case 'thinking': {
-        state.thinkingBlocks.push(event.content);
+        // Progressive thinking — accumulate into a single block
+        if (state.thinkingBlocks.length === 0) {
+          state.thinkingBlocks.push(event.content);
+        } else {
+          state.thinkingBlocks[state.thinkingBlocks.length - 1] += event.content;
+        }
+        App.setStatus('Thinking...');
         this.renderMessageContent(msgEl, state.fullText(), state.thinkingBlocks, state.toolCalls);
         break;
       }
@@ -215,15 +221,17 @@ const ChatPanel = {
     const contentEl = msgEl.querySelector('.msg-content');
     let html = '';
 
-    // Thinking blocks (collapsible)
+    // Thinking blocks (collapsible, auto-expand while streaming)
+    const isStreaming = this.isStreaming;
     for (let i = 0; i < thinkingBlocks.length; i++) {
-      const id = `think-${Date.now()}-${i}`;
+      const expandedClass = isStreaming ? ' expanded' : '';
+      const arrow = isStreaming ? '&#9660;' : '&#9654;';
       html += `
         <div class="thinking-block">
           <div class="thinking-toggle" onclick="this.nextElementSibling.classList.toggle('expanded'); this.querySelector('.arrow').textContent = this.nextElementSibling.classList.contains('expanded') ? '&#9660;' : '&#9654;'">
-            <span class="arrow">&#9654;</span> Reasoning
+            <span class="arrow">${arrow}</span> Reasoning${isStreaming ? '...' : ''}
           </div>
-          <div class="thinking-content">${escapeHtml(thinkingBlocks[i])}</div>
+          <div class="thinking-content${expandedClass}">${escapeHtml(thinkingBlocks[i])}</div>
         </div>
       `;
     }
