@@ -1,0 +1,120 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>BetterCallM — Swiss Legal Intelligence</title>
+  <link rel="stylesheet" href="/css/styles.css">
+  <!-- Marked.js for Markdown rendering (CDN, no install needed) -->
+  <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
+</head>
+<body>
+  <!-- Header -->
+  <header class="header">
+    <div class="header-left">
+      <h1 class="logo">BetterCallM</h1>
+      <span class="subtitle">Swiss Legal Intelligence</span>
+    </div>
+    <div class="header-center">
+      <label for="agent-select" class="agent-label">Agent:</label>
+      <select id="agent-select" class="agent-select">
+        <option value="researcher" selected>Loading agents...</option>
+      </select>
+    </div>
+    <div class="header-right">
+      <span id="model-info" class="model-info">--</span>
+      <span id="connection-status" class="status-dot disconnected" title="Checking connection..."></span>
+      <button id="settings-btn" class="icon-btn" title="Settings">&#9881;</button>
+    </div>
+  </header>
+
+  <!-- Main 3-Panel Layout -->
+  <main class="workspace">
+    <!-- Chat Panel (Left) -->
+    <section class="panel chat-panel">
+      <div class="panel-header">
+        <h2>Chat</h2>
+        <button id="clear-chat" class="small-btn" title="Clear conversation">Clear</button>
+      </div>
+      <div id="messages" class="messages"></div>
+      <div class="chat-input-area">
+        <textarea
+          id="chat-input"
+          class="chat-input"
+          placeholder="Ask a Swiss legal question..."
+          rows="3"
+        ></textarea>
+        <button id="send-btn" class="send-btn" title="Send (Ctrl+Enter)">
+          <span class="send-icon">&#9654;</span>
+        </button>
+      </div>
+    </section>
+
+    <!-- Resize Handle -->
+    <div class="resize-handle" data-resize="left"></div>
+
+    <!-- Document Viewer Panel (Center) -->
+    <section class="panel document-panel">
+      <div class="panel-header">
+        <h2>Documents</h2>
+        <div id="doc-tabs" class="doc-tabs"></div>
+      </div>
+      <div id="document-viewer" class="document-viewer">
+        <div class="empty-state">
+          <p>Legal documents will appear here when retrieved by the AI.</p>
+          <p class="hint">Ask about a BGE decision or federal statute to see documents.</p>
+        </div>
+      </div>
+    </section>
+
+    <!-- Resize Handle -->
+    <div class="resize-handle" data-resize="right"></div>
+
+    <!-- Citations Panel (Right) -->
+    <section class="panel citations-panel">
+      <div class="panel-header">
+        <h2>Citations</h2>
+        <span id="citation-count" class="badge">0</span>
+      </div>
+      <div id="citations-list" class="citations-list">
+        <div class="empty-state">
+          <p>Citations will be tracked here as they appear in the conversation.</p>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <!-- Status Bar -->
+  <footer class="status-bar">
+    <span id="status-text">Ready</span>
+    <span id="tool-activity" class="tool-activity"></span>
+    <span id="token-count" class="token-count"></span>
+  </footer>
+
+  <!-- Settings Modal -->
+  <dialog id="settings-dialog" class="settings-dialog">
+    <div class="dialog-content">
+      <h2>Settings</h2>
+      <div class="setting-group">
+        <label for="ollama-url-input">Ollama URL:</label>
+        <input id="ollama-url-input" type="text" value="http://localhost:11434">
+      </div>
+      <div class="setting-group">
+        <label for="model-input">Model:</label>
+        <input id="model-input" type="text" value="deepseek-r1:8b">
+      </div>
+      <div class="dialog-actions">
+        <button id="settings-save" class="primary-btn">Save</button>
+        <button id="settings-cancel" class="secondary-btn">Cancel</button>
+      </div>
+    </div>
+  </dialog>
+
+  <!-- Scripts (no build step needed) -->
+  <script src="/js/markdown.js"></script>
+  <script src="/js/citations.js"></script>
+  <script src="/js/documents.js"></script>
+  <script src="/js/chat.js"></script>
+  <script src="/js/app.js"></script>
+</body>
+</html>

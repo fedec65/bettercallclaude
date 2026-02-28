@@ -8,7 +8,11 @@
     "build:bundle": "bash scripts/build-servers.sh",
     "build:mcpb": "bash scripts/build-mcpb.sh",
     "test": "cd mcp-servers-src && npm test",
-    "package": "bash scripts/package-plugin.sh"
+    "package": "bash scripts/package-plugin.sh",
+    "webapp:dev": "cd webapp && npm run dev",
+    "webapp:build": "cd webapp && npm run build",
+    "webapp:start": "cd webapp && npm start",
+    "webapp:install": "cd webapp && npm install"
   },
   "repository": {
     "type": "git",

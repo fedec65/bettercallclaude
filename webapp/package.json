@@ -1,0 +1,27 @@
+{
+  "name": "bettercallm-webapp",
+  "version": "1.0.0",
+  "private": true,
+  "description": "BetterCallM - Self-hosted Swiss Legal Intelligence Webapp powered by Ollama + DeepSeek",
+  "type": "module",
+  "scripts": {
+    "dev": "tsx watch src/server.ts",
+    "build": "node build.ts",
+    "start": "node dist/server.js"
+  },
+  "dependencies": {
+    "express": "^4.21.0",
+    "cors": "^2.8.5"
+  },
+  "devDependencies": {
+    "@types/express": "^4.17.21",
+    "@types/cors": "^2.8.17",
+    "@types/node": "^22.10.2",
+    "typescript": "^5.7.2",
+    "tsx": "^4.19.2",
+    "esbuild": "^0.24.0"
+  },
+  "engines": {
+    "node": ">=18.0.0"
+  }
+}

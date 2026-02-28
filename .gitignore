@@ -72,3 +72,8 @@ claudedocs/
 # Generated installation metadata
 manifest.json
 version.txt
+
+# Webapp build output
+webapp/dist/
+webapp/node_modules/
+webapp/data/
