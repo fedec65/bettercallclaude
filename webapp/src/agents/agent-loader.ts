@@ -5,6 +5,7 @@
  */
 
 import { readdir, readFile } from 'node:fs/promises';
+import { existsSync } from 'node:fs';
 import { join } from 'node:path';
 
 export interface AgentDefinition {
@@ -70,6 +71,8 @@ function parseFrontmatter(content: string): { meta: Record<string, unknown>; bod
  */
 export async function loadAgents(agentsDir: string): Promise<Map<string, AgentDefinition>> {
   const agents = new Map<string, AgentDefinition>();
+
+  console.log(`Looking for agents in: ${agentsDir} (exists: ${existsSync(agentsDir)})`);
 
   try {
     const files = await readdir(agentsDir);
