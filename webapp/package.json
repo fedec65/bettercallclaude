@@ -6,7 +6,7 @@
   "type": "module",
   "scripts": {
     "dev": "tsx watch src/server.ts",
-    "build": "node build.ts",
+    "build": "tsx build.ts",
     "start": "node dist/server.js"
   },
   "dependencies": {
