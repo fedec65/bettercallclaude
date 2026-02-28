@@ -1,486 +1,345 @@
-# BetterCallClaude
+# BetterCallM
 
-## Swiss Legal Intelligence Plugin for Cowork and Claude Code
+## Self-Hosted Swiss Legal Intelligence Webapp
 
-BetterCallClaude is a plugin for legal professionals working in Cowork or Claude Code. It transforms legal research, case strategy, and document drafting for Swiss lawyers by providing deep integration with Swiss legal databases, multi-lingual analysis across German, French, Italian, and English, and built-in privacy protection for attorney-client privilege.
+A self-hosted web application for Swiss legal research, strategy, and document drafting. Powered by Ollama with DeepSeek-R1 running locally on your machine. No paid services, no API keys, no cloud dependencies.
 
-The plugin covers the full spectrum of Swiss legal work: BGE/ATF/DTF precedent research, case strategy development with risk assessment, adversarial legal analysis, compliance and data protection advisory, fiscal and corporate law expertise, real estate law, legal drafting with jurisdiction-aware templates, legal translation, and citation verification across all 26 Swiss cantons. Privacy compliance with Anwaltsgeheimnis (Art. 321 StGB) is enforced automatically through a pre-tool-use hook that detects privileged content before it leaves the local environment.
-
-**Version**: 3.1.0 -- 18 agents, 17 commands, 10 skills, 5 MCP servers.
-
-> Love BetterCallClaude? Support the project — [**Buy me a coffee**](https://buymeacoffee.com/federicocesconi) ☕
+BetterCallM provides 19 specialized legal agents, 8 research tools connected to free Swiss legal databases, and a multi-panel workspace with streaming chat, document viewer, and citation tracker.
 
 ---
 
-## Installation
+## Quick Start
 
-BetterCallClaude can be installed through several channels.
+### Prerequisites
 
-### Claude Cowork (Recommended)
+- **Node.js** >= 18
+- **Ollama** installed and running ([ollama.com](https://ollama.com))
 
-Visit the installation page at **[bettercallclaude.ai/desktop](https://bettercallclaude.ai/desktop)** for guided setup instructions. The page walks you through installing the plugin directly in Claude Cowork with a few clicks.
-
-### From GitHub (Claude Code CLI)
-
-Install the plugin directly from GitHub:
-
-```
-claude plugin add fedec65/bettercallclaude
-```
-
-### Windows Installation (Claude Code CLI)
-
-Claude Code on Windows requires [Git for Windows](https://git-scm.com/downloads/win). Install it first, then install Claude Code using one of these methods:
-
-**PowerShell:**
-
-```powershell
-irm https://claude.ai/install.ps1 | iex
-```
-
-**CMD:**
-
-```batch
-curl -fsSL https://claude.ai/install.cmd -o install.cmd && install.cmd && del install.cmd
-```
-
-**WinGet:**
-
-```powershell
-winget install Anthropic.ClaudeCode
-```
-
-After installation, install the plugin:
-
-```
-claude plugin add fedec65/bettercallclaude
-```
-
-You can launch `claude` from PowerShell, CMD, or Git Bash. You do not need to run PowerShell as Administrator.
-
-> **WSL users**: Both WSL 1 and WSL 2 are supported. Use `curl -fsSL https://claude.ai/install.sh | bash` inside your WSL terminal, then install the plugin as above.
-
-> **Git Bash not found?** If Claude Code cannot locate your Git Bash installation, add this to your `settings.json`:
-> ```json
-> { "env": { "CLAUDE_CODE_GIT_BASH_PATH": "C:\\Program Files\\Git\\bin\\bash.exe" } }
-> ```
-
-### Manual Installation (Claude Code CLI)
-
-Clone the repository and point Claude Code to the repo root:
+### Install and Run
 
 ```bash
-git clone https://github.com/fedec65/bettercallclaude.git
-cd bettercallclaude
-claude --plugin-dir .
+# 1. Pull the AI model
+ollama pull deepseek-r1:8b
+
+# 2. Install dependencies
+cd webapp
+npm install
+
+# 3. Start the webapp
+npm run dev
+```
+
+Open **http://localhost:3000** in your browser.
+
+The status indicator in the top-right corner shows green when Ollama is connected and the model is available.
+
+---
+
+## Configuration
+
+All settings are configurable via environment variables. Defaults work out of the box for a standard Ollama setup.
+
+| Variable | Default | Description |
+|----------|---------|-------------|
+| `OLLAMA_URL` | `http://localhost:11434` | Ollama API URL. Change if Ollama runs on a different machine. |
+| `OLLAMA_MODEL` | `deepseek-r1:8b` | Model name. Any Ollama model works (e.g., `deepseek-r1:1.5b`, `llama3.1`, `qwen2.5`). |
+| `WEBAPP_PORT` | `3000` | Port the webapp listens on. |
+| `ENTSCHEIDSUCHE_API_URL` | `https://entscheidsuche.ch` | Swiss court decision search API. Free, no API key required. |
+| `FEDLEX_SPARQL_URL` | `https://fedlex.data.admin.ch/sparqlendpoint` | Swiss federal legislation SPARQL endpoint. Free, no API key required. |
+| `ENTSCHEIDSUCHE_TIMEOUT` | `15000` | Timeout in ms for court decision API calls. |
+| `FEDLEX_TIMEOUT` | `15000` | Timeout in ms for SPARQL queries. |
+| `LOG_LEVEL` | `info` | Logging level (`debug`, `info`, `warn`, `error`). |
+
+Example with a remote Ollama server and a different model:
+
+```bash
+OLLAMA_URL=http://192.168.1.50:11434 OLLAMA_MODEL=deepseek-r1:1.5b npm run dev
 ```
 
 ---
 
-## Available Commands
+## Workspace Layout
 
-| Command | Description |
-|---------|-------------|
-| `/bettercallclaude:legal` | Intelligent gateway -- analyzes intent, routes to the appropriate specialist agent, and manages multi-step legal workflows. |
-| `/bettercallclaude:research` | Search Swiss legal precedents and compile research memoranda. Supports BGE/ATF/DTF databases, doctrine references, and cross-jurisdictional analysis. |
-| `/bettercallclaude:strategy` | Develop litigation strategy with risk assessment, cost-benefit analysis, and procedural pathway evaluation. |
-| `/bettercallclaude:draft` | Draft Swiss legal documents including contracts, court briefs, legal opinions, and memoranda with proper citation formatting. |
-| `/bettercallclaude:cite` | Verify and format Swiss legal citations across all four national languages (BGE/ATF/DTF formats). |
-| `/bettercallclaude:validate` | Validate Swiss legal citations in bulk -- check format, existence, and cross-language consistency. |
-| `/bettercallclaude:precedent` | Search and analyze BGE/ATF/DTF precedents with precedent chain tracking and evolution analysis. |
-| `/bettercallclaude:federal` | Analyze a legal question under federal Swiss law (ZGB, OR, StGB, BV, and related federal statutes). |
-| `/bettercallclaude:cantonal` | Analyze a legal question under cantonal law for a specific canton. |
-| `/bettercallclaude:adversarial` | Run three-agent adversarial analysis -- advocate builds the case, adversary challenges it, judicial analyst synthesizes. |
-| `/bettercallclaude:briefing` | Structured pre-execution briefing session -- assembles a specialist panel, collects case context, and builds an execution plan before agents start working. Supports resume and depth control. |
-| `/bettercallclaude:workflow` | Define and execute multi-agent legal workflows (due diligence, litigation prep, contract lifecycle, real estate closing). |
-| `/bettercallclaude:translate` | Translate Swiss legal documents between DE, FR, IT, and EN while preserving legal terminology precision. |
-| `/bettercallclaude:doc-analyze` | Analyze Swiss legal documents -- identify legal issues, extract key clauses, verify citations, assess compliance. |
-| `/bettercallclaude:help` | Show complete command reference, available agents, skills, and usage examples. |
-| `/bettercallclaude:version` | Display plugin version, installed components, and system status. |
-| `/bettercallclaude:setup` | Check MCP server status and auto-install servers to Claude Desktop if needed. |
-
-### Usage examples
+The webapp is a three-panel legal workspace:
 
 ```
-/bettercallclaude:legal I need to assess our exposure under Art. 97 OR for late delivery
-
-/bettercallclaude:research Art. 97 OR contractual liability for late delivery
-
-/bettercallclaude:strategy Commercial lease dispute in Zurich, landlord claims CHF 200k damages
-
-/bettercallclaude:draft Employment contract for a software engineer in Geneva, bilingual DE/FR
-
-/bettercallclaude:adversarial Is the non-compete clause in this employment contract enforceable?
-
-/bettercallclaude:workflow litigation-prep Personal injury claim against manufacturer
-
-/bettercallclaude:translate DE->FR Klageschrift for Geneva commercial court
-
-/bettercallclaude:precedent Art. 2 ZGB good faith principle evolution since 2015
-
-/bettercallclaude:doc-analyze @contract.pdf Review this commercial lease agreement
-
-/bettercallclaude:cantonal ZH Commercial court jurisdiction for contract disputes over CHF 30k
-
-/bettercallclaude:briefing Prepare full litigation for Art. 97 OR breach, CHF 500K, Zurich
-
-/bettercallclaude:briefing --resume brief_20260225_contract
-
-/bettercallclaude:legal --skip-briefing Quick BGE search for Art. 41 OR
++----------------------------------------------------------+
+|  BetterCallM          [Agent: researcher v]    model info |
++------------------+---------------------+-----------------+
+|                  |                     |                 |
+|  CHAT            |  DOCUMENTS          |  CITATIONS      |
+|                  |                     |                 |
+|  Streaming       |  Court decisions,   |  BGE/ATF/DTF    |
+|  conversation    |  legislation,       |  references     |
+|  with markdown   |  articles from      |  with verify    |
+|  rendering       |  legal databases    |  status and     |
+|                  |  (tabbed view)      |  source links   |
+|  Collapsible     |                     |                 |
+|  <think> blocks  |                     |                 |
+|  Tool call logs  |                     |                 |
+|                  |                     |                 |
+|  [input box]     |                     |                 |
++------------------+---------------------+-----------------+
+|  Ready           | tool activity       | token count     |
++----------------------------------------------------------+
 ```
 
----
+**Chat Panel** — Type your legal question. Responses stream in real-time with markdown rendering. DeepSeek-R1 reasoning (`<think>` blocks) appears in collapsible sections. Tool calls are shown inline with execution time.
 
-## Skills
+**Document Viewer** — Populates automatically when the AI retrieves court decisions or legislation. Tabbed view for multiple documents. Links to original sources on entscheidsuche.ch and fedlex.admin.ch.
 
-Skills are activated automatically when Claude detects relevant legal context in your conversation. You do not need to invoke them manually.
+**Citations Panel** — Tracks every BGE/ATF/DTF citation and statutory reference mentioned in the conversation. Shows validation status (valid, invalid, unverified) and links to source documents.
 
-| Skill | Purpose |
-|-------|---------|
-| `swiss-legal-research` | Precedent analysis methodology, BGE search strategies, source evaluation, and research memorandum structure. |
-| `swiss-legal-strategy` | Case assessment frameworks, risk matrices, procedural pathway analysis, and settlement evaluation. |
-| `swiss-legal-drafting` | Document generation standards, clause libraries, mandatory law compliance checks, and formatting rules. |
-| `swiss-citation-formats` | Citation format tables for DE/FR/IT/EN, BGE/ATF/DTF reference standards, doctrine citation rules, and cross-language conversion. |
-| `swiss-jurisdictions` | Federal vs. cantonal jurisdiction routing, competence analysis, court system hierarchies for all 26 cantons, and conflict-of-law rules. |
-| `privacy-routing` | Anwaltsgeheimnis detection patterns, privacy classification, and local processing triggers for privileged content. |
-| `adversarial-analysis` | Three-agent adversarial methodology (advocate/adversary/judicial), argument scoring, objectivity validation, and Erwagung synthesis structure. |
-| `compliance-frameworks` | FINMA supervision, GwG/AMLA anti-money laundering, FIDLEG/FINIG financial institution licensing, banking secrecy, and cross-border compliance. |
-| `data-protection-law` | nDSG/FADP framework, GDPR adequacy, cantonal data protection laws (IDG/KDSG/LIPAD), DPIA methodology, and cross-border data transfers. |
-| `legal-briefing` | Auto-detects complex queries that benefit from structured intake before agent execution. Suggests briefing sessions when complexity, ambiguity, or pipeline coordination is detected. |
+Panels are resizable by dragging the borders between them.
 
 ---
 
 ## Agents
 
-The plugin includes 18 specialized subagents that handle complex multi-step legal workflows.
+Select an agent from the dropdown in the header. Each agent has a specialized system prompt for its legal domain.
 
-### Core Agents
+| Agent | Specialization |
+|-------|----------------|
+| **researcher** (default) | BGE/ATF/DTF precedent research, statutory interpretation, multi-lingual legal sources |
+| **strategist** | Litigation strategy, case assessment, risk analysis, settlement evaluation |
+| **drafter** | Legal document drafting — contracts, court briefs, opinions, memoranda |
+| **orchestrator** | Multi-agent workflow coordination, pipeline routing |
+| **advocate** | Builds the strongest case for a legal position |
+| **adversary** | Challenges a legal position, finds weaknesses and counter-arguments |
+| **judicial** | Neutral synthesis using Swiss Erwagung methodology |
+| **citation** | Citation verification, cross-language conversion (DE/FR/IT/EN) |
+| **compliance** | FINMA, GwG/AMLA, FIDLEG/FINIG regulatory compliance |
+| **data-protection** | nDSG/FADP, GDPR adequacy, DPIA, cross-border transfers |
+| **risk** | Risk quantification, Monte Carlo simulation, exposure analysis |
+| **procedure** | ZPO/CPC, StPO/CPP, SchKG/LP procedure, deadlines, court competence |
+| **fiscal** | Federal/cantonal tax, DTAs, transfer pricing, BEPS |
+| **corporate** | AG/GmbH formation, M&A, governance, commercial contracts |
+| **realestate** | Grundbuch, lex Koller, tenancy law, construction, property transactions |
+| **translator** | Legal translation between DE, FR, IT, and EN |
+| **cantonal** | All 26 Swiss cantons, cantonal law comparison |
+| **briefing** | Structured pre-execution intake, specialist panel assembly |
+| **summarizer** | Output consolidation, deduplication, length-calibrated summaries |
 
-| Agent | Description |
-|-------|-------------|
-| **Researcher** | Six-step research workflow: parse question, search BGE/ATF/DTF, search cantonal courts, evaluate sources, identify doctrine, compile memorandum with verified citations. |
-| **Strategist** | Five-step strategy workflow: analyze facts, assess claim strength, map procedural pathways, evaluate settlement value, produce strategy memorandum. |
-| **Drafter** | Six-step drafting workflow: determine document type, select template, draft with proper terminology, insert citations, run compliance checks, produce final document. |
+---
 
-### Domain Specialist Agents
+## Tools
 
-| Agent | Description |
-|-------|-------------|
-| **Citation Specialist** | Citation verification and cross-language conversion (BGE/ATF/DTF), format validation, overruling detection. |
-| **Compliance Officer** | FINMA regulatory compliance, GwG/AMLA AML/KYC, FIDLEG/FINIG licensing, banking secrecy analysis. |
-| **Data Protection Specialist** | nDSG/FADP analysis, GDPR adequacy, cantonal data protection laws, DPIA methodology, cross-border transfers. |
-| **Risk Analyst** | Risk matrices, probability assessment, cost-benefit analysis, exposure quantification, scenario modeling. |
-| **Procedure Specialist** | ZPO/CPC civil procedure, StPO/CPP criminal procedure, SchKG/LP debt collection, forum selection, appeal pathways. |
-| **Fiscal Law Expert** | Federal/cantonal tax (DBG/LIFD, StHG/LHID, MWSTG/LTVA), tax treaties, transfer pricing, tax planning. |
-| **Corporate & Commercial Law Expert** | AG/SA and GmbH/Sarl formation, M&A, corporate governance, restructuring, commercial contracts. |
-| **Real Estate Law Expert** | Grundbuch/RF, lex Koller, tenancy law (OR 253ff), construction law, KKBB, real estate transactions. |
-| **Legal Translator** | Legal translation DE/FR/IT/EN, terminology consistency, official Swiss term registers, bilingual document production. |
-| **Cantonal Law Expert** | All 26 cantons, cantonal constitutions, intercantonal concordats, cantonal court systems, cantonal procedural specifics. |
+The AI can call these tools during a conversation to access live Swiss legal data. Tool calls are shown in the chat and results populate the Document Viewer and Citations panels.
 
-### Briefing and Orchestration Agents
+| Tool | Description |
+|------|-------------|
+| `search_bge` | Search Swiss Federal Supreme Court (BGE/ATF/DTF) decisions. Filters by language, date range, result count. |
+| `search_decisions` | Search across all Swiss courts — federal and cantonal. Broader than `search_bge`. |
+| `validate_bge_citation` | Validate and normalize a BGE citation format (e.g., "BGE 145 III 229"). |
+| `lookup_statute` | Look up a Swiss federal statute by SR number (e.g., "220") or abbreviation (e.g., "OR", "ZGB"). |
+| `get_article` | Retrieve a specific article of a federal statute (e.g., Art. 97 OR). |
+| `search_legislation` | Search across Swiss federal legislation by keyword and legal domain. |
+| `validate_citation` | Validate any Swiss legal citation — BGE/ATF/DTF or statutory (Art. X Statute). Multi-language output. |
+| `extract_citations` | Extract all legal citations from a block of text. |
 
-| Agent | Description |
-|-------|-------------|
-| **Briefing Coordinator** | Pre-execution intake through multi-agent panel consultation. Classifies queries, selects 2-5 specialist panelists, collects domain-specific questions, builds structured execution plans with checkpoints, and persists state for cross-session recovery. |
-| **Workflow Orchestrator** | Multi-agent pipeline coordination, workflow templates (due diligence, litigation prep, contract lifecycle, real estate closing), agent routing. Now supports briefing-sourced execution with checkpoint pause/resume. |
-| **Advocate** | Builds the strongest possible case in favor of a legal position with supporting BGE precedents and doctrine. |
-| **Adversary** | Challenges a legal position by finding weaknesses, counter-precedents, and opposing arguments. |
-| **Judicial Analyst** | Neutral synthesis of advocate and adversary positions using Swiss Erwagung (consideration) structure with risk probabilities. |
+All tools use **free public APIs** with no authentication required:
 
-### Adversarial Analysis Workflow
+- **entscheidsuche.ch** — Elasticsearch-based Swiss court decision database covering the Federal Supreme Court and all 26 cantonal courts
+- **fedlex.data.admin.ch** — Federal legislation SPARQL endpoint with ~228,500 legal objects (CC BY-NC-SA 4.0)
 
-The adversarial analysis workflow uses three agents in sequence to provide balanced legal assessment:
+Results are cached in memory to avoid redundant API calls.
 
-1. **Advocate** builds the strongest case for the position, identifying supporting precedents, statutory provisions, and doctrinal authority.
-2. **Adversary** challenges the position systematically, finding counter-precedents, doctrinal criticism, factual weaknesses, and procedural obstacles.
-3. **Judicial Analyst** synthesizes both positions using Swiss Erwagung methodology, assigning probability scores to each legal issue and recommending a course of action.
+---
 
-Invoke with `/bettercallclaude:adversarial` followed by the legal question.
+## How Tool Calling Works
 
-### Multi-Agent Workflows
+DeepSeek-R1 does not have native function calling. The webapp implements a **ReAct (Reasoning + Acting) loop**:
 
-The workflow orchestrator supports predefined pipelines:
+1. Tool descriptions are injected into the system prompt
+2. The model outputs `<tool_call>{"name": "...", "arguments": {...}}</tool_call>` when it needs data
+3. The backend parses the tag, executes the tool, and sends the result back
+4. The model continues its analysis with the new data
+5. This loops until the model produces a final answer (capped at 10 iterations)
 
-| Workflow | Pipeline | Description |
-|----------|----------|-------------|
-| `due-diligence` | Researcher -> Compliance -> Corporate -> Risk | Corporate due diligence with regulatory and risk assessment. |
-| `litigation-prep` | Researcher -> Strategist -> Adversarial -> Drafter | Full litigation preparation with adversarial stress-testing. |
-| `contract-lifecycle` | Drafter -> Compliance -> Citation -> Translator | Contract creation with compliance review and translation. |
-| `real-estate-closing` | Real Estate -> Compliance -> Fiscal -> Drafter | Real estate transaction with regulatory and tax analysis. |
+This works transparently — you just ask a question and the AI decides which tools to call.
 
-Invoke with `/bettercallclaude:workflow` followed by the workflow name and case description.
+---
 
-### Briefing Session (New in v3.1.0)
+## API Reference
 
-Complex legal matters often involve multiple domains, jurisdictions, and competing considerations that a single query cannot fully capture. BetterCallClaude previously used a one-shot classification: the `/legal` gateway would read your query, score its complexity, and immediately route to agents. This worked well for focused questions but led to misrouted or incomplete analysis when the initial query lacked critical context.
+The webapp exposes a REST API for programmatic access.
 
-The **briefing session** adds a collaborative intake phase between your query and agent execution. Instead of guessing what you need, the system assembles a panel of specialist agents, asks you targeted questions, and builds a precise execution plan before any work begins.
+### `POST /api/chat`
 
-**How it works**:
+Main chat endpoint. Returns a Server-Sent Events stream.
 
-1. **Adaptive activation** -- The `/legal` gateway scores your query's complexity (1-10). Simple queries (1-3) route directly as before. Moderate queries (4-6) trigger 2-3 inline clarifying questions. Complex queries (7-10) enter a full briefing session with a specialist panel.
+**Request body:**
 
-2. **Specialist panel** -- For complex queries, the briefing coordinator selects 2-5 agents from a pool of 10 specialists (researcher, strategist, procedure, risk, compliance, drafter, corporate, fiscal, real estate, cantonal). Each panelist is spawned as a real subagent and returns domain-specific questions based on your query.
+```json
+{
+  "message": "What is Art. 97 OR about?",
+  "agent": "researcher",
+  "history": []
+}
+```
 
-3. **Transparent attribution** -- Every question is labeled with which specialist needs the answer and why. You see exactly who is asking (e.g., "Needed by: ⏱️ Procedure (deadline calculation), 📊 Risk (exposure estimate)").
+**SSE event types:**
 
-4. **Structured execution plan** -- After 1-3 rounds of questions, the system builds a step-by-step execution plan showing which agents will run, in what order, with what dependencies, and where checkpoints will pause for your review.
+| Event | Payload | Description |
+|-------|---------|-------------|
+| `token` | `{ content: string }` | Streaming text token from the LLM |
+| `thinking` | `{ content: string }` | DeepSeek reasoning block content |
+| `tool_call` | `{ name: string, arguments: object }` | Tool being invoked |
+| `tool_result` | `{ name: string, result: object, duration: number }` | Tool execution result |
+| `document` | `object` | Legal document data for the viewer |
+| `error` | `{ message: string }` | Error message |
+| `done` | `{ totalTokens?: number }` | Stream complete |
 
-5. **Interactive refinement** -- You can modify the plan before approving it: add or remove agents, adjust the order, change checkpoint placement, or ask why a particular specialist was included.
+### `GET /api/agents`
 
-6. **Checkpoint execution** -- Once approved, the orchestrator executes the plan stage by stage, pausing at each checkpoint for you to review results, adjust the remaining plan, or save progress for later.
+Returns the list of available agents.
 
-7. **Cross-session persistence** -- Briefing state is saved to memory after each interaction. You can close the conversation and resume later with `/bettercallclaude:briefing --resume`. All your answers, the execution plan, and any completed stages are preserved.
+### `POST /api/tools/:name`
 
-**Benefits**:
+Invoke a tool directly. Send the tool arguments as the JSON request body.
 
-- **Fewer misrouted queries** -- The panel catches missing context before agents start working, reducing wasted cycles and incorrect analysis.
-- **Precise execution plans** -- Instead of a generic pipeline, you get a tailored plan with the right agents in the right order for your specific matter.
-- **User control** -- You see and approve the plan before execution. No surprise agent spawning or unexpected output.
-- **Efficient for simple cases** -- Simple queries bypass the briefing entirely. The system only activates when complexity warrants it.
-- **Resumable workflows** -- Long-running matters can be paused at any checkpoint and resumed across sessions without losing progress.
+```bash
+curl -X POST http://localhost:3000/api/tools/search_bge \
+  -H 'Content-Type: application/json' \
+  -d '{"query": "Vertragsverantwortung Art. 97 OR", "limit": 5}'
+```
 
-**Flags**:
+### `GET /api/health`
 
-| Flag | Effect |
-|------|--------|
-| `--briefing` | Force full briefing session regardless of complexity |
-| `--skip-briefing` / `--direct` | Bypass briefing and route directly to agents |
-| `--depth quick` | Lightweight briefing: 2-3 questions, no panel |
-| `--depth deep` | Maximum panel size and question rounds |
-| `--resume [id]` | Resume a saved briefing session |
-| `--list` | List all saved briefing sessions |
+Health check. Returns Ollama connection status, model availability, agent count, and tool count.
 
-**Usage examples**:
+---
+
+## Architecture
 
 ```
-# Complex matter -- triggers full briefing automatically via /legal gateway
-/bettercallclaude:legal Prepare litigation for Art. 97 OR breach, CHF 500K claim,
-  Zurich Commercial Court, employer is a regulated financial institution
+Browser (localhost:3000)
+    |
+    |  SSE streaming + REST
+    v
+Express.js Backend (Node.js)
+    |-- Chat Router (/api/chat)
+    |     |-- Agent Loader (reads agents/*.md as system prompts)
+    |     |-- ReAct Loop (tool calling for DeepSeek)
+    |     |-- Ollama Client (POST /api/chat with streaming)
+    |
+    |-- Tool Registry (8 tools)
+    |     |-- BGE Search (entscheidsuche.ch API)
+    |     |-- Fedlex SPARQL (fedlex.data.admin.ch)
+    |     |-- Citation Validation (regex + formatting)
+    |
+    v
+Ollama (localhost:11434)
+    |-- DeepSeek-R1:8b (or any configured model)
+```
 
-# Explicit briefing -- forces briefing even for simpler queries
-/bettercallclaude:briefing Is Art. 340 OR non-compete enforceable for a 2-year period?
+All data flows locally. The only external network calls are to the free Swiss legal databases (entscheidsuche.ch, fedlex.data.admin.ch).
 
-# Deep briefing -- maximum panel size and question rounds
-/bettercallclaude:briefing --depth deep Cross-border M&A with tax structuring,
-  target in ZH, buyer in GE, FINMA-regulated entities on both sides
+---
 
-# Quick briefing -- lightweight intake, 2-3 questions, no panel
-/bettercallclaude:briefing --depth quick Review my commercial lease for compliance
+## Project Structure
 
-# Resume a saved briefing from a previous session
-/bettercallclaude:briefing --resume brief_20260225_litigation
+```
+webapp/
+  package.json                 Dependencies (express, cors)
+  tsconfig.json                TypeScript configuration
+  build.ts                     esbuild bundler script
+  src/
+    server.ts                  Express server entry point
+    config.ts                  Environment variable configuration
+    routes/
+      chat.ts                  POST /api/chat (SSE streaming)
+      agents.ts                GET /api/agents
+      tools.ts                 POST /api/tools/:name
+    llm/
+      ollama.ts                Ollama API client (streaming)
+      tool-calling.ts          ReAct loop for DeepSeek
+    agents/
+      agent-loader.ts          Reads agents/*.md into system prompts
+    tools/
+      registry.ts              Tool name -> handler mapping
+      bge-search.ts            BGE + court decision search
+      fedlex.ts                SPARQL legislation lookup
+      citations.ts             Citation validation + extraction
+    middleware/
+      cors.ts                  CORS configuration
+  public/
+    index.html                 Three-panel workspace layout
+    css/styles.css             Dark theme styles
+    js/
+      app.js                   App initialization, settings, health check
+      chat.js                  Chat panel, SSE streaming, message rendering
+      documents.js             Document viewer panel
+      citations.js             Citations tracker panel
+      markdown.js              Marked.js wrapper for legal markdown
 
-# List all saved briefing sessions
-/bettercallclaude:briefing --list
-
-# Skip briefing -- bypass intake and route directly to agents
-/bettercallclaude:legal --skip-briefing Search BGE for Art. 41 OR tort liability
-
-# Force briefing on a query that would normally route directly
-/bettercallclaude:legal --briefing Find BGE on Art. 97 OR foreseeability
+agents/                        19 agent definition files (markdown with YAML frontmatter)
 ```
 
 ---
 
 ## Language Support
 
-BetterCallClaude supports all four Swiss national languages plus English for legal analysis:
+The webapp supports all four Swiss national languages plus English:
 
-| Language | Code | Legal Context |
+| Language | Code | Legal context |
 |----------|------|---------------|
-| German | DE | Primary language for federal statutes (ZGB, OR, StGB). Used in ZH, BE, BS, and German-speaking cantons. |
-| French | FR | Official text for CO, CC, CP. Used in GE, VD, and French-speaking cantons. Bern is bilingual (DE/FR). |
-| Italian | IT | Official text for CO, CC, CP. Used in TI and Italian-speaking regions. |
-| English | EN | Supported as working language with Swiss legal context. Terms are mapped to their official Swiss equivalents. |
+| German | DE | Primary for federal statutes (ZGB, OR, StGB). BGE citation format. |
+| French | FR | Official for CO, CC, CP. ATF citation format. |
+| Italian | IT | Official for CCS, CO, CPS. DTF citation format. |
+| English | EN | Working language with Swiss legal term mapping. |
 
-Language detection is automatic. When you write in German, the plugin responds with German legal terminology and citation formats (BGE, Art., Abs., E.). When you write in French, it switches to ATF, art., al., and consid. formats. You can also request a specific language explicitly.
-
----
-
-## Jurisdictions
-
-### Federal Law
-
-Federal law is the default jurisdiction when no canton is specified. The plugin covers all major federal codes:
-
-- BV / Cst. / Cost. (Federal Constitution)
-- ZGB / CC (Civil Code)
-- OR / CO (Code of Obligations)
-- StGB / CP (Criminal Code)
-- ZPO / CPC (Civil Procedure)
-- StPO / CPP (Criminal Procedure)
-- SchKG / LP (Debt Collection and Bankruptcy)
-- UWG / LCD (Unfair Competition Act)
-- DSG / LPD (Data Protection Act)
-- DBG / LIFD (Federal Direct Tax Act)
-- StHG / LHID (Tax Harmonization Act)
-- MWSTG / LTVA (Value Added Tax Act)
-- GwG / LBA (Anti-Money Laundering Act)
-- FIDLEG / LSFin (Financial Services Act)
-- FINIG / LEFin (Financial Institutions Act)
-- BankG / LB (Banking Act)
-
-### Cantonal Law
-
-All 26 Swiss cantons are fully configured with court system details, citation formats, and MCP search capability via entscheidsuche.ch:
-
-| Canton | Code | Language | Key Characteristics |
-|--------|------|----------|---------------------|
-| **German-speaking** | | | |
-| Aargau | AG | DE | Third largest by population. Industrial center, energy sector. |
-| Appenzell I.Rh. | AI | DE | Smallest canton. Landsgemeinde tradition. |
-| Appenzell A.Rh. | AR | DE | Rural canton. Textile heritage. |
-| Basel-Landschaft | BL | DE | Suburban to Basel. Pharmaceutical industry. |
-| Basel-Stadt | BS | DE | Pharmaceutical and life sciences center. Cross-border commerce. |
-| Glarus | GL | DE | Landsgemeinde tradition. Industrial heritage. |
-| Luzern | LU | DE | Central Switzerland hub. Tourism center. |
-| Nidwalden | NW | DE | Business-friendly. Low tax canton. |
-| Obwalden | OW | DE | Low tax canton. Private banking. |
-| Schaffhausen | SH | DE | Northernmost canton. Cross-border with Germany. |
-| Schwyz | SZ | DE | Origin of Swiss name. No inheritance tax. |
-| Solothurn | SO | DE | Watch industry center (Jura arc). |
-| St. Gallen | SG | DE | Eastern Switzerland center. University (HSG). Handelsgericht. |
-| Thurgau | TG | DE | Lake Constance. Agriculture and food industry. |
-| Uri | UR | DE | Gotthard corridor. Founding canton. |
-| Zug | ZG | DE | Crypto/commodity hub. Very low taxes. |
-| Zurich | ZH | DE | Largest canton. Major commercial center. Handelsgericht. |
-| **French-speaking** | | | |
-| Geneva | GE | FR | International arbitration hub. Banking and private wealth. |
-| Jura | JU | FR | Newest canton (1979). Watchmaking. |
-| Neuchatel | NE | FR | Watchmaking capital. Innovation hub. |
-| Vaud | VD | FR | Home to Federal Supreme Court in Lausanne. |
-| **Italian-speaking** | | | |
-| Ticino | TI | IT | Only Italian-speaking canton. Cross-border with Italy. |
-| **Bilingual DE/FR** | | | |
-| Bern | BE | DE/FR | Federal capital. Strong administrative law. |
-| Fribourg | FR | DE/FR | University city. Bridge between language regions. |
-| Valais/Wallis | VS | DE/FR | Major tourism. Wine region. Alpine economy. |
-| **Trilingual** | | | |
-| Graubuenden | GR | DE/IT/RM | Largest by area. Major tourism (St. Moritz, Davos). |
-
-Jurisdiction routing is automatic. Mentioning a canton code, canton name, or cantonal court triggers the appropriate cantonal law mode. Cross-cantonal issues default to federal law analysis.
+The AI detects your language automatically and adapts citation formats, terminology, and legal references accordingly.
 
 ---
 
-## MCP Servers
+## Data Sources
 
-The plugin includes five pre-compiled MCP servers that provide direct integration with Swiss legal databases. See [CONNECTORS.md](CONNECTORS.md) for detailed API documentation.
+All external data sources are free and require no API keys or authentication.
 
-| Server | Purpose |
-|--------|---------|
-| `bge-search` | Search and retrieve decisions from the BGE (Federal Supreme Court) database. Supports keyword search, article reference filtering, date ranges, and section filtering. |
-| `entscheidsuche` | Search across multiple Swiss court databases including federal and cantonal courts. Supports language filtering and court-specific queries. |
-| `legal-citations` | Validate citation format and existence, convert citations between DE/FR/IT/EN formats. |
-| `fedlex-sparql` | Look up Swiss federal legislation via the Fedlex SPARQL endpoint. Retrieve statutes by SR number, search legislation, find related acts, get article text. |
-| `onlinekommentar` | Search and retrieve Swiss legal commentaries (Kommentare). Find scholarly analysis by article reference, keyword, or legislative act. |
+| Source | URL | Data |
+|--------|-----|------|
+| EntscheidSuche | entscheidsuche.ch | Swiss court decisions — Federal Supreme Court (BGE/ATF/DTF), Federal Administrative Court, Federal Patent Court, Federal Criminal Court, and all 26 cantonal courts. Elasticsearch API. |
+| Fedlex SPARQL | fedlex.data.admin.ch/sparqlendpoint | Swiss federal legislation — ~228,500 legal objects. SR-classified statutes, articles, amendment chains. JOLUX ontology (FRBR-based). CC BY-NC-SA 4.0. |
 
-### Requirements
-
-- Node.js >= 18
-
-MCP servers are pre-compiled and included in the plugin. No build step is required for end users. All server paths are configured in `.mcp.json` using the `${CLAUDE_PLUGIN_ROOT}` variable for portability.
-
-**Cowork users**: Cowork runs in a sandboxed VM, so 4 of 5 MCP servers cannot reach external APIs from inside Cowork. To get full MCP server access, install the servers at the Claude Desktop level using `bash scripts/install-claude-desktop.sh` (requires cloning this repo on your host machine first). Run `/bettercallclaude:setup` for guided configuration.
+For details on the EntscheidSuche API, see: https://entscheidsuche.ch/pdf/EntscheidsucheAPI.pdf
 
 ---
 
-## Privacy Protection
-
-BetterCallClaude includes built-in Anwaltsgeheimnis (attorney-client privilege) compliance.
-
-A `PreToolUse` hook monitors outgoing tool calls for patterns that indicate privileged content. The hook scans for privilege indicators in German (Anwaltsgeheimnis, Mandantengeheimnis, vertraulich), French (secret professionnel, confidentiel, privilegie), and Italian (segreto professionale, confidenziale, privilegio).
-
-When privileged content is detected, the hook returns an `ask` decision that prompts the user for confirmation before the tool call proceeds. This prevents accidental disclosure of attorney-client privileged material through external API calls.
-
-The privacy system supports three modes:
-
-| Mode | Behavior |
-|------|----------|
-| `strict` | All external calls require confirmation. Local processing preferred via Ollama. |
-| `balanced` | Privileged content triggers confirmation. Non-privileged content processed normally. |
-| `cloud` | Standard cloud processing with privacy hook active for explicit privilege markers only. |
-
----
-
-## Requirements
-
-- Cowork or Claude Code (latest version)
-- Node.js >= 18 (for MCP servers)
-
----
-
-## Author
-
-Federico Cesconi
-
-GitHub: [fedec65/bettercallclaude](https://github.com/fedec65/bettercallclaude)
-
----
-
-## License
-
-AGPL-3.0 -- See [LICENSE](LICENSE) for full terms.
-
-Built with love for the Swiss legal community. [Support the project ☕](https://buymeacoffee.com/federicocesconi)
-
----
-
-## For Developers
-
-The `mcp-servers-src/` directory contains the TypeScript source code for all five MCP servers. To build from source:
+## Scripts
 
 ```bash
-# Install dependencies and compile TypeScript
-npm run build
+# Development (hot reload)
+cd webapp && npm run dev
 
-# Build single-file bundles into mcp-servers/*/dist/
-npm run build:bundle
+# Production build
+cd webapp && npm run build
 
-# Run tests
-npm test
+# Start production server
+cd webapp && npm start
 
-# Create distributable plugin zip
-npm run package
-
-# Create .mcpb bundles for Claude Desktop
-npm run build:mcpb
+# Or from the project root:
+npm run webapp:dev
+npm run webapp:build
+npm run webapp:start
 ```
-
-### Repository Structure
-
-```
-.claude-plugin/plugin.json   Plugin manifest
-.mcp.json                    MCP server configuration
-agents/                      18 agent definitions (markdown)
-commands/                    17 slash commands (markdown)
-skills/                      10 auto-activated skills (markdown)
-hooks/                       Privacy detection hook
-mcp-servers/                 Pre-compiled MCP server bundles (checked into git)
-mcp-servers-src/             TypeScript source for MCP servers
-  shared/                    Shared infrastructure (database, HTTP, NLP)
-  entscheidsuche/            Swiss court decision search
-  bge-search/                Federal Supreme Court search
-  legal-citations/           Citation verification and formatting
-  fedlex-sparql/             Federal legislation via SPARQL
-  onlinekommentar/           Legal commentaries
-  integration-tests/         Cross-server integration tests
-scripts/                     Build and installation scripts
-docs/                        Documentation
-```
-
-Compiled bundles in `mcp-servers/*/dist/` are checked into git so end users don't need Node.js build tooling. After modifying server source, run `npm run build:bundle` and commit the updated dist files.
 
 ---
 
 ## Professional Disclaimer
 
-BetterCallClaude is a legal research and analysis tool. All outputs produced by this plugin:
+BetterCallM is a legal research and analysis tool. All outputs:
 
-- Require professional lawyer review and validation before use.
-- Do not constitute legal advice.
-- May contain errors, omissions, or outdated information.
-- Must be verified against official sources (admin.ch, court databases, official gazettes).
-- Must be adapted to the specific circumstances of each case.
+- Require professional lawyer review and validation before use
+- Do not constitute legal advice
+- May contain errors, omissions, or outdated information
+- Must be verified against official sources (admin.ch, court databases, official gazettes)
+- Must be adapted to the specific circumstances of each case
 
 Lawyers maintain full professional responsibility for all legal work products. This tool assists legal professionals but does not replace professional judgment, independent verification, or the duty of care owed to clients.
+
+---
+
+## License
+
+AGPL-3.0 — See [LICENSE](LICENSE) for full terms.

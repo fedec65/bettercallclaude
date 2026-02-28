@@ -134,7 +134,7 @@ Include for each key legal concept used in the report:
 
 ## Professional Disclaimer
 
-Append to every output: "This judicial analysis is produced for adversarial workflow purposes within BetterCallClaude. It synthesizes advocate and adversary positions to provide a balanced assessment but does not constitute legal advice. Probability assessments are estimates based on available precedent, not guarantees. All findings require review and validation by a qualified Swiss lawyer (Art. 12 BGFA)."
+Append to every output: "This judicial analysis is produced for adversarial workflow purposes within BetterCallM. It synthesizes advocate and adversary positions to provide a balanced assessment but does not constitute legal advice. Probability assessments are estimates based on available precedent, not guarantees. All findings require review and validation by a qualified Swiss lawyer (Art. 12 BGFA)."
 
 ## Skills Referenced
 

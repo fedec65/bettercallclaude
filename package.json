@@ -1,14 +1,9 @@
 {
-  "name": "bettercallclaude",
-  "version": "3.1.0",
+  "name": "bettercallm",
+  "version": "1.0.0",
   "private": true,
-  "description": "Swiss Legal Intelligence Plugin for Claude",
+  "description": "Self-Hosted Swiss Legal Intelligence Webapp",
   "scripts": {
-    "build": "cd mcp-servers-src && npm ci && npm run build",
-    "build:bundle": "bash scripts/build-servers.sh",
-    "build:mcpb": "bash scripts/build-mcpb.sh",
-    "test": "cd mcp-servers-src && npm test",
-    "package": "bash scripts/package-plugin.sh",
     "webapp:dev": "cd webapp && npm run dev",
     "webapp:build": "cd webapp && npm run build",
     "webapp:start": "cd webapp && npm start",
@@ -16,9 +11,9 @@
   },
   "repository": {
     "type": "git",
-    "url": "https://github.com/fedec65/bettercallclaude"
+    "url": "https://github.com/kimo26/bettercallmwebapp"
   },
-  "author": "Federico Cesconi",
+  "author": "kimo26",
   "license": "AGPL-3.0",
   "engines": {
     "node": ">=18.0.0"

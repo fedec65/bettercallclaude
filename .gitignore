@@ -4,23 +4,6 @@ node_modules/
 # TypeScript build intermediates
 *.tsbuildinfo
 
-# MCP server source build outputs (intermediate — NOT the checked-in compiled bundles)
-mcp-servers-src/*/dist/
-mcp-servers-src/*/node_modules/
-mcp-servers-src/*/coverage/
-mcp-servers-src/*/.env
-
-# NOTE: mcp-servers/*/dist/ is NOT ignored — compiled bundles are checked into git
-# so end users don't need a build step
-
-# Runtime data (SQLite databases created at runtime)
-mcp-servers/*/data/
-
-# Package outputs
-dist/mcpb/
-dist/mcpb-staging/
-dist/*.zip
-
 # OS files
 .DS_Store
 Thumbs.db
@@ -48,30 +31,8 @@ tmp/
 temp/
 *.tmp
 
-# Project instructions (local only)
-CLAUDE.md
-
-# Python (for development tooling)
-__pycache__/
-*.py[cod]
-*$py.class
-.venv/
-venv/
-.pytest_cache/
-.coverage
-htmlcov/
-.mypy_cache/
-
 # Test coverage
 coverage/
-
-# Development artifacts
-claudedocs/
-.serena/
-
-# Generated installation metadata
-manifest.json
-version.txt
 
 # Webapp build output
 webapp/dist/

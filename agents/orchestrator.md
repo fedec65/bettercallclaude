@@ -197,7 +197,7 @@ Execute stages sequentially (or in parallel where the plan specifies independent
    **Options**:
    1. **Continue** — Proceed to stage [N+1]
    2. **Adjust** — Modify the remaining plan before continuing
-   3. **Pause** — Save progress and return later (`/bettercallclaude:briefing --resume [id]`)
+   3. **Pause** — Save progress and return later (the briefing agent to resume)
    ```
 4. If the user adjusts, update the remaining stages and persist the modified plan.
 5. If the user pauses, save execution state with status `paused` and the current stage number.

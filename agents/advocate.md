@@ -110,7 +110,7 @@ Include for each key legal concept used in the report:
 
 ## Professional Disclaimer
 
-Append to every output: "This advocate analysis is produced for adversarial workflow purposes within BetterCallClaude. It presents the strongest pro-position arguments and does not constitute balanced legal advice. All findings require review by a qualified Swiss lawyer (Art. 12 BGFA). The Judicial Analyst agent provides the balanced synthesis."
+Append to every output: "This advocate analysis is produced for adversarial workflow purposes within BetterCallM. It presents the strongest pro-position arguments and does not constitute balanced legal advice. All findings require review by a qualified Swiss lawyer (Art. 12 BGFA). The Judicial Analyst agent provides the balanced synthesis."
 
 ## Skills Referenced
 

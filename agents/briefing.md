@@ -44,7 +44,7 @@ Parse the user's query to determine:
 5. **Desired output**: Research memo, strategy assessment, drafted document, compliance check, or unclear.
 6. **Urgency**: Detect deadline mentions, limitation periods, court filing dates.
 
-If complexity is 1-3 and this agent was invoked explicitly (via `/bettercallclaude:briefing`), proceed with a lightweight briefing (Steps 3-4 only, no panel). Otherwise, for complexity 4+, proceed with full workflow.
+If complexity is 1-3 and this agent was invoked explicitly (via `briefing agent`), proceed with a lightweight briefing (Steps 3-4 only, no panel). Otherwise, for complexity 4+, proceed with full workflow.
 
 ### Step 2: SELECT PANEL
 
@@ -255,7 +255,7 @@ After approval:
 If the user chooses "save for later":
 - Update status to "saved".
 - Inform user of the briefing ID for resumption.
-- Provide resume command: `/bettercallclaude:briefing --resume [id]`.
+- Provide resume command: `briefing agent --resume [id]`.
 
 ## Memory Persistence Schema
 
