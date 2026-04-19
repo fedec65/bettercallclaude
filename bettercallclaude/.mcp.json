@@ -2,31 +2,34 @@
   "mcpServers": {
     "entscheidsuche": {
       "type": "http",
-      "url": "https://mcp.bettercallclaude.ch/entscheidsuche/mcp"
+      "url": "${user_config.mcp_base_url}/entscheidsuche/mcp"
     },
     "bge-search": {
       "type": "http",
-      "url": "https://mcp.bettercallclaude.ch/bge-search/mcp"
+      "url": "${user_config.mcp_base_url}/bge-search/mcp"
     },
     "legal-citations": {
       "type": "http",
-      "url": "https://mcp.bettercallclaude.ch/legal-citations/mcp"
+      "url": "${user_config.mcp_base_url}/legal-citations/mcp"
     },
     "fedlex-sparql": {
       "type": "http",
-      "url": "https://mcp.bettercallclaude.ch/fedlex-sparql/mcp"
+      "url": "${user_config.mcp_base_url}/fedlex-sparql/mcp"
     },
     "onlinekommentar": {
       "type": "http",
-      "url": "https://mcp.bettercallclaude.ch/onlinekommentar/mcp"
+      "url": "${user_config.mcp_base_url}/onlinekommentar/mcp"
     },
     "swiss-caselaw": {
       "type": "sse",
-      "url": "https://mcp.opencaselaw.ch"
+      "url": "${user_config.caselaw_base_url}"
     },
     "ollama": {
       "command": "node",
-      "args": ["${CLAUDE_PLUGIN_ROOT}/mcp-servers/ollama/dist/index.js"]
+      "args": ["${CLAUDE_PLUGIN_ROOT}/mcp-servers/ollama/dist/index.js"],
+      "env": {
+        "OLLAMA_HOST": "${user_config.ollama_host}"
+      }
     }
   }
 }
