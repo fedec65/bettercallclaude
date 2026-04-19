@@ -10,8 +10,8 @@
 
 import { describe, test, expect, beforeEach, afterEach } from 'vitest';
 import { DatabaseClient, DatabaseConfig } from '../../database/client';
-import { BGERepository, BGEDecision } from '../../database/repositories/bge-repository';
-import { CacheRepository } from '../../database/repositories/cache-repository';
+import { BGERepository, BGEDecision } from '../../database/repositories/BGERepository';
+import { SqliteCacheRepository } from '../../database/repositories/SqliteCacheRepository';
 import { randomUUID } from 'crypto';
 import * as fs from 'fs';
 import * as path from 'path';
@@ -176,7 +176,7 @@ describe('Database Persistence Integration Tests', () => {
         await client.connect();
         await client.migrate();
 
-        const repo = new CacheRepository(client);
+        const repo = new SqliteCacheRepository(client);
 
         await repo.set(cacheKey, cacheData, 3600, 'test');
 
@@ -196,7 +196,7 @@ describe('Database Persistence Integration Tests', () => {
         const client = new DatabaseClient(config);
         await client.connect();
 
-        const repo = new CacheRepository(client);
+        const repo = new SqliteCacheRepository(client);
 
         const retrieved = await repo.get(cacheKey);
         expect(retrieved).toEqual(cacheData);

@@ -4,11 +4,11 @@
 
 import { describe, test, expect, beforeEach, afterEach } from 'vitest';
 import { DatabaseClient, DatabaseConfig } from '../../../database/client';
-import { CacheRepository } from '../../../database/repositories/cache-repository';
+import { SqliteCacheRepository } from '../../../database/repositories/SqliteCacheRepository';
 
-describe('CacheRepository', () => {
+describe('SqliteCacheRepository', () => {
   let client: DatabaseClient;
-  let repository: CacheRepository;
+  let repository: SqliteCacheRepository;
 
   beforeEach(async () => {
     const config: DatabaseConfig = {
@@ -18,7 +18,7 @@ describe('CacheRepository', () => {
     client = new DatabaseClient(config);
     await client.connect();
     await client.migrate();
-    repository = new CacheRepository(client);
+    repository = new SqliteCacheRepository(client);
   });
 
   afterEach(async () => {

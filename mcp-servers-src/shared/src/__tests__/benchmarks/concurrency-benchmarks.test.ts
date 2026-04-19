@@ -13,8 +13,8 @@
 
 import { describe, test, expect, beforeEach, afterEach } from 'vitest';
 import { DatabaseClient, DatabaseConfig } from '../../database/client';
-import { BGERepository } from '../../database/repositories/bge-repository';
-import { CacheRepository } from '../../database/repositories/cache-repository';
+import { BGERepository } from '../../database/repositories/BGERepository';
+import { SqliteCacheRepository } from '../../database/repositories/SqliteCacheRepository';
 import { randomUUID } from 'crypto';
 import * as os from 'os';
 import * as path from 'path';
@@ -296,7 +296,7 @@ describe('Concurrency Performance Benchmarks', () => {
         await client.connect();
         await client.migrate();
 
-        const cacheRepo = new CacheRepository(client);
+        const cacheRepo = new SqliteCacheRepository(client);
         for (let i = 1; i <= 100; i++) {
           await cacheRepo.set(
             `concurrent-key-${i}`,
@@ -315,7 +315,7 @@ describe('Concurrency Performance Benchmarks', () => {
       const tasks = Array.from({ length: 5 }, async () => {
         const client = new DatabaseClient(config);
         await client.connect();
-        const cacheRepo = new CacheRepository(client);
+        const cacheRepo = new SqliteCacheRepository(client);
 
         for (let i = 1; i <= 100; i++) {
           await cacheRepo.get(`concurrent-key-${i}`);

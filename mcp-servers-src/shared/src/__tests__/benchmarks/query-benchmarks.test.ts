@@ -14,10 +14,10 @@
 
 import { describe, test, expect, beforeAll, afterAll } from 'vitest';
 import { DatabaseClient, DatabaseConfig } from '../../database/client';
-import { BGERepository } from '../../database/repositories/bge-repository';
-import { CantonalRepository } from '../../database/repositories/cantonal-repository';
-import { CacheRepository } from '../../database/repositories/cache-repository';
-import { SearchRepository } from '../../database/repositories/search-repository';
+import { BGERepository } from '../../database/repositories/BGERepository';
+import { CantonalRepository } from '../../database/repositories/CantonalRepository';
+import { SqliteCacheRepository } from '../../database/repositories/SqliteCacheRepository';
+import { SearchRepository } from '../../database/repositories/SearchRepository';
 import { randomUUID } from 'crypto';
 import * as os from 'os';
 import * as path from 'path';
@@ -28,7 +28,7 @@ describe('Query Performance Benchmarks', () => {
   let client: DatabaseClient;
   let bgeRepo: BGERepository;
   let cantonalRepo: CantonalRepository;
-  let cacheRepo: CacheRepository;
+  let cacheRepo: SqliteCacheRepository;
   let searchRepo: SearchRepository;
 
   beforeAll(async () => {
@@ -46,7 +46,7 @@ describe('Query Performance Benchmarks', () => {
 
     bgeRepo = new BGERepository(client);
     cantonalRepo = new CantonalRepository(client);
-    cacheRepo = new CacheRepository(client);
+    cacheRepo = new SqliteCacheRepository(client);
     searchRepo = new SearchRepository(client);
 
     // Seed database with test data

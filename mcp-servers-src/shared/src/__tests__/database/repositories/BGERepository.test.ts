@@ -4,7 +4,7 @@
 
 import { describe, test, expect, beforeEach, afterEach } from 'vitest';
 import { DatabaseClient, DatabaseConfig } from '../../../database/client';
-import { BGERepository, BGEDecision } from '../../../database/repositories/bge-repository';
+import { BGERepository, BGEDecision } from '../../../database/repositories/BGERepository';
 import { randomUUID } from 'crypto';
 
 describe('BGERepository', () => {

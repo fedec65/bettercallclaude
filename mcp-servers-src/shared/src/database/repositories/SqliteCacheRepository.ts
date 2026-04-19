@@ -1,11 +1,17 @@
 /**
- * Cache Repository
- * Manages API response caching with TTL and hit tracking
+ * Sqlite Cache Repository
+ *
+ * Raw-SQL cache layer backed by the DatabaseClient wrapper. This is the
+ * legacy implementation kept in place for tests and benchmarks; the
+ * production servers (entscheidsuche, bge-search) use the TypeORM-based
+ * CacheRepository in ./CacheRepository.ts instead. The two are intentionally
+ * distinct classes so a consumer cannot accidentally cross-wire a
+ * DatabaseClient into a TypeORM DataSource slot or vice versa.
  */
 
 import { DatabaseClient } from '../client';
 
-export interface CacheEntry {
+export interface SqliteCacheEntry {
   id: string;
   cache_key: string;
   cache_type: string;
@@ -16,7 +22,7 @@ export interface CacheEntry {
   last_accessed_at?: string;
 }
 
-export class CacheRepository {
+export class SqliteCacheRepository {
   constructor(private db: DatabaseClient) {}
 
   /**
@@ -42,7 +48,7 @@ export class CacheRepository {
    * Increments hit_count and updates last_accessed_at
    */
   async get(key: string): Promise<unknown | null> {
-    const entry = await this.db.queryOne<CacheEntry>(
+    const entry = await this.db.queryOne<SqliteCacheEntry>(
       `SELECT * FROM api_cache WHERE cache_key = ?`,
       { values: [key] }
     );
@@ -75,7 +81,7 @@ export class CacheRepository {
    * Check if a key exists and is not expired
    */
   async has(key: string): Promise<boolean> {
-    const entry = await this.db.queryOne<CacheEntry>(
+    const entry = await this.db.queryOne<SqliteCacheEntry>(
       `SELECT expires_at FROM api_cache WHERE cache_key = ?`,
       { values: [key] }
     );
@@ -176,14 +182,14 @@ export class CacheRepository {
   /**
    * Get most accessed cache entries
    */
-  async getMostAccessed(limit: number = 10): Promise<CacheEntry[]> {
+  async getMostAccessed(limit: number = 10): Promise<SqliteCacheEntry[]> {
     const sql = `
       SELECT * FROM api_cache
       ORDER BY hit_count DESC
       LIMIT ?
     `;
 
-    const results = await this.db.query<CacheEntry>(sql, { values: [limit] });
+    const results = await this.db.query<SqliteCacheEntry>(sql, { values: [limit] });
     return results.map(r => this.parseEntry(r));
   }
 
@@ -198,7 +204,7 @@ export class CacheRepository {
    * Parse cache entry from database (convert JSON strings to objects)
    * Note: data is stored as JSON string in SQLite, needs parsing
    */
-  private parseEntry(row: CacheEntry): CacheEntry {
+  private parseEntry(row: SqliteCacheEntry): SqliteCacheEntry {
     return {
       ...row,
       data: typeof row.data === 'string'

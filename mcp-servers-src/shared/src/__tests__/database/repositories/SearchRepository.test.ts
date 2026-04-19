@@ -4,7 +4,7 @@
 
 import { describe, test, expect, beforeEach, afterEach } from 'vitest';
 import { DatabaseClient, DatabaseConfig } from '../../../database/client';
-import { SearchRepository, SearchQuery } from '../../../database/repositories/search-repository';
+import { SearchRepository, SearchQuery } from '../../../database/repositories/SearchRepository';
 import { randomUUID } from 'crypto';
 
 describe('SearchRepository', () => {

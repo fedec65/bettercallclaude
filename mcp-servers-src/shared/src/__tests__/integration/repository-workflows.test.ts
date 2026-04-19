@@ -6,17 +6,17 @@
 
 import { describe, test, expect, beforeEach, afterEach } from 'vitest';
 import { DatabaseClient, DatabaseConfig } from '../../database/client';
-import { BGERepository, BGEDecision } from '../../database/repositories/bge-repository';
-import { CantonalRepository, CantonalDecision } from '../../database/repositories/cantonal-repository';
-import { CacheRepository } from '../../database/repositories/cache-repository';
-import { SearchRepository, SearchQuery } from '../../database/repositories/search-repository';
+import { BGERepository, BGEDecision } from '../../database/repositories/BGERepository';
+import { CantonalRepository, CantonalDecision } from '../../database/repositories/CantonalRepository';
+import { SqliteCacheRepository } from '../../database/repositories/SqliteCacheRepository';
+import { SearchRepository, SearchQuery } from '../../database/repositories/SearchRepository';
 import { randomUUID } from 'crypto';
 
 describe('Repository Integration Tests', () => {
   let client: DatabaseClient;
   let bgeRepo: BGERepository;
   let cantonalRepo: CantonalRepository;
-  let cacheRepo: CacheRepository;
+  let cacheRepo: SqliteCacheRepository;
   let searchRepo: SearchRepository;
 
   beforeEach(async () => {
@@ -30,7 +30,7 @@ describe('Repository Integration Tests', () => {
 
     bgeRepo = new BGERepository(client);
     cantonalRepo = new CantonalRepository(client);
-    cacheRepo = new CacheRepository(client);
+    cacheRepo = new SqliteCacheRepository(client);
     searchRepo = new SearchRepository(client);
   });
 
