@@ -1,14 +1,14 @@
 {
-  "description": "Anwaltsgeheimnis (attorney-client privilege) detection for Swiss law practice",
+  "description": "Anwaltsgeheimnis (attorney-client privilege) detection for Swiss law practice. Scans Write/Edit/MultiEdit/WebFetch and all MCP tool inputs (mcp__.*) before content leaves the machine.",
   "hooks": {
     "PreToolUse": [
       {
-        "matcher": "Write|Edit|Bash",
+        "matcher": "Write|Edit|MultiEdit|WebFetch|mcp__.*",
         "hooks": [
           {
             "type": "command",
             "command": "node ${CLAUDE_PLUGIN_ROOT}/scripts/privacy-check.js",
-            "timeout": 10
+            "timeout": 15
           }
         ]
       }
