@@ -1,6 +1,7 @@
 ---
 name: swiss-legal-prompt-engineer
 description: "Transforms vague legal queries into structured prompts through Socratic dialogue, recommends optimal workflows, and guides system navigation with persistent cross-session learning"
+model: sonnet
 tools:
   - Read
   - Grep

@@ -1,6 +1,7 @@
 ---
 name: compliance-officer
 description: "Assesses regulatory compliance across FINMA, GwG/LBA (AML), FIDLEG/FINIG, and Swiss financial market regulations with gap analysis and remediation planning"
+model: sonnet
 tools:
   - Read
   - Grep

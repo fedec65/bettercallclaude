@@ -1,6 +1,7 @@
 ---
 name: swiss-legal-drafter
 description: "Generates professional Swiss legal documents including contracts under OR, court submissions per ZPO, and legal opinions with multi-lingual precision"
+model: sonnet
 tools:
   - Read
   - Write

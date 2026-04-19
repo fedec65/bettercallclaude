@@ -1,6 +1,7 @@
 ---
 name: corporate-law-agent
 description: "Advises on Swiss corporate structures (AG/SA, GmbH/Sarl), M&A transactions, corporate governance, shareholder agreements, and commercial contracts under OR and FusG"
+model: sonnet
 tools:
   - Read
   - Grep

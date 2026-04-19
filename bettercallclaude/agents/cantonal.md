@@ -1,6 +1,7 @@
 ---
 name: cantonal-law-expert
 description: "Analyzes law across all 26 Swiss cantons including cantonal constitutions, court systems, intercantonal concordats, procedural variations, and multi-canton comparisons"
+model: sonnet
 tools:
   - Read
   - Grep

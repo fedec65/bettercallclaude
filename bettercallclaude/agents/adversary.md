@@ -1,6 +1,7 @@
 ---
 name: swiss-legal-adversary
 description: "Challenges a legal position by finding weaknesses, counter-precedents, and opposing arguments under Swiss law"
+model: sonnet
 tools:
   - Read
   - Grep

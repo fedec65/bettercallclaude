@@ -1,7 +1,9 @@
 ---
 name: swiss-legal-briefing-coordinator
 description: "Pre-execution briefing session that collects case context through multi-agent panel consultation, builds a structured execution plan, and persists state for cross-session recovery"
+model: sonnet
 tools:
+  - Task
   - Read
   - Grep
   - Glob

@@ -1,6 +1,7 @@
 ---
 name: swiss-judicial-analyst
 description: "Provides neutral synthesis of advocate and adversary positions using Swiss Erwagung (consideration) structure with calibrated risk probabilities"
+model: opus
 tools:
   - Read
   - Grep
