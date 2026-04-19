@@ -34,7 +34,7 @@
     "@rollup/rollup-linux-x64-gnu": "^4.28.0"
   },
   "engines": {
-    "node": ">=18.0.0",
+    "node": ">=20.0.0",
     "npm": ">=9.0.0"
   },
   "overrides": {

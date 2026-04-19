@@ -41,12 +41,12 @@
     "@types/pg": "^8.10.0",
     "@types/natural": "^5.1.0",
     "@types/uuid": "^9.0.7",
-    "typescript": "^5.3.3",
+    "typescript": "^5.7.2",
     "vitest": "^4.0.15",
     "nock": "^13.4.0",
     "prettier": "^3.1.1"
   },
   "engines": {
-    "node": ">=18.0.0"
+    "node": ">=20.0.0"
   }
 }

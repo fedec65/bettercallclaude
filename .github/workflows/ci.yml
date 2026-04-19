@@ -28,7 +28,6 @@ jobs:
       - name: Lint
         working-directory: mcp-servers-src
         run: npm run lint --if-present
-        continue-on-error: true
 
       - name: Build
         working-directory: mcp-servers-src
@@ -37,6 +36,33 @@ jobs:
       - name: Test
         working-directory: mcp-servers-src
         run: npm test
+
+  test-http-server:
+    name: Test HTTP MCP Server
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Use Node.js 22
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+
+      - name: Install dependencies (mcp-servers-src for workspace path resolution)
+        working-directory: mcp-servers-src
+        run: npm ci
+
+      - name: Install dependencies (mcp-servers-http)
+        working-directory: mcp-servers-http
+        run: npm ci
+
+      - name: Typecheck
+        working-directory: mcp-servers-http
+        run: npm run typecheck
+
+      - name: Build
+        working-directory: mcp-servers-http
+        run: npm run build
 
   validate-plugin:
     name: Validate Plugin Structure
