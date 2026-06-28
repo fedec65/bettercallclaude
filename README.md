@@ -1,4 +1,4 @@
-[![Version](https://img.shields.io/badge/version-4.8.3-blue)](https://github.com/fedec65/bettercallclaude/releases)
+[![Version](https://img.shields.io/badge/version-4.9.0-blue)](https://github.com/fedec65/bettercallclaude/releases)
 [![License: AGPL-3.0](https://img.shields.io/badge/license-AGPL--3.0-green)](LICENSE)
 [![Platform](https://img.shields.io/badge/platform-Cowork%20Desktop-orange)](https://claude.ai)
 [![Website](https://img.shields.io/badge/web-bettercallclaude.ch-brightgreen)](https://bettercallclaude.ch)
@@ -11,7 +11,7 @@
 
 <p align="center"><strong>Swiss Legal Intelligence Plugin for Cowork Desktop</strong></p>
 
-BetterCallClaude transforms legal research, case strategy, and document drafting for Swiss lawyers. It provides deep integration with Swiss legal databases, multi-lingual analysis (DE/FR/IT/EN), and built-in Anwaltsgeheimnis (attorney-client privilege) protection -- 20 agents, 24 commands, 12 skills, and 9 MCP servers covering BGE/ATF/DTF precedent research, litigation strategy, adversarial analysis, legal drafting, citation verification, document intelligence, NDA triage, and CAS/TAS sports arbitration across all 26 Swiss cantons.
+BetterCallClaude transforms legal research, case strategy, and document drafting for Swiss lawyers. It provides deep integration with Swiss legal databases, multi-lingual analysis (DE/FR/IT/EN), and built-in Anwaltsgeheimnis (attorney-client privilege) protection -- 20 agents, 26 commands, 13 skills, and 9 MCP servers covering BGE/ATF/DTF precedent research, litigation strategy, adversarial analysis, legal drafting, citation verification, document intelligence, NDA triage, iterative quality loops, and CAS/TAS sports arbitration across all 26 Swiss cantons.
 
 > **Claude Code CLI users**: this repository is Cowork Desktop only. The CLI version is at [fedec65/bettercallclaude-cli](https://github.com/fedec65/bettercallclaude-cli).
 
@@ -46,15 +46,16 @@ BetterCallClaude provides a structured methodology for handling legal work with 
 
 ---
 
-## What's New in v4.8.3
+## What's New in v4.9.0
 
-**v4.8.3 — MCP tool fixes, CONNECTORS documentation, widget integration hooks.**
+**v4.9.0 — Goal-loop iterative verification: `/legal-goal` and `/legal-loop`.**
 
-- **MCP tool name corrections**: fixed incorrect tool probe names in `doctor.md` (`search_personas` → `legal_analyze`, `search_tas_awards` → `cas_search`). Corrected `legal-persona` description across `doctor`, `help`, `version`, and `README`.
-- **CONNECTORS.md completed**: documented all 9 MCP servers with full tool specifications. Added `legal-persona` (3 tools), `tas-jurisprudence` (4 tools), `swiss-caselaw` (SSE, opencaselaw.ch).
-- **Widget hooks**: conditional invocation of `present_adversarial_analysis` (W2 dashboard) in adversarial-analysis, `present_intake_form` (W4 form) in legal-intake, `compute_deadlines` in swiss-legal-strategy. All with graceful text fallback when tools unavailable.
+- **`/legal-goal`**: define a machine-checkable legal success condition — from named profiles (`citations-clean`, `draft-passes-gate`, `adversarial-converge`, `nda-batch-clean`, `reg-watch`) or free-text objectives. Produces a persisted Goal Record; never starts work itself.
+- **`/legal-loop`**: run a worker-evaluator iteration cycle against a Goal Record. A *separate judge agent* verifies each iteration using MCP tools (citation validation, claim support, source retrieval). Stops on success, max iterations, stagnation, or privacy violation. Persists an auditable verdict trail.
+- **Evaluator skill** (`legal-evaluator`): shared verdict engine enforcing worker-judge separation. Uses `validate_citation`, `review_citations`, `check_claim_support` and Swiss source retrieval tools. Returns structured pass/fail verdicts with score and itemised findings.
+- **5 pre-wired profiles**: `citations-clean` (flagship anti-hallucination gate), `draft-passes-gate`, `adversarial-converge`, `nda-batch-clean`, `reg-watch` (schedulable regulatory monitoring).
 
-**Content counts**: 20 agents, 24 commands, 12 skills, 9 MCP servers.
+**Content counts**: 20 agents, 26 commands, 13 skills, 9 MCP servers.
 
 [Full changelog →](CHANGELOG.md)
 

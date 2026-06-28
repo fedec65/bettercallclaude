@@ -27,8 +27,8 @@ bettercallclaude/           The Cowork Desktop / Claude Code plugin itself.
 ├── .claude-plugin/         plugin.json + marketplace.json. Schema-validated in CI.
 ├── .mcp.json               MCP server declarations. Remote URLs + ollama stdio.
 ├── agents/                 20 subagent prompts. YAML frontmatter: name, description, model, tools.
-├── commands/               24 slash commands.
-├── skills/                 12 skills (SKILL.md per directory).
+├── commands/               26 slash commands.
+├── skills/                 13 skills (SKILL.md per directory).
 ├── hooks/                  Cowork Desktop hooks. Entrypoint for privacy protection.
 ├── scripts/                privacy-check.js and its test file.
 └── mcp-servers/ollama/     Bundled local STDIO MCP server (dist/ committed).
