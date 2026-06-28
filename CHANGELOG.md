@@ -4,6 +4,38 @@ All notable changes to BetterCallClaude will be documented in this file.
 
 ---
 
+## [4.9.0] - 2026-05-25
+
+### Added — Goal-Loop Iterative Verification
+
+- **`/legal-goal` command**: define a machine-checkable legal success condition. Accepts named profiles (`citations-clean`, `draft-passes-gate`, `adversarial-converge`, `nda-batch-clean`, `reg-watch`) or free-text objectives. Produces a persisted Goal Record with YAML header; never starts work itself.
+- **`/legal-loop` command**: run a worker-evaluator iteration cycle against a Goal Record. Separate judge agent verifies each iteration using MCP tools. Implements: privacy pre-check, work step, verdict step, decision (stop on success / max-iterations / no-progress / privacy violation). Persists auditable verdict trail in `bcc-output/loops/`.
+- **`legal-evaluator` skill** (verdict engine): shared skill that judges artifacts against Goal Records. Enforces worker-judge separation (refuses to judge if worker == evaluator). Returns structured Verdict (pass/fail, 0-100 score, itemised findings). Uses citation integrity, factual support, and source retrieval MCP tools.
+- **5 pre-wired loop profiles**:
+  - `citations-clean` — flagship anti-hallucination gate; every citation validated via MCP, R1/R2 enforced
+  - `draft-passes-gate` — drafting quality gate (citations + structure + claim support)
+  - `adversarial-converge` — iterative stress-test; advocate strengthens, adversary + judge evaluate
+  - `nda-batch-clean` — triage completeness gate for NDA folders
+  - `reg-watch` — scheduled regulatory monitoring (Fedlex + swiss-caselaw changes, one-pass-per-run)
+- **Scheduling documentation** for `reg-watch`: how to launch from cron-style tasks, Claude scheduled sessions, or Devin automations.
+
+### Safety (non-negotiable)
+- Max iterations: finite, default 5, hard cap 20
+- No-progress guard: stops after 2 consecutive iterations without score improvement
+- Separation enforcement: worker and evaluator must be different agents
+- Honest termination: NOT MET on stop-without-success, residual findings always listed
+- Privacy pre-check every iteration
+- R1/R2 anti-hallucination rules enforced in every citation-bearing loop
+- Human-in-the-loop: loop never files, sends, signs, or transmits anything
+
+### Implementation choices (Section 11 of spec)
+- Score scale: 0-100 uniform across all profiles
+- Goal Record header: YAML frontmatter in .md file
+- Evaluator: skill invocation (not subagent), with separation guaranteed by role check
+- Default max_iterations: 5 for most profiles; 3 for nda-batch-clean; 1 for reg-watch
+
+---
+
 ## [4.8.3] - 2026-05-25
 
 ### Fixed — MCP Tool References

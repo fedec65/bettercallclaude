@@ -1,4 +1,4 @@
-[![Version](https://img.shields.io/badge/version-4.8.3-blue)](https://github.com/fedec65/bettercallclaude/releases)
+[![Version](https://img.shields.io/badge/version-4.9.0-blue)](https://github.com/fedec65/bettercallclaude/releases)
 [![License: AGPL-3.0](https://img.shields.io/badge/license-AGPL--3.0-green)](LICENSE)
 [![Platform](https://img.shields.io/badge/platform-Cowork%20Desktop-orange)](https://claude.ai)
 [![Website](https://img.shields.io/badge/web-bettercallclaude.ch-brightgreen)](https://bettercallclaude.ch)
@@ -11,7 +11,7 @@
 
 <p align="center"><strong>Swiss Legal Intelligence Plugin for Cowork Desktop</strong></p>
 
-BetterCallClaude transforms legal research, case strategy, and document drafting for Swiss lawyers. It provides deep integration with Swiss legal databases, multi-lingual analysis (DE/FR/IT/EN), and built-in Anwaltsgeheimnis (attorney-client privilege) protection -- 20 agents, 24 commands, 12 skills, and 9 MCP servers covering BGE/ATF/DTF precedent research, litigation strategy, adversarial analysis, legal drafting, citation verification, document intelligence, NDA triage, and CAS/TAS sports arbitration across all 26 Swiss cantons.
+BetterCallClaude transforms legal research, case strategy, and document drafting for Swiss lawyers. It provides deep integration with Swiss legal databases, multi-lingual analysis (DE/FR/IT/EN), and built-in Anwaltsgeheimnis (attorney-client privilege) protection -- 20 agents, 26 commands, 13 skills, and 9 MCP servers covering BGE/ATF/DTF precedent research, litigation strategy, adversarial analysis, legal drafting, citation verification, document intelligence, NDA triage, iterative quality loops, and CAS/TAS sports arbitration across all 26 Swiss cantons.
 
 > **Claude Code CLI users**: this repository is Cowork Desktop only. The CLI version is at [fedec65/bettercallclaude-cli](https://github.com/fedec65/bettercallclaude-cli).
 
@@ -46,15 +46,16 @@ BetterCallClaude provides a structured methodology for handling legal work with 
 
 ---
 
-## What's New in v4.8.3
+## What's New in v4.9.0
 
-**v4.8.3 — MCP tool fixes, CONNECTORS documentation, widget integration hooks.**
+**v4.9.0 — Goal-loop iterative verification: `/legal-goal` and `/legal-loop`.**
 
-- **MCP tool name corrections**: fixed incorrect tool probe names in `doctor.md` (`search_personas` → `legal_analyze`, `search_tas_awards` → `cas_search`). Corrected `legal-persona` description across `doctor`, `help`, `version`, and `README`.
-- **CONNECTORS.md completed**: documented all 9 MCP servers with full tool specifications. Added `legal-persona` (3 tools), `tas-jurisprudence` (4 tools), `swiss-caselaw` (SSE, opencaselaw.ch).
-- **Widget hooks**: conditional invocation of `present_adversarial_analysis` (W2 dashboard) in adversarial-analysis, `present_intake_form` (W4 form) in legal-intake, `compute_deadlines` in swiss-legal-strategy. All with graceful text fallback when tools unavailable.
+- **`/legal-goal`**: define a machine-checkable legal success condition — from named profiles (`citations-clean`, `draft-passes-gate`, `adversarial-converge`, `nda-batch-clean`, `reg-watch`) or free-text objectives. Produces a persisted Goal Record; never starts work itself.
+- **`/legal-loop`**: run a worker-evaluator iteration cycle against a Goal Record. A *separate judge agent* verifies each iteration using MCP tools (citation validation, claim support, source retrieval). Stops on success, max iterations, stagnation, or privacy violation. Persists an auditable verdict trail.
+- **Evaluator skill** (`legal-evaluator`): shared verdict engine enforcing worker-judge separation. Uses `validate_citation`, `review_citations`, `check_claim_support` and Swiss source retrieval tools. Returns structured pass/fail verdicts with score and itemised findings.
+- **5 pre-wired profiles**: `citations-clean` (flagship anti-hallucination gate), `draft-passes-gate`, `adversarial-converge`, `nda-batch-clean`, `reg-watch` (schedulable regulatory monitoring).
 
-**Content counts**: 20 agents, 24 commands, 12 skills, 9 MCP servers.
+**Content counts**: 20 agents, 26 commands, 13 skills, 9 MCP servers.
 
 [Full changelog →](CHANGELOG.md)
 
@@ -118,6 +119,8 @@ MCP servers connect automatically via HTTP. No Node.js, no local setup, no API k
 | `/bettercallclaude:setup` | ⚠ Alias for `/start` — will be removed in v5.0. |
 | `/bettercallclaude:version` | Display plugin version, installed components, and system status. |
 | `/bettercallclaude:legal-5step` | Execute the 5-step end-to-end Swiss legal framework: intake → research → strategy → adversarial → draft. |
+| `/bettercallclaude:legal-goal` | Define a checkable legal success condition — from named profiles or free-text. Produces a persisted Goal Record; never starts work. |
+| `/bettercallclaude:legal-loop` | Run the worker→evaluator iteration cycle against a Goal Record until success or stop limit. Separate judge agent verifies each turn. |
 | `/bettercallclaude:privacy` | View or change the privacy mode (`strict` / `balanced` / `cloud`). Settings stored in `~/.betterask/config.yaml`. |
 | `/bettercallclaude:help` | Show complete command reference, available agents, skills, and usage examples. |
 
@@ -175,6 +178,63 @@ MCP servers connect automatically via HTTP. No Node.js, no local setup, no API k
 - **Multi-agent workflows** -- Predefined pipelines for due diligence, litigation prep, contract lifecycle, and real estate closings.
 - **All 26 cantons** -- Full cantonal coverage with court systems, citation formats, and MCP search via entscheidsuche.ch. Federal law is the default; mentioning a canton triggers cantonal mode.
 - **Multi-language** -- Automatic language detection for DE/FR/IT/EN with correct legal terminology and citation formats.
+
+---
+
+## Goal-Loop Iterative Verification
+
+BetterCallClaude's goal-loop system brings iterative quality control to legal deliverables. Instead of relying on a single pass, a **separate judge agent** verifies the work after each iteration — an agent never grades its own homework.
+
+### How it works
+
+```
+/legal-goal citations-clean --target="my-memo.md"
+  → defines what "done" means (a Goal Record)
+
+/legal-loop goal-20260525-citations-clean
+  → iterates: worker revises → evaluator judges → repeat until MET
+```
+
+**Step by step:**
+1. `/legal-goal` produces a Goal Record describing the success condition, worker, evaluator, and MCP checks to run
+2. `/legal-loop` executes the cycle:
+   - **Privacy pre-check** (every iteration — Anwaltsgeheimnis protection)
+   - **Work step** — the worker agent produces/revises the artifact
+   - **Verdict step** — a *different* judge agent runs MCP verification tools and returns pass/fail with itemised findings
+   - **Decision** — if pass → stop (MET); if fail and iterations remain → feed findings back to worker; if limit reached → stop (NOT MET)
+3. Every iteration's verdict is persisted for audit: `bcc-output/loops/<goal-id>/`
+
+### Pre-wired profiles
+
+| Profile | Worker | Evaluator | Use case |
+|---------|--------|-----------|----------|
+| `citations-clean` | Drafter | Citation specialist | Anti-hallucination gate — every citation validated via MCP (R1/R2) |
+| `draft-passes-gate` | Legal drafter | Judicial analyst | Full quality gate (citations + structure + factual support) |
+| `adversarial-converge` | Advocate | Adversary + Judge | Iterative stress-test until position stabilises |
+| `nda-batch-clean` | NDA triage | Completeness check | Zero unclassified docs, zero unflagged deviations |
+| `reg-watch` | Fedlex/caselaw query | Relevance judge | Scheduled regulatory monitoring (one pass per run) |
+
+### Safety guarantees
+
+- **Finite loops**: max 5 iterations (configurable, hard cap 20)
+- **No-progress guard**: stops if score stagnates for 2 iterations
+- **Honest termination**: always says NOT MET when the condition is not satisfied
+- **Worker ≠ Judge**: enforced — loop refuses to run if both resolve to the same agent
+- **Privacy**: pre-check runs every iteration; disallowed boundary crossings halt immediately
+- **Human-in-the-loop**: the loop never files, sends, signs, or transmits anything
+
+### Example: fixing citations iteratively
+
+```
+/legal-goal citations-clean --target="gutachten-art97.md"
+  → Goal Record: "every citation must validate via MCP; zero self-constructed references"
+
+/legal-loop goal-20260525-citations-clean
+  Iteration 1: score 72/100 — 7 findings (3 invalid citations, 4 unverified)
+  Iteration 2: score 89/100 — 3 findings (1 invalid, 2 unverified)
+  Iteration 3: score 100/100 — 0 findings
+  → MET. Final artifact in bcc-output/loops/.../final/
+```
 
 ---
 

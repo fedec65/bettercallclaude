@@ -54,6 +54,8 @@ BetterCallClaude provides Swiss legal intelligence through three interfaces:
 | `/bettercallclaude:workflow` | Define and execute multi-agent pipelines |
 | `/bettercallclaude:briefing` | Structured pre-execution briefing with specialist panel and plan building |
 | `/bettercallclaude:translate` | Translate legal documents between DE, FR, IT, EN |
+| `/bettercallclaude:legal-goal` | Define a checkable legal success condition (profile or free-text) for iterative verification |
+| `/bettercallclaude:legal-loop` | Run worker-evaluator iteration cycle against a Goal Record until success or stop limit |
 
 ### Onboarding & Diagnostics
 
@@ -111,7 +113,7 @@ BetterCallClaude provides Swiss legal intelligence through three interfaces:
 
 ---
 
-## Skills (12)
+## Skills (13)
 
 Skills activate automatically when Claude detects relevant context.
 
@@ -125,6 +127,7 @@ Skills activate automatically when Claude detects relevant context.
 | swiss-citation-formats | Citation formatting, BGE/ATF/DTF references in text |
 | adversarial-analysis | Three-agent adversarial legal analysis requests |
 | legal-intake | Vague or complex queries — Socratic refinement (single-domain) or structured briefing (multi-domain) |
+| legal-evaluator | Verdict engine for /legal-loop — judges artifacts against Goal Records using MCP verification |
 | data-protection-law | DSG/FADP, GDPR adequacy, privacy compliance questions |
 | compliance-frameworks | FINMA, AML/KYC, financial regulatory compliance |
 | privacy-routing | Sensitive client data patterns detected (Anwaltsgeheimnis) |
@@ -208,7 +211,7 @@ Skills activate automatically when Claude detects relevant context.
 
 ---
 
-**BetterCallClaude v4.8.3 -- Swiss Legal Intelligence for Cowork Desktop**
+**BetterCallClaude v4.9.0 -- Swiss Legal Intelligence for Cowork Desktop**
 
 If the user provided additional input, respond to it in the context of this help reference.
 
