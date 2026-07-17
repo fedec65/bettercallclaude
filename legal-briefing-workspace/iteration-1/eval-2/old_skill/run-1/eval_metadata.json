@@ -1,0 +1,11 @@
+{
+  "eval_id": 2,
+  "eval_name": "vague-employment",
+  "prompt": "I need help with a situation involving one of my employees. Things haven't been working out and we're thinking of maybe letting them go, but I'm not sure exactly how to do it properly or what the risks are.",
+  "assertions": [
+    {"text": "detects_vagueness: Identifies that the query is vague/ambiguous before routing"},
+    {"text": "raises_jurisdiction: Explicitly asks about or flags missing jurisdictional context"},
+    {"text": "asks_clarifying_questions: Asks specific clarifying questions OR suggests briefing to gather needed info"},
+    {"text": "offers_skip_option: User can bypass the clarification/briefing step if they prefer"}
+  ]
+}

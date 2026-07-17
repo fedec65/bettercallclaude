@@ -1,4 +1,4 @@
-[![Version](https://img.shields.io/badge/version-4.9.0-blue)](https://github.com/fedec65/bettercallclaude/releases)
+[![Version](https://img.shields.io/badge/version-4.9.1-blue)](https://github.com/fedec65/bettercallclaude/releases)
 [![License: AGPL-3.0](https://img.shields.io/badge/license-AGPL--3.0-green)](LICENSE)
 [![Platform](https://img.shields.io/badge/platform-Cowork%20Desktop-orange)](https://claude.ai)
 [![Website](https://img.shields.io/badge/web-bettercallclaude.ch-brightgreen)](https://bettercallclaude.ch)
@@ -11,30 +11,9 @@
 
 <p align="center"><strong>Swiss Legal Intelligence Plugin for Cowork Desktop</strong></p>
 
-BetterCallClaude transforms legal research, case strategy, and document drafting for Swiss lawyers. It provides deep integration with Swiss legal databases, multi-lingual analysis (DE/FR/IT/EN), and built-in Anwaltsgeheimnis (attorney-client privilege) protection -- 20 agents, 26 commands, 13 skills, and 9 MCP servers covering BGE/ATF/DTF precedent research, litigation strategy, adversarial analysis, legal drafting, citation verification, document intelligence, NDA triage, iterative quality loops, and CAS/TAS sports arbitration across all 26 Swiss cantons.
+BetterCallClaude transforms legal research, case strategy, and document drafting for Swiss lawyers. It provides deep integration with Swiss legal databases, multi-lingual analysis (DE/FR/IT/EN), and built-in Anwaltsgeheimnis (attorney-client privilege) protection -- 20 agents, 19 commands, 14 skills, and 9 MCP servers covering BGE/ATF/DTF precedent research, litigation strategy, adversarial analysis, legal drafting, citation verification, document intelligence, and CAS/TAS sports arbitration across all 26 Swiss cantons.
 
 > **Claude Code CLI users**: this repository is Cowork Desktop only. The CLI version is at [fedec65/bettercallclaude-cli](https://github.com/fedec65/bettercallclaude-cli).
-
----
-
-## Swiss Law, Not Delaware
-
-Anthropic's official Legal plugin (`anthropics/knowledge-work-plugins`) provides contract review and NDA triage for US law (Delaware, New York, California). **BetterCallClaude covers Switzerland**: federal law, all 26 cantons, four national languages, verified citations from official sources, and attorney-client privilege protection.
-
-The two plugins coexist. For Swiss-law matters, BetterCallClaude takes precedence. For US-law matters, the Anthropic plugin applies.
-
-| | Anthropic Legal Plugin | BetterCallClaude Swiss |
-|---|---|---|
-| **Jurisdiction** | US (DE/NY/CA default) | Switzerland (federal + 26 cantons) |
-| **Primary sources** | Model knowledge | 8+ MCP servers on official sources (BGE, Fedlex, entscheidsuche, ...) |
-| **Languages** | EN | DE/FR/IT/EN |
-| **Citations** | -- | Swiss standards verified via MCP (BGE/ATF/DTF) |
-| **Attorney-client privilege** | -- | Privacy-routing hook (Art. 321 StGB) |
-| **Adversarial analysis** | -- | 3-agent advocate/adversary/judge with probability scores |
-| **NDA triage** | GREEN/YELLOW/RED (US criteria) | GREEN/YELLOW/RED (Swiss criteria: Art. 160 ff. OR, Lugano, zwingendes Recht) |
-| **Local playbook** | `legal.local.md` | `bettercallclaude.local.md` (+ `legal.local.md` compat) |
-
-See [MIGRATION-FROM-ANTHROPIC-LEGAL.md](docs/MIGRATION-FROM-ANTHROPIC-LEGAL.md) for the full migration and coexistence guide.
 
 ---
 
@@ -46,16 +25,17 @@ BetterCallClaude provides a structured methodology for handling legal work with 
 
 ---
 
-## What's New in v4.9.0
+## What's New in v4.4.0
 
-**v4.9.0 — Goal-loop iterative verification: `/legal-goal` and `/legal-loop`.**
+**v4.4.0 — Repository split + two new MCP servers.** The plugin repo is now plugin-only; MCP server source code lives canonically in a dedicated repository, and two new MCP servers are exposed to users.
 
-- **`/legal-goal`**: define a machine-checkable legal success condition — from named profiles (`citations-clean`, `draft-passes-gate`, `adversarial-converge`, `nda-batch-clean`, `reg-watch`) or free-text objectives. Produces a persisted Goal Record; never starts work itself.
-- **`/legal-loop`**: run a worker-evaluator iteration cycle against a Goal Record. A *separate judge agent* verifies each iteration using MCP tools (citation validation, claim support, source retrieval). Stops on success, max iterations, stagnation, or privacy violation. Persists an auditable verdict trail.
-- **Evaluator skill** (`legal-evaluator`): shared verdict engine enforcing worker-judge separation. Uses `validate_citation`, `review_citations`, `check_claim_support` and Swiss source retrieval tools. Returns structured pass/fail verdicts with score and itemised findings.
-- **5 pre-wired profiles**: `citations-clean` (flagship anti-hallucination gate), `draft-passes-gate`, `adversarial-converge`, `nda-batch-clean`, `reg-watch` (schedulable regulatory monitoring).
+- **Repository split** — `mcp-servers-src/` and `mcp-servers-http/` have been removed from this repo. The TypeScript source for all 7 remote MCP servers and the HTTP aggregator deployed at `mcp.bettercallclaude.ch` now live in [`fedec65/BetterCallClaudeMCP`](https://github.com/fedec65/BetterCallClaudeMCP). Plugin users are unaffected — `.mcp.json` still points at the same production URLs.
+- **New MCP: `legal-persona`** — Swiss-law-aware document intelligence. Three tools: `legal_strategy` (structured case strategy with statutory citations), `legal_draft` (15 Swiss document types across contracts, litigation, and opinions in DE/FR/IT/EN), and `legal_analyze` (compliance, clause-extraction, and issue-flagging against OR / ZGB / DSG).
+- **New MCP: `tas-jurisprudence`** — Court of Arbitration for Sport (CAS/TAS) decision search. Four tools: `cas_search`, `cas_get_award`, `cas_recent`, `cas_by_sport`. Backed by a Playwright-rendered crawl of `jurisprudence.tas-cas.org` with respectful rate limits.
+- **Ollama local server** — still bundled in this repo; `npm run build:ollama` now rebuilds it in-place for contributors.
+- **Simpler CI** — plugin-only repo means CI is now `validate-plugin` + package dry-run; the MCP build/test matrix has moved to `BetterCallClaudeMCP`.
 
-**Content counts**: 20 agents, 26 commands, 13 skills, 9 MCP servers.
+**Content counts**: 20 agents, 19 commands, 14 skills, 9 MCP servers in `.mcp.json` (7 remote HTTP on `mcp.bettercallclaude.ch` + `swiss-caselaw` SSE on `mcp.opencaselaw.ch` + `ollama` local STDIO).
 
 [Full changelog →](CHANGELOG.md)
 
@@ -63,25 +43,11 @@ BetterCallClaude provides a structured methodology for handling legal work with 
 
 - **HTTP-only transport**: 8 of 9 MCP servers connect via `mcp.bettercallclaude.ch` / `mcp.opencaselaw.ch` -- no local Node.js build required for those
 - **Local STDIO server** (`ollama`): bundled and only touches `http://localhost:11434` for privacy-routed translation/summarisation
-- **Onboarding**: `/bettercallclaude:start` guides you from installation to first deliverable
+- **Simplified setup**: `/setup` checks connectivity only -- no transport switching needed in Cowork
 
 ---
 
-## Getting Started (Cowork Desktop)
-
-> **[Quickstart guide →](docs/QUICKSTART-COWORK.md)** (DE/FR/IT/EN, zero jargon, one page)
-
-1. Install from [claude.com/plugins](https://claude.com/plugins) — search **BetterCallClaude** and click **Install**
-2. Share a folder containing your case files or documents
-3. Type `/bettercallclaude:start` to begin — BetterCallClaude checks connectivity, helps create your local playbook, and shows usage examples tailored to your profile
-
-All results are saved as files in your shared folder (`bcc-output/`) — the chat shows only a brief summary.
-
-MCP servers connect automatically. No setup, no API keys required.
-
----
-
-## Installation (Advanced)
+## Installation
 
 > **Full installation guide with screenshots:** [BetterCallClaude Tutorial →](https://github.com/fedec65/bettercallclaude_tutorial)
 
@@ -111,63 +77,35 @@ MCP servers connect automatically via HTTP. No Node.js, no local setup, no API k
 | `/bettercallclaude:briefing` | Structured pre-execution briefing -- assembles a specialist panel, collects case context, and builds an execution plan before agents start working. |
 | `/bettercallclaude:workflow` | Define and execute multi-agent legal workflows (due diligence, litigation prep, contract lifecycle, real estate closing). |
 | `/bettercallclaude:translate` | Translate Swiss legal documents between DE, FR, IT, and EN while preserving legal terminology precision. |
-| `/bettercallclaude:doc-analyze` | Analyze Swiss legal documents -- identify legal issues, extract key clauses, verify citations, assess compliance. Playbook-aware deviation analysis when `bettercallclaude.local.md` is present. |
-| `/bettercallclaude:nda-triage` | Triage NDAs against Swiss law: GREEN (standard) / YELLOW (review) / RED (issues). Single file or batch mode. Uses playbook thresholds. |
+| `/bettercallclaude:doc-analyze` | Analyze Swiss legal documents -- identify legal issues, extract key clauses, verify citations, assess compliance. |
 | `/bettercallclaude:summarize` | Consolidate multi-agent pipeline output -- deduplicate disclaimers, terminology, and citations with length control (`--short`/`--medium`/`--long`). |
-| `/bettercallclaude:start` | Welcome and onboarding — checks connectivity, guides playbook creation, shows usage examples. |
-| `/bettercallclaude:doctor` | Diagnose MCP server connectivity — tests each server, reports status and impact. |
-| `/bettercallclaude:setup` | ⚠ Alias for `/start` — will be removed in v5.0. |
+| `/bettercallclaude:setup` | Check MCP server connectivity and display status for all 9 servers. |
 | `/bettercallclaude:version` | Display plugin version, installed components, and system status. |
-| `/bettercallclaude:legal-5step` | Execute the 5-step end-to-end Swiss legal framework: intake → research → strategy → adversarial → draft. |
-| `/bettercallclaude:legal-goal` | Define a checkable legal success condition — from named profiles or free-text. Produces a persisted Goal Record; never starts work. |
-| `/bettercallclaude:legal-loop` | Run the worker→evaluator iteration cycle against a Goal Record until success or stop limit. Separate judge agent verifies each turn. |
-| `/bettercallclaude:privacy` | View or change the privacy mode (`strict` / `balanced` / `cloud`). Settings stored in `~/.betterask/config.yaml`. |
 | `/bettercallclaude:help` | Show complete command reference, available agents, skills, and usage examples. |
-
-### Skills
-
-| Skill | Description |
-|-------|-------------|
-| `legal-5step-framework` | Coordinates the 5-step pipeline, enforces data flow between agents, manages quality gates and checkpoints. |
 
 ### Usage Examples
 
-**For law firms:**
-```
-"Analizza questo NDA e dimmi se è accettabile"
-
-"Cerca la giurisprudenza recente sulla disdetta anticipata del contratto di locazione a Zurigo"
-
-"Prepara una Klageschrift per inadempimento contrattuale"
-```
-
-**For in-house counsel:**
-```
-"Controlla questi 5 NDA nella cartella e dammi un riepilogo"
-
-"Il nostro fornitore vuole modificare la clausola di responsabilità — è accettabile?"
-
-"Prepara un briefing sul nuovo nDSG per il management"
-```
-
-**With slash commands:**
 ```
 /bettercallclaude:legal I need to assess our exposure under Art. 97 OR for late delivery
 
+/bettercallclaude:refine I have problems with my landlord
+
 /bettercallclaude:research Art. 97 OR contractual liability for late delivery
 
-/bettercallclaude:nda-triage @nda-folder/ Batch triage all NDAs
+/bettercallclaude:strategy Commercial lease dispute in Zurich, landlord claims CHF 200k damages
 
-/bettercallclaude:adversarial Is the non-compete clause enforceable?
+/bettercallclaude:draft Employment contract for a software engineer in Geneva, bilingual DE/FR
 
-/bettercallclaude:doctor
+/bettercallclaude:adversarial Is the non-compete clause in this employment contract enforceable?
+
+/bettercallclaude:workflow litigation-prep Personal injury claim against manufacturer
+
+/bettercallclaude:briefing Prepare full litigation for Art. 97 OR breach, CHF 500K, Zurich
+
+/bettercallclaude:cantonal ZH Commercial court jurisdiction for contract disputes over CHF 30k
+
+/bettercallclaude:doc-analyze @contract.pdf Review this commercial lease agreement
 ```
-
-### Renamed Commands
-
-| Old Command | New Command | Status |
-|-------------|-------------|--------|
-| `/bettercallclaude:setup` | `/bettercallclaude:start` | Alias active until v5.0 |
 
 ---
 
@@ -178,63 +116,6 @@ MCP servers connect automatically via HTTP. No Node.js, no local setup, no API k
 - **Multi-agent workflows** -- Predefined pipelines for due diligence, litigation prep, contract lifecycle, and real estate closings.
 - **All 26 cantons** -- Full cantonal coverage with court systems, citation formats, and MCP search via entscheidsuche.ch. Federal law is the default; mentioning a canton triggers cantonal mode.
 - **Multi-language** -- Automatic language detection for DE/FR/IT/EN with correct legal terminology and citation formats.
-
----
-
-## Goal-Loop Iterative Verification
-
-BetterCallClaude's goal-loop system brings iterative quality control to legal deliverables. Instead of relying on a single pass, a **separate judge agent** verifies the work after each iteration — an agent never grades its own homework.
-
-### How it works
-
-```
-/legal-goal citations-clean --target="my-memo.md"
-  → defines what "done" means (a Goal Record)
-
-/legal-loop goal-20260525-citations-clean
-  → iterates: worker revises → evaluator judges → repeat until MET
-```
-
-**Step by step:**
-1. `/legal-goal` produces a Goal Record describing the success condition, worker, evaluator, and MCP checks to run
-2. `/legal-loop` executes the cycle:
-   - **Privacy pre-check** (every iteration — Anwaltsgeheimnis protection)
-   - **Work step** — the worker agent produces/revises the artifact
-   - **Verdict step** — a *different* judge agent runs MCP verification tools and returns pass/fail with itemised findings
-   - **Decision** — if pass → stop (MET); if fail and iterations remain → feed findings back to worker; if limit reached → stop (NOT MET)
-3. Every iteration's verdict is persisted for audit: `bcc-output/loops/<goal-id>/`
-
-### Pre-wired profiles
-
-| Profile | Worker | Evaluator | Use case |
-|---------|--------|-----------|----------|
-| `citations-clean` | Drafter | Citation specialist | Anti-hallucination gate — every citation validated via MCP (R1/R2) |
-| `draft-passes-gate` | Legal drafter | Judicial analyst | Full quality gate (citations + structure + factual support) |
-| `adversarial-converge` | Advocate | Adversary + Judge | Iterative stress-test until position stabilises |
-| `nda-batch-clean` | NDA triage | Completeness check | Zero unclassified docs, zero unflagged deviations |
-| `reg-watch` | Fedlex/caselaw query | Relevance judge | Scheduled regulatory monitoring (one pass per run) |
-
-### Safety guarantees
-
-- **Finite loops**: max 5 iterations (configurable, hard cap 20)
-- **No-progress guard**: stops if score stagnates for 2 iterations
-- **Honest termination**: always says NOT MET when the condition is not satisfied
-- **Worker ≠ Judge**: enforced — loop refuses to run if both resolve to the same agent
-- **Privacy**: pre-check runs every iteration; disallowed boundary crossings halt immediately
-- **Human-in-the-loop**: the loop never files, sends, signs, or transmits anything
-
-### Example: fixing citations iteratively
-
-```
-/legal-goal citations-clean --target="gutachten-art97.md"
-  → Goal Record: "every citation must validate via MCP; zero self-constructed references"
-
-/legal-loop goal-20260525-citations-clean
-  Iteration 1: score 72/100 — 7 findings (3 invalid citations, 4 unverified)
-  Iteration 2: score 89/100 — 3 findings (1 invalid, 2 unverified)
-  Iteration 3: score 100/100 — 0 findings
-  → MET. Final artifact in bcc-output/loops/.../final/
-```
 
 ---
 
@@ -262,17 +143,13 @@ See [CONNECTORS.md](bettercallclaude/CONNECTORS.md) for detailed API documentati
 
 ## Privacy
 
-BetterCallClaude includes a built-in Anwaltsgeheimnis (attorney-client privilege, Art. 321 StGB) detection hook as an additional layer of protection. A `PreToolUse` hook scans outgoing tool calls for privilege indicators in German, French, Italian, and English before content leaves the machine. Strong privilege markers (e.g. Anwaltsgeheimnis, secret professionnel, Art. 321 StGB) trigger a confirmation prompt; weaker indicators (e.g. bare "vertraulich", "confidentiel") also prompt when legal context is detected. The user always retains the ability to approve or reject.
+BetterCallClaude includes built-in Anwaltsgeheimnis (attorney-client privilege, Art. 321 StGB) compliance. A `PreToolUse` hook scans outgoing tool calls for privilege indicators in German (Anwaltsgeheimnis, Mandantengeheimnis, vertraulich), French (secret professionnel, confidentiel), and Italian (segreto professionale, confidenziale).
 
 | Mode | Behavior |
 |------|----------|
-| `strict` | Same pattern matching as balanced but blocks (`deny`) instead of prompting. Content without privilege markers passes through so MCP servers remain usable. Ollama (local) always exempt. |
-| `balanced` | Strong privilege markers prompt for confirmation (`ask`). Weak markers with legal context also prompt. Non-privileged content processed normally. Default mode. |
-| `cloud` | Strong privilege markers prompt for confirmation (`ask`). Weak markers allowed without prompt. Maximum capability, reduced privacy. |
-
-> **Disclaimer**: Privacy routing is an assistive technology and does not guarantee compliance with Art. 321 StGB or Art. 13 BGFA. Lawyers remain professionally responsible for protecting client confidentiality. Always verify that appropriate privacy measures are in place before processing sensitive legal content.
-
-> **Known limitations**: The hook uses regex-based pattern matching on text content. Concatenated keywords (e.g. `segretoprofessionale`), accent variations, content encoded as base64, and content inside binary file attachments may bypass detection. The hook is designed to catch accidental leakage, not adversarial evasion. For Bash commands, file paths referencing privileged directories are checked, but the actual file content is not read.
+| `strict` | All external calls require confirmation. Local processing preferred via Ollama. |
+| `balanced` | Privileged content triggers confirmation. Non-privileged content processed normally. |
+| `cloud` | Standard cloud processing with privacy hook active for explicit privilege markers only. |
 
 ---
 

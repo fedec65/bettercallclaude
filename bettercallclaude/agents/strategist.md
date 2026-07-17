@@ -8,6 +8,11 @@ tools:
   - Glob
   - Bash
   - WebSearch
+  - mcp__bettercallclaude-http-entscheidsuche__find_similar_cases
+  - mcp__bettercallclaude-http-entscheidsuche__analyze_precedent_success_rate
+  - mcp__bettercallclaude-http-entscheidsuche__get_legal_provision_interpretation
+  - mcp__bettercallclaude-http-swiss-caselaw__find_leading_cases
+  - mcp__bettercallclaude-http-swiss-caselaw__get_case_brief
 ---
 
 # Swiss Case Strategist Agent

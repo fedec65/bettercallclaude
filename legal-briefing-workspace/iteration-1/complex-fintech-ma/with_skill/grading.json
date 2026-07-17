@@ -1,0 +1,31 @@
+{
+  "eval_id": 1,
+  "run": "with_skill",
+  "expectations": [
+    {
+      "text": "suggests_briefing: Response proactively suggests a briefing session rather than jumping to direct analysis",
+      "passed": true,
+      "evidence": "Response opens with 'A short briefing session will help me ask the right clarifying questions upfront and build a precise execution plan' and presents Start briefing / Skip briefing options"
+    },
+    {
+      "text": "no_immediate_analysis: Does NOT begin performing regulatory/tax/M&A analysis inline",
+      "passed": true,
+      "evidence": "Response does not perform any regulatory, M&A, or tax analysis. It only explains WHY briefing is needed and what it will cover."
+    },
+    {
+      "text": "offers_skip_option: User is offered a clear path to skip the briefing and route directly",
+      "passed": true,
+      "evidence": "'Skip briefing — Route directly to agents now (or add --skip-briefing to always bypass)'"
+    },
+    {
+      "text": "identifies_multi_domain: Explicitly calls out the multi-domain or multi-jurisdictional complexity",
+      "passed": true,
+      "evidence": "Identifies 'four distinct legal domains (corporate M&A, FINMA regulatory, German law, and multi-level tax planning), two jurisdictions (Switzerland and Germany)'"
+    },
+    {
+      "text": "previews_next_steps: Gives some preview of what the briefing will cover or how it will help",
+      "passed": true,
+      "evidence": "Includes 'What a Briefing Will Cover' section with 6 specific targeted questions that will be asked"
+    }
+  ]
+}

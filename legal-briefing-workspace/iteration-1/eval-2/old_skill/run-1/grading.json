@@ -1,0 +1,32 @@
+{
+  "eval_id": 2,
+  "run": "old_skill",
+  "expectations": [
+    {
+      "text": "detects_vagueness: Identifies that the query is vague/ambiguous before routing",
+      "passed": true,
+      "evidence": "Response header 'Query Refinement Suggested' and explicitly runs the Auto-Refine Flow from commands/briefing.md"
+    },
+    {
+      "text": "raises_jurisdiction: Explicitly asks about or flags missing jurisdictional context",
+      "passed": true,
+      "evidence": "Question 1: 'What is your jurisdiction? Are you operating in Switzerland (and if so, which canton)...'"
+    },
+    {
+      "text": "asks_clarifying_questions: Asks specific clarifying questions OR suggests briefing to gather needed info",
+      "passed": true,
+      "evidence": "Asks 3 specific clarifying questions: jurisdiction, type of termination, and primary goal \u2014 before briefing"
+    },
+    {
+      "text": "offers_skip_option: User can bypass the clarification/briefing step if they prefer",
+      "passed": true,
+      "evidence": "Option 2: 'Skip refinement \u2192 Proceed with briefing as-is (may require more back-and-forth during the session)'"
+    }
+  ],
+  "summary": {
+    "pass_rate": 1.0,
+    "passed": 4,
+    "failed": 0,
+    "total": 4
+  }
+}

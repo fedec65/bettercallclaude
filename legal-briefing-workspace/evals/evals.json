@@ -1,0 +1,23 @@
+{
+  "skill_name": "legal-briefing",
+  "evals": [
+    {
+      "id": 1,
+      "prompt": "My Swiss client, a fintech AG licensed by FINMA as a payment institution, wants to expand into Germany and is considering either establishing a German subsidiary or acquiring a small existing German e-money institution. We need to analyze the regulatory requirements in both jurisdictions, assess the M&A vs. greenfield corporate structuring options, and evaluate the tax implications of each scenario at both federal and cantonal level. The client is Zurich-based and the timeline is approximately 6 months.",
+      "expected_output": "The response should proactively suggest or activate a briefing session (NOT jump straight to analysis). It should identify the multi-domain complexity (FINMA/regulatory + corporate/M&A + tax), explain why structured intake is needed, present the briefing options clearly, and if proceeding, select an appropriate panel that includes compliance, corporate, and fiscal agents.",
+      "files": []
+    },
+    {
+      "id": 2,
+      "prompt": "I need help with a situation involving one of my employees. Things haven't been working out and we're thinking of maybe letting them go, but I'm not sure exactly how to do it properly or what the risks are.",
+      "expected_output": "The response should detect query vagueness (missing: legal question, party position context, jurisdiction, desired outcome) and ask targeted clarifying questions BEFORE routing. After clarification, it should suggest a briefing session for the resulting employment law matter.",
+      "files": []
+    },
+    {
+      "id": 3,
+      "prompt": "Is this BGE citation correctly formatted: BGE 141 III 569?",
+      "expected_output": "The response should NOT suggest or activate a briefing session. It should route directly to the citation specialist or handle the citation check immediately. The briefing suggestion UI must not appear.",
+      "files": []
+    }
+  ]
+}

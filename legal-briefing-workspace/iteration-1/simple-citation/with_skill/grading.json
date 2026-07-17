@@ -1,0 +1,21 @@
+{
+  "eval_id": 3,
+  "run": "with_skill",
+  "expectations": [
+    {
+      "text": "no_briefing_suggested: Does NOT suggest or activate a briefing session",
+      "passed": true,
+      "evidence": "Response goes directly to citation analysis with no briefing suggestion, options, or UI presented"
+    },
+    {
+      "text": "answers_citation_directly: Addresses the citation question directly and immediately",
+      "passed": true,
+      "evidence": "Immediately answers 'Yes, BGE 141 III 569 is correctly formatted' and explains the citation structure"
+    },
+    {
+      "text": "correct_format_assessment: States that the citation is correctly formatted (it is)",
+      "passed": true,
+      "evidence": "'Yes, BGE 141 III 569 is correctly formatted.' — also notes multilingual equivalents ATF/DTF"
+    }
+  ]
+}

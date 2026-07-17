@@ -1,0 +1,37 @@
+{
+  "eval_id": 1,
+  "run": "old_skill",
+  "expectations": [
+    {
+      "text": "suggests_briefing: Response proactively suggests a briefing session rather than jumping to direct analysis",
+      "passed": true,
+      "evidence": "Response presents \ud83d\udca1 briefing suggestion with 'Proceed with briefing (recommended)' and 'Skip briefing' options"
+    },
+    {
+      "text": "no_immediate_analysis: Does NOT begin performing regulatory/tax/M&A analysis inline",
+      "passed": true,
+      "evidence": "Response only explains why briefing is beneficial, does not perform analysis"
+    },
+    {
+      "text": "offers_skip_option: User is offered a clear path to skip the briefing and route directly",
+      "passed": true,
+      "evidence": "'Skip briefing \u2014 Route directly to agents (add --skip-briefing to bypass in future)'"
+    },
+    {
+      "text": "identifies_multi_domain: Explicitly calls out the multi-domain or multi-jurisdictional complexity",
+      "passed": true,
+      "evidence": "Identifies 'regulatory compliance (FINMA/BaFin), corporate M&A strategy, and multi-jurisdictional tax analysis across Switzerland and Germany'"
+    },
+    {
+      "text": "previews_next_steps: Gives some preview of what the briefing will cover or how it will help",
+      "passed": true,
+      "evidence": "'What happens next: If you choose Proceed with briefing, I'll ask 3-4 clarifying questions about your client's priorities, existing constraints, and success metrics.'"
+    }
+  ],
+  "summary": {
+    "pass_rate": 1.0,
+    "passed": 5,
+    "failed": 0,
+    "total": 5
+  }
+}

@@ -48,7 +48,9 @@ BetterCallClaude implements a **dual-interface architecture** combining granular
 │                     SHARED INFRASTRUCTURE                       │
 ├─────────────────────────────────────────────────────────────────┤
 │  MCP Servers: bge-search, entscheidsuche, fedlex-sparql,        │
-│               legal-citations, onlinekommentar                  │
+│               legal-citations, onlinekommentar,                 │
+│               legal-persona, tas-jurisprudence, swiss-caselaw,  │
+│               ollama                                            │
 │  Case Context: Serena memory persistence                        │
 │  Verification: Citation validation layer                        │
 │  Audit: Anwaltsgeheimnis-compliant logging                      │
@@ -73,9 +75,9 @@ BetterCallClaude implements a **dual-interface architecture** combining granular
 
 | Agent | Purpose | Complexity | MCP Dependencies |
 |-------|---------|------------|------------------|
-| `/agent-researcher` | Deep legal research with multi-source synthesis | High | entscheidsuche, bge-search, fedlex-sparql |
+| `/agent-researcher` | Deep legal research with multi-source synthesis | High | entscheidsuche, bge-search, fedlex-sparql, swiss-caselaw, onlinekommentar |
 | `/agent-strategist` | Case strategy and risk assessment | High | All research MCPs + legal-citations |
-| `/agent-drafter` | Swiss-compliant document generation | Medium-High | legal-citations, templates |
+| `/agent-drafter` | Swiss-compliant document generation | Medium-High | legal-citations, swiss-caselaw, templates |
 
 ### Category B: Swiss Registry Agents
 
@@ -559,6 +561,10 @@ See `src/agents/base.py` and `src/agents/base.ts` for implementation.
 | fedlex-sparql | Federal law SPARQL queries | Implemented |
 | legal-citations | Citation extraction/verification | Implemented |
 | onlinekommentar | Legal commentary search | Implemented |
+| legal-persona | Judicial persona analysis, deadlines, intake forms | Implemented |
+| tas-jurisprudence | CAS/TAS sports arbitration awards | Implemented |
+| swiss-caselaw | Case-law search, citation graphs, doctrine | Implemented |
+| ollama | Local privacy classification | Implemented |
 
 ### Performance Requirements
 

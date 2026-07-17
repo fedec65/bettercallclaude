@@ -1,0 +1,12 @@
+{
+  "eval_id": 1,
+  "eval_name": "complex-fintech-ma",
+  "prompt": "My Swiss client, a fintech AG licensed by FINMA as a payment institution, wants to expand into Germany and is considering either establishing a German subsidiary or acquiring a small existing German e-money institution. We need to analyze the regulatory requirements in both jurisdictions, assess the M&A vs. greenfield corporate structuring options, and evaluate the tax implications of each scenario at both federal and cantonal level. The client is Zurich-based and the timeline is approximately 6 months.",
+  "assertions": [
+    {"text": "suggests_briefing: Response proactively suggests a briefing session rather than jumping to direct analysis"},
+    {"text": "no_immediate_analysis: Does NOT begin performing regulatory/tax/M&A analysis inline"},
+    {"text": "offers_skip_option: User is offered a clear path to skip the briefing and route directly"},
+    {"text": "identifies_multi_domain: Explicitly calls out the multi-domain or multi-jurisdictional complexity"},
+    {"text": "previews_next_steps: Gives some preview of what the briefing will cover or how it will help"}
+  ]
+}

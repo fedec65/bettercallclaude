@@ -4,6 +4,24 @@ All notable changes to BetterCallClaude will be documented in this file.
 
 ---
 
+## [4.9.1] - 2026-07-17
+
+### Fixed
+- **MCP tool integration in agents** — all 20 agents now declare the MCP tools they use in their YAML frontmatter. Previously only `prompt-engineer.md` declared MCP tools; other agents listed only generic Kimi tools and could not invoke the legal databases referenced in their bodies.
+- **Wrong/non-existent tool references**:
+  - `bettercallclaude/agents/researcher.md`: removed `get_decision_by_citation` (not provided by any MCP) and replaced `verify_citation` with the real `validate_citation` tool.
+  - `bettercallclaude/agents/drafter.md`: replaced `verify_citation` with `validate_citation`.
+  - `bettercallclaude/commands/setup.md`: corrected diagnostic tool names for `legal-persona` (`legal_analyze`, `legal_draft`, `legal_strategy`, `compute_deadlines`, `present_adversarial_analysis`, `present_intake_form`), `tas-jurisprudence` (`cas_search`, `cas_get_award`, `cas_recent`, `cas_by_sport`), and the full `ollama` tool set.
+- **`CONNECTORS.md` accuracy** — updated to describe all 9 MCP servers (7 HTTP + 1 SSE + 1 local STDIO), fixed `entscheidsuche` `get_decision` → `get_decision_details`, and added tool summaries for `legal-persona`, `tas-jurisprudence`, `swiss-caselaw`, and `ollama`.
+
+### Changed
+- **Documentation refreshed** — `AGENTS.md` and `docs/AGENT_ARCHITECTURE.md` now list all 9 registered MCP servers and their transports.
+
+### Notes for maintainers
+- Agent frontmatter MCP tool names follow the convention `mcp__bettercallclaude-http-<server>__<tool>` for HTTP/SSE servers (matching `prompt-engineer.md`).
+- `legal-briefing-workspace/` (evaluation data, not a skill) was moved out of `bettercallclaude/skills/` so the skill-frontmatter CI check passes.
+
+
 ## [4.9.0] - 2026-05-25
 
 ### Added — Goal-Loop Iterative Verification
@@ -236,7 +254,6 @@ Skill count reduced from 15 to 12 with zero capability loss. All content migrate
 - **Cowork upgrade path:** `marketplace.json` advertises `4.5.0` once this lands on `main`. Existing users will see "Update plugin" on their next marketplace Sync (manual or auto).
 
 ### Content counts
-- 20 agents, 19 commands, 14 skills, 9 MCP servers in `.mcp.json` (7 remote HTTP + `swiss-caselaw` SSE + `ollama` local STDIO). Same as 4.4.0.
 
 ---
 

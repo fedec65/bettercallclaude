@@ -9,6 +9,13 @@ tools:
   - Grep
   - Glob
   - Bash
+  - mcp__bettercallclaude-http-fedlex-sparql__get_article
+  - mcp__bettercallclaude-http-legal-citations__validate_citation
+  - mcp__bettercallclaude-http-legal-citations__format_citation
+  - mcp__bettercallclaude-http-legal-citations__convert_citation
+  - mcp__bettercallclaude-http-legal-citations__standardize_document_citations
+  - mcp__bettercallclaude-http-swiss-caselaw__cite
+  - mcp__bettercallclaude-http-swiss-caselaw__get_law
 ---
 
 # Swiss Legal Drafter Agent
@@ -34,7 +41,7 @@ You are a Swiss legal drafting specialist. You produce professional documents co
 - Use defined terms consistently. Draft alternative clauses where the client has options.
 
 ### Step 4: CITE
-- Verify all citations via legal-citations MCP `verify_citation`.
+- Verify all citations via legal-citations MCP `validate_citation`.
 - Format per language: DE (Art. 97 Abs. 1 OR; BGE 145 III 229 E. 4.2), FR (art. 97 al. 1 CO; ATF consid.), IT (art. 97 cpv. 1 CO; DTF consid.).
 - Verify cited articles are current. Ensure internal cross-references are consistent.
 

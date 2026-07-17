@@ -1,8 +1,8 @@
 # MCP Server Integration -- CONNECTORS
 
-This document describes the five MCP (Model Context Protocol) servers included with the BetterCallClaude plugin. These servers provide direct integration with Swiss legal databases for precedent search, court decision retrieval, citation verification, federal legislation lookup, and legal commentary access.
+This document describes the MCP (Model Context Protocol) servers included with the BetterCallClaude plugin. These servers provide direct integration with Swiss legal databases for precedent search, court decision retrieval, citation verification, federal legislation lookup, legal commentary access, judicial persona analysis, sports arbitration research, and local privacy classification.
 
-All servers are pre-compiled and self-contained (all dependencies bundled inline). No build step or `npm install` is required.
+The plugin ships with nine MCP servers: seven HTTP servers hosted at `https://mcp.bettercallclaude.ch`, one SSE server hosted at `https://mcp.opencaselaw.ch`, and one local STDIO server (`ollama`) that runs on the user's machine for attorney-client privilege protection.
 
 ---
 
@@ -10,64 +10,85 @@ All servers are pre-compiled and self-contained (all dependencies bundled inline
 
 | Server | Purpose | Transport |
 |--------|---------|-----------|
-| `bge-search` | Search and retrieve Federal Supreme Court (BGE/ATF/DTF) decisions | stdio |
-| `entscheidsuche` | Search across Swiss federal and cantonal court databases | stdio |
-| `legal-citations` | Validate citation format and convert between languages | stdio |
-| `fedlex-sparql` | Look up Swiss federal legislation via the Fedlex SPARQL endpoint | stdio |
-| `onlinekommentar` | Search and retrieve Swiss legal commentaries (Kommentare) | stdio |
+| `bge-search` | Search and retrieve Federal Supreme Court (BGE/ATF/DTF) decisions | HTTP |
+| `entscheidsuche` | Search across Swiss federal and cantonal court databases | HTTP |
+| `legal-citations` | Validate citation format and convert between languages | HTTP |
+| `fedlex-sparql` | Look up Swiss federal legislation via the Fedlex SPARQL endpoint | HTTP |
+| `onlinekommentar` | Search and retrieve Swiss legal commentaries (Kommentare) | HTTP |
+| `legal-persona` | Judicial persona analysis, deadline computation, intake forms | HTTP |
+| `tas-jurisprudence` | CAS/TAS sports arbitration awards and jurisprudence | HTTP |
+| `swiss-caselaw` | Case-law search, citation graphs, doctrine (opencaselaw.ch) | SSE |
+| `ollama` | Local privacy classification for privileged content | STDIO (local) |
 
 ### Requirements
 
-- Node.js >= 18
+- Node.js >= 18 (required only for the local `ollama` STDIO server)
 
 ### Configuration
 
 #### Claude Code CLI (Automatic)
 
-All five servers auto-register via the `.mcp.json` file at the plugin root using `${CLAUDE_PLUGIN_ROOT}`:
+All nine servers auto-register via the `.mcp.json` file at the plugin root:
 
 ```json
 {
   "mcpServers": {
-    "bettercallclaude-entscheidsuche": {
-      "command": "node",
-      "args": ["${CLAUDE_PLUGIN_ROOT}/mcp-servers/entscheidsuche/dist/index.js"]
+    "entscheidsuche": {
+      "type": "http",
+      "url": "https://mcp.bettercallclaude.ch/entscheidsuche/mcp"
     },
-    "bettercallclaude-bge-search": {
-      "command": "node",
-      "args": ["${CLAUDE_PLUGIN_ROOT}/mcp-servers/bge-search/dist/index.js"]
+    "bge-search": {
+      "type": "http",
+      "url": "https://mcp.bettercallclaude.ch/bge-search/mcp"
     },
-    "bettercallclaude-legal-citations": {
-      "command": "node",
-      "args": ["${CLAUDE_PLUGIN_ROOT}/mcp-servers/legal-citations/dist/index.js"]
+    "legal-citations": {
+      "type": "http",
+      "url": "https://mcp.bettercallclaude.ch/legal-citations/mcp"
     },
-    "bettercallclaude-fedlex-sparql": {
-      "command": "node",
-      "args": ["${CLAUDE_PLUGIN_ROOT}/mcp-servers/fedlex-sparql/dist/index.js"]
+    "fedlex-sparql": {
+      "type": "http",
+      "url": "https://mcp.bettercallclaude.ch/fedlex-sparql/mcp"
     },
-    "bettercallclaude-onlinekommentar": {
+    "onlinekommentar": {
+      "type": "http",
+      "url": "https://mcp.bettercallclaude.ch/onlinekommentar/mcp"
+    },
+    "legal-persona": {
+      "type": "http",
+      "url": "https://mcp.bettercallclaude.ch/legal-persona/mcp"
+    },
+    "tas-jurisprudence": {
+      "type": "http",
+      "url": "https://mcp.bettercallclaude.ch/tas-jurisprudence/mcp"
+    },
+    "swiss-caselaw": {
+      "type": "sse",
+      "url": "https://mcp.opencaselaw.ch"
+    },
+    "ollama": {
       "command": "node",
-      "args": ["${CLAUDE_PLUGIN_ROOT}/mcp-servers/onlinekommentar/dist/index.js"]
+      "args": ["${CLAUDE_PLUGIN_ROOT}/mcp-servers/ollama/dist/index.js"],
+      "env": {
+        "OLLAMA_HOST": "${user_config.ollama_host}"
+      }
     }
   }
 }
 ```
 
-After plugin installation, verify with `/mcp` that all 5 servers appear. Restart Claude Code if needed.
+After plugin installation, verify with `/mcp` that all 9 servers appear. Restart Claude Code if needed.
 
 #### Cowork Desktop (Guided Setup)
 
-Cowork Desktop may not auto-register MCP servers from the plugin's `.mcp.json`. Run `/bettercallclaude:start` (or `/bettercallclaude:doctor` for diagnostics) to:
+Cowork Desktop reads the plugin's `.mcp.json` automatically. Run `/bettercallclaude:setup` to:
 
 1. Check which servers are connected
-2. Get a ready-to-paste configuration with absolute paths for your environment
-3. Verify after configuration
-
-The setup command replaces `${CLAUDE_PLUGIN_ROOT}` with the actual plugin installation path on your system.
+2. Verify the local `ollama` server can start
+3. Confirm HTTP/SSE connectivity
 
 #### Without MCP Servers
 
-BetterCallClaude operates in reduced mode when servers are unavailable. Commands fall back to built-in Swiss law knowledge but cannot search live databases, verify citation existence, or access current legislation. Run `/bettercallclaude:doctor` to check connectivity.
+BetterCallClaude operates in reduced mode when servers are unavailable. Commands fall back to built-in Swiss law knowledge but cannot search live databases, verify citation existence, or access current legislation. Run `/bettercallclaude:setup` to configure.
 
 ---
 
@@ -261,7 +282,7 @@ Returns an array of decision objects:
 
 ---
 
-#### get_decision
+#### get_decision_details
 
 Retrieve the full text of a specific court decision by its entscheidsuche identifier.
 
@@ -275,7 +296,7 @@ Retrieve the full text of a specific court decision by its entscheidsuche identi
 
 ```json
 {
-  "tool": "get_decision",
+  "tool": "get_decision_details",
   "arguments": {
     "id": "ge-2023-12345"
   }
@@ -706,9 +727,70 @@ List all available Swiss legislative acts with their UUIDs, names, and abbreviat
 
 ---
 
+## legal-persona
+
+Provides Swiss judicial persona analysis, procedural deadline computation, and structured legal intake forms.
+
+### Tools
+
+- `legal_analyze` — Analyze a legal question from a selected judicial persona perspective.
+- `legal_draft` — Draft a legal document using a persona's reasoning style.
+- `legal_strategy` — Generate strategy recommendations from a persona viewpoint.
+- `compute_deadlines` — Compute Swiss procedural deadlines.
+- `present_adversarial_analysis` — Present an adversarial analysis in persona style.
+- `present_intake_form` — Present a structured intake form to collect case details.
+
+---
+
+## tas-jurisprudence
+
+Provides search and retrieval of CAS/TAS (Court of Arbitration for Sport / Tribunal arbitral du sport) awards and jurisprudence.
+
+### Tools
+
+- `cas_search` — Search CAS/TAS awards by keyword, sport, or party.
+- `cas_get_award` — Retrieve a specific CAS/TAS award by identifier.
+- `cas_recent` — List recent CAS/TAS awards.
+- `cas_by_sport` — Browse awards by sport category.
+
+---
+
+## swiss-caselaw
+
+Provides broad Swiss case-law search via `mcp.opencaselaw.ch`, including citation graphs, appeal chains, doctrine, and scholarly sources.
+
+### Key Tools
+
+- `search_decisions` — Full-text decision search.
+- `get_decision` — Retrieve a decision by identifier.
+- `get_case_brief` — Structured case summary.
+- `find_leading_cases` — Find landmark decisions on a topic.
+- `find_citations` — Find decisions citing a given BGE.
+- `get_law` / `get_legislation` — Retrieve federal / cantonal statute text.
+- `get_doctrine` / `get_commentary` — Retrieve doctrinal positions and commentary.
+- `cite` — Get a verified canonical citation string for a decision.
+
+For the complete tool list, query the server's `tools/list` endpoint or see the agent frontmatter in `bettercallclaude/agents/`.
+
+---
+
+## ollama
+
+Local STDIO server for privacy classification and offline generation of privileged content. This server never sends data to cloud APIs, ensuring compliance with Art. 321 StGB (attorney-client privilege).
+
+### Tools
+
+- `ollama_check_status` — Check whether the local Ollama service is running.
+- `ollama_list_models` — List available local models.
+- `ollama_generate` — Generate text locally for privileged content.
+- `ollama_classify_privacy` — Classify text by Swiss privacy level (offline).
+- `ollama_chat` — Run a local multi-turn chat for privileged content.
+
+---
+
 ## Error Handling
 
-All five servers return errors in a consistent format:
+All servers return errors in a consistent format:
 
 ```json
 {

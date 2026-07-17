@@ -1,0 +1,32 @@
+{
+  "eval_id": 2,
+  "run": "with_skill",
+  "expectations": [
+    {
+      "text": "detects_vagueness: Identifies that the query is vague/ambiguous before routing",
+      "passed": true,
+      "evidence": "Response explicitly notices the query is 'open-ended about what you need and which jurisdiction applies' and lists three specific gaps it notices"
+    },
+    {
+      "text": "raises_jurisdiction: Explicitly asks about or flags missing jurisdictional context",
+      "passed": true,
+      "evidence": "Notices 'No canton mentioned \u2014 employment and social insurance rules vary significantly by jurisdiction'"
+    },
+    {
+      "text": "asks_clarifying_questions: Asks specific clarifying questions OR suggests briefing to gather needed info",
+      "passed": true,
+      "evidence": "Suggests briefing and previews what will be asked: 'key facts about the employee, jurisdiction, and your concerns'"
+    },
+    {
+      "text": "offers_skip_option: User can bypass the clarification/briefing step if they prefer",
+      "passed": true,
+      "evidence": "'Skip briefing \u2014 Route directly to legal analysis now (or add --skip-briefing to always bypass)'"
+    }
+  ],
+  "summary": {
+    "pass_rate": 1.0,
+    "passed": 4,
+    "failed": 0,
+    "total": 4
+  }
+}

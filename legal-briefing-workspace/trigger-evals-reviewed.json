@@ -1,0 +1,82 @@
+[
+  {
+    "query": "my client is a zurich-based holding AG that owns three operating subsidiaries — one in Basel, one in Geneva, and one in Zug. we need to restructure the group ahead of a potential IPO, deal with some historic transfer pricing issues with the tax authorities, and make sure the board governance documents are updated. where do we even start?",
+    "should_trigger": true
+  },
+  {
+    "query": "i'm advising a FINMA-regulated asset manager that wants to expand into crypto custody. they're also dealing with a whistleblower complaint internally and need help figuring out what to disclose to FINMA and what stays confidential under anwaltsgeheimnis. there's also a potential cross-border data transfer issue with their US parent.",
+    "should_trigger": true
+  },
+  {
+    "query": "tenant in Geneva has been paying reduced rent for 8 months citing habitability issues, landlord wants to terminate and reclaim the property, there are competing claims about notice periods under cantonal law vs OR, and the tenant is threatening a discrimination claim. need a full assessment and possibly draft a formal response.",
+    "should_trigger": true
+  },
+  {
+    "query": "need advice on a situation — our startup just got a term sheet from a US VC, we're a swiss gmbh, they want us to flip to a delaware C-corp but we have swiss employees with vested options, a SECA-compliant option pool, and our main customer contract has swiss law and zürich arbitration clauses. i'm not sure what the right move is.",
+    "should_trigger": true
+  },
+  {
+    "query": "handle our employment dispute in canton vaud — there's been a termination, possible wrongful dismissal, and we might need to go to court",
+    "should_trigger": true
+  },
+  {
+    "query": "figure out the compliance situation for our fintech — we do payments, lending, and some crypto stuff, operating from zurich",
+    "should_trigger": true
+  },
+  {
+    "query": "we need to deal with a cross-border M&A deal, there's a swiss target, a german acquirer, antitrust filing might be needed, and the sellers have some complicated earn-out provisions they want analyzed and maybe redrafted",
+    "should_trigger": true
+  },
+  {
+    "query": "advise on setting up a family office structure for a UHNW client — they have assets in switzerland, liechtenstein, and the cayman islands, we need to look at succession planning, tax exposure, and regulatory requirements",
+    "should_trigger": true
+  },
+  {
+    "query": "need a comprehensive strategy across employment termination, potential discrimination claim under GlG, social insurance audit underway, and non-compete enforcement in three cantons simultaneously — this is urgent, we have a hearing in 6 weeks",
+    "should_trigger": true
+  },
+  {
+    "query": "i have a client in a complex situation involving a shareholder dispute in a closely held AG, deadlock in the board, one shareholder alleging breach of fiduciary duty, the other threatening to call in a shareholder loan — we need research, strategy, and probably need to draft something",
+    "should_trigger": true
+  },
+  {
+    "query": "what does art 260a OR say about the conversion of debt into equity?",
+    "should_trigger": false
+  },
+  {
+    "query": "translate this NDA clause from german to french: 'Der Empfänger verpflichtet sich, die vertraulichen Informationen streng vertraulich zu behandeln.'",
+    "should_trigger": false
+  },
+  {
+    "query": "is BGE 147 III 393 correctly cited?",
+    "should_trigger": false
+  },
+  {
+    "query": "which court handles commercial disputes in zurich?",
+    "should_trigger": false
+  },
+  {
+    "query": "what's the deadline to appeal a cantonal court decision to the bundesgericht under Art 100 BGG?",
+    "should_trigger": false
+  },
+  {
+    "query": "summarize the key holding in ATF 138 III 337 for me",
+    "should_trigger": false
+  },
+  {
+    "query": "i need to review and potentially redline an NDA — it's a fairly standard bilateral one between two swiss companies, about 4 pages, no unusual clauses from what i can tell",
+    "should_trigger": false
+  },
+  {
+    "query": "my client just received a formal warning (Abmahnung) from their employer. what are their options under swiss employment law?",
+    "should_trigger": false
+  },
+  {
+    "query": "i'm litigating an OR 97 damages claim in canton bern — the other side has filed a motion to dismiss on jurisdiction grounds. how do i oppose it?",
+    "should_trigger": false
+  },
+  {
+    "query": "does the swiss nDSG apply to a US company processing data of swiss residents?",
+    "should_trigger": false
+  }
+]

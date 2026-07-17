@@ -1,6 +1,6 @@
 {
   "name": "bettercallclaude",
-  "version": "4.9.0",
+  "version": "4.9.1",
   "description": "Swiss Legal Intelligence -- BGE/ATF/DTF precedent research, case strategy, legal drafting, and citation verification across all 26 Swiss cantons with Anwaltsgeheimnis privacy protection.",
   "author": { "name": "Federico Cesconi" },
   "userConfig": {
@@ -31,13 +31,6 @@
       "description": "Optional bearer token for accessing a protected BetterCallClaude MCP deployment. Leave blank for the public service.",
       "default": "",
       "sensitive": true
-    },
-    "privacy_mode": {
-      "type": "string",
-      "title": "Privacy mode",
-      "description": "Privacy routing mode: strict (same pattern matching as balanced but blocks instead of prompting — non-privileged content passes through, only Ollama exempt from all checks), balanced (prompt on privilege markers), or cloud (prompt on strong markers only, weak signals pass through).",
-      "default": "balanced",
-      "sensitive": false
     }
   }
 }

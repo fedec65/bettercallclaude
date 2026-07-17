@@ -1,0 +1,10 @@
+{
+  "eval_id": 3,
+  "eval_name": "simple-citation",
+  "prompt": "Is this BGE citation correctly formatted: BGE 141 III 569?",
+  "assertions": [
+    {"text": "no_briefing_suggested: Does NOT suggest or activate a briefing session"},
+    {"text": "answers_citation_directly: Addresses the citation question directly and immediately"},
+    {"text": "correct_format_assessment: States that the citation is correctly formatted (it is)"}
+  ]
+}

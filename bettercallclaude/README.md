@@ -6,7 +6,7 @@ BetterCallClaude is a plugin for legal professionals working in Cowork or Claude
 
 The plugin covers the full spectrum of Swiss legal work: BGE/ATF/DTF precedent research, case strategy development with risk assessment, adversarial legal analysis, compliance and data protection advisory, fiscal and corporate law expertise, real estate law, legal drafting with jurisdiction-aware templates, legal translation, and citation verification across all 26 Swiss cantons. Privacy compliance with Anwaltsgeheimnis (Art. 321 StGB) is enforced automatically through a pre-tool-use hook that detects privileged content before it leaves the local environment.
 
-**Version**: 4.9.0 -- 20 agents, 26 commands, 13 skills, 9 MCP servers.
+**Version**: 4.9.1 -- 20 agents, 26 commands, 14 skills, 9 MCP servers.
 
 > Love BetterCallClaude? Support the project — [**Buy me a coffee**](https://buymeacoffee.com/federicocesconi) ☕
 
@@ -98,9 +98,7 @@ claude --plugin-dir bettercallclaude/
 | `/bettercallclaude:help` | Show complete command reference, available agents, skills, and usage examples. |
 | `/bettercallclaude:version` | Display plugin version, installed components, and system status. |
 | `/bettercallclaude:summarize` | Consolidate multi-agent pipeline output -- deduplicate disclaimers, terminology, and citations with length control (`--short`/`--medium`/`--long`). |
-| `/bettercallclaude:start` | Welcome and onboarding — checks connectivity, guides playbook creation, shows usage examples. |
-| `/bettercallclaude:doctor` | Diagnose MCP server connectivity — tests each server, reports status and impact. |
-| `/bettercallclaude:setup` | ⚠ Alias for `/start` — will be removed in v5.0. |
+| `/bettercallclaude:setup` | Check MCP server status and auto-install servers to Claude Desktop if needed. |
 
 ### Usage examples
 
@@ -144,14 +142,12 @@ Skills are activated automatically when Claude detects relevant legal context in
 | `swiss-legal-strategy` | Case assessment frameworks, risk matrices, procedural pathway analysis, and settlement evaluation. |
 | `swiss-legal-drafting` | Document generation standards, clause libraries, mandatory law compliance checks, and formatting rules. |
 | `swiss-citation-formats` | Citation format tables for DE/FR/IT/EN, BGE/ATF/DTF reference standards, doctrine citation rules, and cross-language conversion. |
-| `swiss-document-analysis` | Legal document analysis — structured review of contracts, court decisions, statutes, NDA triage (GREEN/YELLOW/RED), playbook-aware deviation analysis. |
-| `swiss-legal-translation` | Legal translation between DE, FR, IT, and EN with correct terminology, citation conversion delegation, and formal register preservation. |
+| `swiss-jurisdictions` | Federal vs. cantonal jurisdiction routing, competence analysis, court system hierarchies for all 26 cantons, and conflict-of-law rules. |
 | `privacy-routing` | Anwaltsgeheimnis detection patterns, privacy classification, and local processing triggers for privileged content. |
 | `adversarial-analysis` | Three-agent adversarial methodology (advocate/adversary/judicial), argument scoring, objectivity validation, and Erwagung synthesis structure. |
 | `compliance-frameworks` | FINMA supervision, GwG/AMLA anti-money laundering, FIDLEG/FINIG financial institution licensing, banking secrecy, and cross-border compliance. |
 | `data-protection-law` | nDSG/FADP framework, GDPR adequacy, cantonal data protection laws (IDG/KDSG/LIPAD), DPIA methodology, and cross-border data transfers. |
-| `legal-intake` | Transforms vague or complex queries into actionable plans — Refine mode (single-domain Socratic dialogue) or Briefing mode (multi-domain specialist panel + execution plan). |
-| `legal-5step-framework` | Sequential 5-step legal pipeline: intake → research → strategy → adversarial → draft, with quality gates and checkpoints. |
+| `legal-briefing` | Auto-detects complex queries that benefit from structured intake before agent execution. Suggests briefing sessions when complexity, ambiguity, or pipeline coordination is detected. |
 
 ---
 
@@ -379,16 +375,12 @@ The plugin includes five pre-compiled MCP servers that provide direct integratio
 | `legal-citations` | Validate citation format and existence, convert citations between DE/FR/IT/EN formats. |
 | `fedlex-sparql` | Look up Swiss federal legislation via the Fedlex SPARQL endpoint. Retrieve statutes by SR number, search legislation, find related acts, get article text. |
 | `onlinekommentar` | Search and retrieve Swiss legal commentaries (Kommentare). Find scholarly analysis by article reference, keyword, or legislative act. |
-| `legal-persona` | Swiss-law document intelligence — strategy analysis, automated drafting, and compliance checking via MCP tools (`legal_strategy`, `legal_draft`, `legal_analyze`). |
-| `tas-jurisprudence` | CAS/TAS sports arbitration awards — search, retrieve full awards, recent decisions, and browse by sport (`cas_search`, `cas_get_award`, `cas_recent`, `cas_by_sport`). |
-| `swiss-caselaw` | Case law search, citation graphs, appeal chains, and doctrine via opencaselaw.ch (SSE). |
-| `ollama` | Local privacy classification — routes privileged content through a local LLM to avoid cloud exposure (`ollama_check_status`). |
 
 ### Requirements
 
-- Node.js >= 20 (only required for local Ollama invocation; the other eight MCP servers are reached over HTTPS / SSE and run no code on your machine).
+- Node.js >= 20 (only required for local Ollama invocation; the other six MCP servers are reached over HTTPS / SSE and run no code on your machine).
 
-Eight of the nine MCP servers are hosted remotely (seven HTTP servers at `mcp.bettercallclaude.ch`, one SSE server at `mcp.opencaselaw.ch`) and are reached by Cowork Desktop without any local build step. Only the local `ollama` server runs from a committed compiled bundle at `bettercallclaude/mcp-servers/ollama/dist/index.js`; to use it you need a running Ollama daemon (default `http://localhost:11434`, overridable via the `ollama_host` userConfig key).
+Six of the seven MCP servers are hosted remotely (five HTTP servers at `mcp.bettercallclaude.ch`, one SSE server at `mcp.opencaselaw.ch`) and are reached by Cowork Desktop without any local build step. Only the local `ollama` server runs from a committed compiled bundle at `bettercallclaude/mcp-servers/ollama/dist/index.js`; to use it you need a running Ollama daemon (default `http://localhost:11434`, overridable via the `ollama_host` userConfig key).
 
 All server paths and URLs are configured in `.mcp.json` using the `${CLAUDE_PLUGIN_ROOT}` and `${user_config.*}` interpolations for portability and self-hosting (see [`docs/PRIVACY.md`](../docs/PRIVACY.md)).
 
