@@ -1,5 +1,12 @@
 ---
 description: "View or change the BetterCallClaude privacy mode (strict/balanced/cloud)"
+tools:
+  - Read
+  - Grep
+  - Glob
+  - Bash
+  - WebSearch
+  - WebFetch
 ---
 
 # BetterCallClaude Privacy Configuration

@@ -1,6 +1,18 @@
 ---
 name: swiss-legal-translation
 description: "Swiss legal translator — translates Swiss legal texts (contracts, submissions, statutes, opinions) between DE, FR, IT, and EN with correct terminology and register. Trigger when: a user asks to translate a Swiss legal document or term, or a document must be prepared in a different national language. Uses fedlex-sparql for statute text verification. Delegates citation conversion to swiss-citation-formats. Do NOT trigger for: citation formatting without translation (use swiss-citation-formats), document drafting (use swiss-legal-drafting), or general non-legal translation."
+tools:
+  - Read
+  - Grep
+  - Glob
+  - Bash
+  - WebSearch
+  - WebFetch
+  - mcp__bettercallclaude-http-fedlex-sparql__get_article
+  - mcp__bettercallclaude-http-fedlex-sparql__lookup_statute
+  - mcp__bettercallclaude-http-legal-citations__format_citation
+  - mcp__bettercallclaude-http-legal-citations__convert_citation
+  - mcp__bettercallclaude-http-swiss-caselaw__get_law
 ---
 
 # Swiss Legal Translation

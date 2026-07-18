@@ -1,6 +1,18 @@
 ---
 name: swiss-legal-drafting
 description: "Swiss legal document drafter — creates contracts (OR), court submissions (ZPO), and legal opinions (Gutachten) in DE/FR/IT/EN with correct Swiss citations and Gutachtenstil. Trigger when: a user asks to draft, write, or create a legal document. Uses swiss-citation-formats for citation verification and swiss-legal-research for jurisdiction resolution. Do NOT trigger for: document analysis (swiss-document-analysis), research (swiss-legal-research), or citation formatting only."
+tools:
+  - Read
+  - Grep
+  - Glob
+  - Bash
+  - WebSearch
+  - WebFetch
+  - mcp__bettercallclaude-http-legal-citations__validate_citation
+  - mcp__bettercallclaude-http-legal-citations__format_citation
+  - mcp__bettercallclaude-http-legal-citations__standardize_document_citations
+  - mcp__bettercallclaude-http-legal-citations__convert_citation
+  - mcp__bettercallclaude-http-swiss-caselaw__cite
 ---
 
 # Swiss Legal Drafting

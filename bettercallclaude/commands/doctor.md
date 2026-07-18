@@ -1,5 +1,20 @@
 ---
 description: "Diagnose MCP server connectivity — tests each server, reports status and impact in plain language, suggests fixes for issues."
+tools:
+  - Read
+  - Grep
+  - Glob
+  - Bash
+  - WebSearch
+  - WebFetch
+  - mcp__bettercallclaude-http-bge-search__search_bge
+  - mcp__bettercallclaude-http-entscheidsuche__search_decisions
+  - mcp__bettercallclaude-http-fedlex-sparql__search_legislation
+  - mcp__bettercallclaude-http-legal-citations__validate_citation
+  - mcp__bettercallclaude-http-onlinekommentar__search_commentaries
+  - mcp__bettercallclaude-http-legal-persona__legal_analyze
+  - mcp__bettercallclaude-http-tas-jurisprudence__cas_search
+  - mcp__bettercallclaude-ollama__ollama_check_status
 ---
 
 # BetterCallClaude — Diagnostics

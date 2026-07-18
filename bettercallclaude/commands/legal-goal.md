@@ -1,5 +1,15 @@
 ---
 description: "Define a checkable legal success condition for /legal-loop. Accepts a named profile (citations-clean, draft-passes-gate, adversarial-converge, nda-batch-clean, reg-watch) or free-text objective. Produces a persisted Goal Record — never starts work itself."
+tools:
+  - Read
+  - Grep
+  - Glob
+  - Bash
+  - WebSearch
+  - WebFetch
+  - mcp__bettercallclaude-http-swiss-caselaw__search_decisions
+  - mcp__bettercallclaude-http-fedlex-sparql__search_legislation
+  - mcp__bettercallclaude-http-legal-citations__validate_citation
 ---
 
 # /legal-goal — Define a Legal Success Condition

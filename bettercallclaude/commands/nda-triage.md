@@ -1,5 +1,19 @@
 ---
 description: "Triage NDAs against Swiss law — classify as GREEN (standard) / YELLOW (review) / RED (issues) using playbook thresholds and Swiss legal criteria. Supports single file or batch (folder) mode."
+tools:
+  - Read
+  - Grep
+  - Glob
+  - Bash
+  - WebSearch
+  - WebFetch
+  - mcp__bettercallclaude-http-fedlex-sparql__get_article
+  - mcp__bettercallclaude-http-entscheidsuche__get_decision_details
+  - mcp__bettercallclaude-http-legal-citations__validate_citation
+  - mcp__bettercallclaude-http-legal-citations__standardize_document_citations
+  - mcp__bettercallclaude-http-swiss-caselaw__get_case_brief
+  - mcp__bettercallclaude-http-swiss-caselaw__find_citations
+  - mcp__bettercallclaude-http-swiss-caselaw__get_law
 ---
 
 # NDA Triage — Swiss Law

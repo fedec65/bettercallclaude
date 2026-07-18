@@ -1,5 +1,18 @@
 ---
 description: "Develop litigation strategy with risk assessment, procedural analysis, cost-benefit calculation, and settlement evaluation for Swiss courts"
+tools:
+  - Read
+  - Grep
+  - Glob
+  - Bash
+  - WebSearch
+  - WebFetch
+  - mcp__bettercallclaude-http-entscheidsuche__find_similar_cases
+  - mcp__bettercallclaude-http-entscheidsuche__get_legal_provision_interpretation
+  - mcp__bettercallclaude-http-entscheidsuche__analyze_precedent_success_rate
+  - mcp__bettercallclaude-http-swiss-caselaw__get_case_brief
+  - mcp__bettercallclaude-http-swiss-caselaw__find_leading_cases
+  - mcp__bettercallclaude-http-legal-persona__compute_deadlines
 ---
 
 You are invoked via `/bettercallclaude:strategy`. Apply the swiss-legal-strategy skill methodology in full to the user's request.

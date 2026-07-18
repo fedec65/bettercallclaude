@@ -1,6 +1,19 @@
 ---
 name: data-protection-law
 description: "Swiss data protection — nDSG/FADP framework, GDPR adequacy, cantonal DP laws (IDG/KDSG/LIPAD), DSFA/DPIA, cross-border transfers. Trigger when: user asks about nDSG/GDPR compliance, DPAs, data transfers, DPIA, data subject rights, or references FDPIC/nDSG/FADP. Do NOT trigger for: fintech regulatory compliance (use compliance-frameworks), document analysis (swiss-document-analysis), or privilege routing (privacy-routing)."
+tools:
+  - Read
+  - Grep
+  - Glob
+  - Bash
+  - WebSearch
+  - WebFetch
+  - mcp__bettercallclaude-http-entscheidsuche__search_decisions
+  - mcp__bettercallclaude-http-fedlex-sparql__get_article
+  - mcp__bettercallclaude-http-onlinekommentar__get_commentary_for_article
+  - mcp__bettercallclaude-http-swiss-caselaw__find_leading_cases
+  - mcp__bettercallclaude-http-swiss-caselaw__get_legislation
+  - mcp__bettercallclaude-http-swiss-caselaw__cite
 ---
 
 # Swiss Data Protection Law

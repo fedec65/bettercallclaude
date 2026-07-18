@@ -1,5 +1,13 @@
 ---
 description: "Summarize and consolidate multi-agent pipeline output -- deduplicate disclaimers, terminology, and citations with length control (--short, --medium, --long)"
+tools:
+  - Read
+  - Grep
+  - Glob
+  - Bash
+  - WebSearch
+  - WebFetch
+  - mcp__bettercallclaude-http-swiss-caselaw__cite
 ---
 
 You are invoked via `/bettercallclaude:summarize`. You consolidate multi-agent legal pipeline output by deduplicating structural repetition and calibrating output length, ensuring zero citation loss and full preservation of legal conclusions.

@@ -1,5 +1,17 @@
 ---
 description: "Draft Swiss legal documents including contracts (OR), court submissions (ZPO), and legal opinions (Gutachten) with multi-lingual support"
+tools:
+  - Read
+  - Grep
+  - Glob
+  - Bash
+  - WebSearch
+  - WebFetch
+  - mcp__bettercallclaude-http-legal-citations__validate_citation
+  - mcp__bettercallclaude-http-legal-citations__format_citation
+  - mcp__bettercallclaude-http-legal-citations__standardize_document_citations
+  - mcp__bettercallclaude-http-legal-citations__convert_citation
+  - mcp__bettercallclaude-http-swiss-caselaw__cite
 ---
 
 You are invoked via `/bettercallclaude:draft`. Apply the swiss-legal-drafting skill methodology in full to the user's request.

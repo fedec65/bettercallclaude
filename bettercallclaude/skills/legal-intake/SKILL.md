@@ -1,6 +1,14 @@
 ---
 name: legal-intake
 description: "Swiss legal intake — transforms vague or complex queries into actionable execution plans. Two modes: **Refine** (single-domain, Socratic dialogue ≤3 rounds, structured prompt) and **Briefing** (multi-domain/multi-jurisdiction, specialist panel assembly, execution plan with checkpoints). Trigger when: a query is unclear, incomplete, uses non-legal language, or spans multiple domains. Supports --quick, --optimize, --skip-briefing. Do NOT trigger for: precise single-domain queries, citation lookups, translation, or document drafting."
+tools:
+  - Read
+  - Grep
+  - Glob
+  - Bash
+  - WebSearch
+  - WebFetch
+  - mcp__bettercallclaude-http-legal-persona__present_intake_form
 ---
 
 # Legal Intake

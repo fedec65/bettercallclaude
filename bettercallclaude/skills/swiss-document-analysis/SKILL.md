@@ -1,6 +1,20 @@
 ---
 name: swiss-document-analysis
 description: "Swiss legal document analyzer — structured analysis of contracts, court decisions, statutes, submissions. Includes NDA triage (GREEN/YELLOW/RED) and playbook-aware contract review. Trigger when: user uploads a document for review, requests NDA triage, or mentions 'playbook' or 'posizioni standard'. Uses swiss-caselaw, entscheidsuche, legal-citations, fedlex-sparql MCPs. Do NOT trigger for: drafting (swiss-legal-drafting), citation formatting only (swiss-citation-formats), or research without a document (swiss-legal-research)."
+tools:
+  - Read
+  - Grep
+  - Glob
+  - Bash
+  - WebSearch
+  - WebFetch
+  - mcp__bettercallclaude-http-entscheidsuche__get_decision_details
+  - mcp__bettercallclaude-http-fedlex-sparql__get_article
+  - mcp__bettercallclaude-http-legal-citations__validate_citation
+  - mcp__bettercallclaude-http-legal-citations__standardize_document_citations
+  - mcp__bettercallclaude-http-swiss-caselaw__get_case_brief
+  - mcp__bettercallclaude-http-swiss-caselaw__find_citations
+  - mcp__bettercallclaude-http-swiss-caselaw__get_law
 ---
 
 # Swiss Legal Document Analysis

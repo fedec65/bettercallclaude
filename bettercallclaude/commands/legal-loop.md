@@ -1,5 +1,29 @@
 ---
 description: "Iterate a worker-evaluator cycle against a Goal Record until the success condition is met or a stop limit is reached. The evaluator (a different agent than the worker) judges each iteration using MCP verification tools. Produces an auditable verdict trail and a final MET / NOT MET status."
+tools:
+  - Read
+  - Grep
+  - Glob
+  - Bash
+  - WebSearch
+  - WebFetch
+  - mcp__bettercallclaude-http-bge-search__search_bge
+  - mcp__bettercallclaude-http-bge-search__get_bge_decision
+  - mcp__bettercallclaude-http-entscheidsuche__search_decisions
+  - mcp__bettercallclaude-http-fedlex-sparql__search_legislation
+  - mcp__bettercallclaude-http-fedlex-sparql__get_article
+  - mcp__bettercallclaude-http-fedlex-sparql__lookup_statute
+  - mcp__bettercallclaude-http-legal-citations__validate_citation
+  - mcp__bettercallclaude-http-legal-citations__standardize_document_citations
+  - mcp__bettercallclaude-http-onlinekommentar__search_commentaries
+  - mcp__bettercallclaude-http-swiss-caselaw__get_decision
+  - mcp__bettercallclaude-http-swiss-caselaw__get_erwaegung
+  - mcp__bettercallclaude-http-swiss-caselaw__get_regeste
+  - mcp__bettercallclaude-http-swiss-caselaw__find_citations
+  - mcp__bettercallclaude-http-swiss-caselaw__get_commentary
+  - mcp__bettercallclaude-http-swiss-caselaw__cite
+  - mcp__bettercallclaude-ollama__ollama_check_status
+  - mcp__bettercallclaude-ollama__ollama_classify_privacy
 ---
 
 # /legal-loop — Worker-Evaluator Iteration Cycle

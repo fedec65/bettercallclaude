@@ -1,6 +1,19 @@
 ---
 name: swiss-legal-strategy
 description: "Swiss legal strategy — case strength, risk probability, cost-benefit, settlement/BATNA, and ADR assessment across ZPO/StPO/VwVG proceedings. Trigger when: user needs litigation viability, settle-or-sue decision, procedural options, or strategy memo. Uses entscheidsuche MCP for precedent-based probability. Do NOT trigger for: drafting (swiss-legal-drafting), deadlines (procedure agent), or pure research (swiss-legal-research)."
+tools:
+  - Read
+  - Grep
+  - Glob
+  - Bash
+  - WebSearch
+  - WebFetch
+  - mcp__bettercallclaude-http-entscheidsuche__find_similar_cases
+  - mcp__bettercallclaude-http-entscheidsuche__get_legal_provision_interpretation
+  - mcp__bettercallclaude-http-entscheidsuche__analyze_precedent_success_rate
+  - mcp__bettercallclaude-http-swiss-caselaw__get_case_brief
+  - mcp__bettercallclaude-http-swiss-caselaw__find_leading_cases
+  - mcp__bettercallclaude-http-legal-persona__compute_deadlines
 ---
 
 # Swiss Legal Strategy

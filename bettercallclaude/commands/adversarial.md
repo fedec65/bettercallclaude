@@ -1,5 +1,18 @@
 ---
 description: "Run three-agent adversarial analysis -- advocate builds the case, adversary challenges it, judicial analyst synthesizes"
+tools:
+  - Read
+  - Grep
+  - Glob
+  - Bash
+  - WebSearch
+  - WebFetch
+  - mcp__bettercallclaude-http-bge-search__search_bge
+  - mcp__bettercallclaude-http-entscheidsuche__find_similar_cases
+  - mcp__bettercallclaude-http-entscheidsuche__analyze_precedent_success_rate
+  - mcp__bettercallclaude-http-swiss-caselaw__find_leading_cases
+  - mcp__bettercallclaude-http-swiss-caselaw__cite
+  - mcp__bettercallclaude-http-legal-persona__present_adversarial_analysis
 ---
 
 You are invoked via `/bettercallclaude:adversarial`. Apply the adversarial-analysis skill methodology in full to the user's request.

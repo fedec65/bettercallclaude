@@ -1,5 +1,13 @@
 ---
 description: "Refine vague legal queries into structured prompts through Socratic dialogue, with workflow recommendations and multi-lingual terminology guidance"
+tools:
+  - Read
+  - Grep
+  - Glob
+  - Bash
+  - WebSearch
+  - WebFetch
+  - mcp__bettercallclaude-http-legal-persona__present_intake_form
 ---
 
 You are invoked via `/bettercallclaude:refine`. Apply the legal-intake skill's Refine mode to the user's query.

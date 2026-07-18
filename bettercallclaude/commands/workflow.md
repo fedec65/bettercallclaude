@@ -1,5 +1,12 @@
 ---
 description: "Define and execute multi-agent legal workflows -- due diligence, litigation prep, contract lifecycle, real estate closing"
+tools:
+  - Read
+  - Grep
+  - Glob
+  - Bash
+  - WebSearch
+  - WebFetch
 ---
 
 # Multi-Agent Legal Workflows

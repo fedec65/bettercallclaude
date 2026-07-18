@@ -1,6 +1,19 @@
 ---
 name: legal-5step-framework
 description: "End-to-end 5-step Swiss legal pipeline: (1) intake/fact extraction, (2) BGE/statute research, (3) strategy/risk assessment, (4) adversarial stress test, (5) verified document drafting. Trigger when: user asks for full analysis, 'run all steps', 'full pipeline', or 'end-to-end'. Do NOT trigger for: single-step tasks (use individual commands), citation-only work, or translation. Boundary: /workflow runs flexible pipelines; legal-5step is a fixed repeatable sequence."
+tools:
+  - Read
+  - Grep
+  - Glob
+  - Bash
+  - WebSearch
+  - WebFetch
+  - mcp__bettercallclaude-http-entscheidsuche__find_similar_cases
+  - mcp__bettercallclaude-http-entscheidsuche__analyze_precedent_success_rate
+  - mcp__bettercallclaude-http-swiss-caselaw__get_erwaegung
+  - mcp__bettercallclaude-http-swiss-caselaw__find_citations
+  - mcp__bettercallclaude-http-swiss-caselaw__get_law
+  - mcp__bettercallclaude-http-swiss-caselaw__cite
 ---
 
 # BetterCallClaude 5-Step Legal Framework

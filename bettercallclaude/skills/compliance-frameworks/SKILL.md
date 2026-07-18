@@ -1,6 +1,19 @@
 ---
 name: compliance-frameworks
 description: "Swiss financial regulatory compliance — FINMA, GwG/AML/KYC, FIDLEG/FINIG licensing, BankG, crypto/DLT regulation, cross-border obligations (AEOI/CRS, FATCA). Trigger when: user asks about FINMA licensing, AML/KYC compliance, financial services cross-border, crypto regulation, or fintech data processing. Do NOT trigger for: general corporate law, non-financial data protection (data-protection-law), tax (fiscal agent), or cantonal zoning."
+tools:
+  - Read
+  - Grep
+  - Glob
+  - Bash
+  - WebSearch
+  - WebFetch
+  - mcp__bettercallclaude-http-entscheidsuche__search_decisions
+  - mcp__bettercallclaude-http-fedlex-sparql__get_article
+  - mcp__bettercallclaude-http-onlinekommentar__search_commentaries
+  - mcp__bettercallclaude-http-onlinekommentar__get_commentary_for_article
+  - mcp__bettercallclaude-http-swiss-caselaw__find_leading_cases
+  - mcp__bettercallclaude-http-swiss-caselaw__cite
 ---
 
 # Swiss Financial Regulatory Compliance

@@ -1,6 +1,20 @@
 ---
 name: swiss-citation-formats
 description: "Swiss legal citation formatter — validates, formats, and converts BGE/ATF/DTF, statutory, and cantonal citations across DE/FR/IT/EN. Trigger when: citations need formatting, validation, or cross-language conversion. Uses legal-citations MCP (validate, format, convert). Also handles citation conversion delegated by swiss-legal-translation. Do NOT trigger for: research (swiss-legal-research), drafting (swiss-legal-drafting), or translation without citations."
+tools:
+  - Read
+  - Grep
+  - Glob
+  - Bash
+  - WebSearch
+  - WebFetch
+  - mcp__bettercallclaude-http-fedlex-sparql__get_article
+  - mcp__bettercallclaude-http-legal-citations__validate_citation
+  - mcp__bettercallclaude-http-legal-citations__format_citation
+  - mcp__bettercallclaude-http-legal-citations__standardize_document_citations
+  - mcp__bettercallclaude-http-legal-citations__convert_citation
+  - mcp__bettercallclaude-http-swiss-caselaw__get_law
+  - mcp__bettercallclaude-http-swiss-caselaw__cite
 ---
 
 # Swiss Citation Formats

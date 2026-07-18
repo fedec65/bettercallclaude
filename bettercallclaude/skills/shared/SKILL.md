@@ -1,6 +1,14 @@
 ---
 name: output-conventions
 description: Shared deliverable-as-file output conventions for all BetterCallClaude commands. Defines the bcc-output folder structure, file naming, and chat summary template.
+tools:
+  - Read
+  - Grep
+  - Glob
+  - Bash
+  - WebSearch
+  - WebFetch
+  - mcp__bettercallclaude-http-swiss-caselaw__cite
 ---
 
 # BetterCallClaude Output Conventions

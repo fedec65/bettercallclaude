@@ -1,6 +1,19 @@
 ---
 name: adversarial-analysis
 description: "Adversarial stress test — three agents (Advocate FOR, Adversary AGAINST, Judicial synthesis with probability). Trigger when: user wants to stress-test a position, check weaknesses before filing, or requests adversarial review. Also option '4' in /legal menu. Do NOT trigger for: initial research (swiss-legal-research), strategy (swiss-legal-strategy), or drafting — this is a quality layer, not first-pass analysis."
+tools:
+  - Read
+  - Grep
+  - Glob
+  - Bash
+  - WebSearch
+  - WebFetch
+  - mcp__bettercallclaude-http-bge-search__search_bge
+  - mcp__bettercallclaude-http-entscheidsuche__find_similar_cases
+  - mcp__bettercallclaude-http-entscheidsuche__analyze_precedent_success_rate
+  - mcp__bettercallclaude-http-swiss-caselaw__find_leading_cases
+  - mcp__bettercallclaude-http-swiss-caselaw__cite
+  - mcp__bettercallclaude-http-legal-persona__present_adversarial_analysis
 ---
 
 # Adversarial Legal Analysis

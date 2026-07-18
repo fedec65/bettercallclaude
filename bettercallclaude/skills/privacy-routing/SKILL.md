@@ -1,6 +1,13 @@
 ---
 name: privacy-routing
 description: "Privacy routing for Swiss attorney-client privilege (Anwaltsgeheimnis, Art. 321 StGB) with pattern detection in German, French, and Italian to protect confidential legal communications"
+tools:
+  - Read
+  - Grep
+  - Glob
+  - Bash
+  - WebSearch
+  - WebFetch
 ---
 
 # Privacy Routing

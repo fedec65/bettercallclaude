@@ -4,6 +4,18 @@ All notable changes to BetterCallClaude will be documented in this file.
 
 ---
 
+## [4.9.2] - 2026-07-17
+
+### Fixed
+- **MCP tool integration in skills and commands** — all 14 skills and all 26 commands now declare the MCP tools they use in their YAML frontmatter, completing the v4.9.1 integration work that covered the 20 agents.
+- **`scripts/generate-tool-frontmatter.js`** — new analysis script that scans skills/commands for MCP tool references and generates fully-qualified frontmatter entries (`mcp__bettercallclaude-http-<server>__<tool>`).
+
+### Notes for maintainers
+- Skills/commands that delegate to other skills inherit the invoked skills' MCP tools in their frontmatter (e.g., `research.md` includes the full `swiss-legal-research` tool set).
+- The mapping of bare tool names to MCP servers is best-effort static analysis; ambiguous cases were resolved by context heuristics and manual review.
+
+---
+
 ## [4.9.1] - 2026-07-17
 
 ### Fixed

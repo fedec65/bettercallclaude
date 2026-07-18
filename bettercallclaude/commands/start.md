@@ -1,5 +1,12 @@
 ---
 description: "Welcome and first-use onboarding — checks MCP connectivity, guides playbook creation, shows usage examples tailored to your profile. Replaces /setup."
+tools:
+  - Read
+  - Grep
+  - Glob
+  - Bash
+  - WebSearch
+  - WebFetch
 ---
 
 # BetterCallClaude — Welcome

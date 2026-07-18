@@ -1,5 +1,13 @@
 ---
 description: "Structured pre-execution briefing session -- collects case context through specialist panel, builds execution plan, supports resume and depth control"
+tools:
+  - Read
+  - Grep
+  - Glob
+  - Bash
+  - WebSearch
+  - WebFetch
+  - mcp__bettercallclaude-http-legal-persona__present_intake_form
 ---
 
 # Legal Briefing Session
