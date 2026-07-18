@@ -25,17 +25,16 @@ BetterCallClaude provides a structured methodology for handling legal work with 
 
 ---
 
-## What's New in v4.4.0
+## What's New in v4.9.2
 
-**v4.4.0 — Repository split + two new MCP servers.** The plugin repo is now plugin-only; MCP server source code lives canonically in a dedicated repository, and two new MCP servers are exposed to users.
+**v4.9.2 — MCP tool integration completed across all plugin surfaces.** All agents, skills, and commands now declare the MCP tools they use in YAML frontmatter, so the model can directly invoke Swiss legal databases without guessing tool names.
 
-- **Repository split** — `mcp-servers-src/` and `mcp-servers-http/` have been removed from this repo. The TypeScript source for all 7 remote MCP servers and the HTTP aggregator deployed at `mcp.bettercallclaude.ch` now live in [`fedec65/BetterCallClaudeMCP`](https://github.com/fedec65/BetterCallClaudeMCP). Plugin users are unaffected — `.mcp.json` still points at the same production URLs.
-- **New MCP: `legal-persona`** — Swiss-law-aware document intelligence. Three tools: `legal_strategy` (structured case strategy with statutory citations), `legal_draft` (15 Swiss document types across contracts, litigation, and opinions in DE/FR/IT/EN), and `legal_analyze` (compliance, clause-extraction, and issue-flagging against OR / ZGB / DSG).
-- **New MCP: `tas-jurisprudence`** — Court of Arbitration for Sport (CAS/TAS) decision search. Four tools: `cas_search`, `cas_get_award`, `cas_recent`, `cas_by_sport`. Backed by a Playwright-rendered crawl of `jurisprudence.tas-cas.org` with respectful rate limits.
-- **Ollama local server** — still bundled in this repo; `npm run build:ollama` now rebuilds it in-place for contributors.
-- **Simpler CI** — plugin-only repo means CI is now `validate-plugin` + package dry-run; the MCP build/test matrix has moved to `BetterCallClaudeMCP`.
+- **Skills** — all 14 `SKILL.md` files now list the MCP tools referenced in their bodies (e.g., `swiss-legal-research` exposes BGE/ATF/DTF search, statute lookup, and citation verification tools).
+- **Commands** — all 26 command `.md` files now include the MCP tools needed by the skills they invoke (e.g., `/bettercallclaude:research` exposes the full `swiss-legal-research` tool set).
+- **Agents** — 20 agents already received tool frontmatter in v4.9.1; v4.9.2 completes the picture.
+- **Tooling** — new `scripts/generate-tool-frontmatter.js` scans markdown for MCP tool references and generates fully-qualified `mcp__bettercallclaude-http-<server>__<tool>` entries for future maintenance.
 
-**Content counts**: 20 agents, 19 commands, 14 skills, 9 MCP servers in `.mcp.json` (7 remote HTTP on `mcp.bettercallclaude.ch` + `swiss-caselaw` SSE on `mcp.opencaselaw.ch` + `ollama` local STDIO).
+**Content counts**: 20 agents, 26 commands, 14 skills, 9 MCP servers in `.mcp.json` (7 remote HTTP on `mcp.bettercallclaude.ch` + `swiss-caselaw` SSE on `mcp.opencaselaw.ch` + `ollama` local STDIO).
 
 [Full changelog →](CHANGELOG.md)
 
