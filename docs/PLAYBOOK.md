@@ -25,6 +25,25 @@ When a `legal.local.md` (Anthropic format) is found at priority 3 and no `better
 
 ---
 
+## Cowork Desktop: Playbook Not Found Across Sessions
+
+**Problem**: In Cowork Desktop, the playbook is only visible when the current session's shared folder contains it. If the playbook is in Folder A but you open a session with Folder B, BetterCallClaude cannot see it.
+
+**Why**: Cowork restricts plugin file access to the currently selected shared folder for security. There is no Cowork-global config directory equivalent to Claude Code's `~/.claude/`.
+
+**Recommended setup — designate one legal-work folder:**
+
+1. Create a folder like `~/Documents/Legal-Work/` (or `~/OneDrive/Legal-Work/`).
+2. Place `bettercallclaude.local.md` in its root, or in `.claude/bettercallclaude.local.md` inside it.
+3. Use this folder for all BetterCallClaude sessions (NDA triage, contract review, research, drafting).
+4. The playbook will be found reliably every time.
+
+**Alternative — copy to every folder you use:**
+
+If you must work across multiple folders, copy `bettercallclaude.local.md` into the root of each shared folder you use for legal sessions. Keep the copies in sync manually when you update the playbook.
+
+---
+
 ## Schema
 
 The playbook uses Markdown with the following sections. All four language templates (DE/FR/IT/EN) use the **same section structure** — skills parse a single schema regardless of language.
