@@ -25,14 +25,14 @@ BetterCallClaude provides a structured methodology for handling legal work with 
 
 ---
 
-## What's New in v4.9.2
+## What's New in v4.9.3
 
-**v4.9.2 — MCP tool integration completed across all plugin surfaces.** All agents, skills, and commands now declare the MCP tools they use in YAML frontmatter, so the model can directly invoke Swiss legal databases without guessing tool names.
+**v4.9.3 — Critical fix: agents can now reach the MCP connectors in Cowork.** The tool names declared in agent, skill, and command frontmatter were corrected to the plugin-scoped format required by Claude Cowork Desktop.
 
-- **Skills** — all 14 `SKILL.md` files now list the MCP tools referenced in their bodies (e.g., `swiss-legal-research` exposes BGE/ATF/DTF search, statute lookup, and citation verification tools).
-- **Commands** — all 26 command `.md` files now include the MCP tools needed by the skills they invoke (e.g., `/bettercallclaude:research` exposes the full `swiss-legal-research` tool set).
-- **Agents** — 20 agents already received tool frontmatter in v4.9.1; v4.9.2 completes the picture.
-- **Tooling** — new `scripts/generate-tool-frontmatter.js` scans markdown for MCP tool references and generates fully-qualified `mcp__bettercallclaude-http-<server>__<tool>` entries for future maintenance.
+- **Root cause** — v4.9.1/v4.9.2 added `tools:` frontmatter using `mcp__bettercallclaude-http-<server>__<tool>` names, but Cowork expects `mcp__plugin_bettercallclaude_<server>__<tool>`. Because the declared names didn't match, agents had no MCP tools available and fell back to web search for citation verification.
+- **Fix** — all 20 agents, 14 skills, and 26 commands now declare correctly scoped tool names (737 references updated). Example: `mcp__plugin_bettercallclaude_bge-search__search_bge`.
+- **Result** — after updating to v4.9.3, agents, skills, and commands can directly invoke the Swiss legal databases (BGE/ATF/DTF search, statute lookup, citation verification, and more).
+- **Update note** — Cowork's GitHub-synced marketplace may not auto-sync for Pro plan users. If the update doesn't appear, remove and re-add the marketplace in Cowork, or see `docs/plugin-update-guide.md` for the manual workaround.
 
 **Content counts**: 20 agents, 26 commands, 14 skills, 9 MCP servers in `.mcp.json` (7 remote HTTP on `mcp.bettercallclaude.ch` + `swiss-caselaw` SSE on `mcp.opencaselaw.ch` + `ollama` local STDIO).
 
