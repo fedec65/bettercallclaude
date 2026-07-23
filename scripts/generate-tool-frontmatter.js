@@ -110,10 +110,7 @@ function resolveServer(tool, text) {
 }
 
 function fullyQualified(tool, server) {
-  if (server === 'ollama') {
-    return `mcp__bettercallclaude-ollama__${tool}`;
-  }
-  return `mcp__bettercallclaude-http-${server}__${tool}`;
+  return `mcp__plugin_bettercallclaude_${server}__${tool}`;
 }
 
 function analyzeFile(filePath) {

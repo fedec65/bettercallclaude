@@ -7,34 +7,34 @@ tools:
   - Bash
   - WebSearch
   - WebFetch
-  - mcp__bettercallclaude-http-bge-search__search_bge
-  - mcp__bettercallclaude-http-bge-search__get_bge_decision
-  - mcp__bettercallclaude-http-entscheidsuche__search_decisions
-  - mcp__bettercallclaude-http-entscheidsuche__get_decision_details
-  - mcp__bettercallclaude-http-fedlex-sparql__search_legislation
-  - mcp__bettercallclaude-http-fedlex-sparql__get_article
-  - mcp__bettercallclaude-http-legal-citations__validate_citation
-  - mcp__bettercallclaude-http-legal-citations__format_citation
-  - mcp__bettercallclaude-http-onlinekommentar__search_commentaries
-  - mcp__bettercallclaude-http-swiss-caselaw__get_decision
-  - mcp__bettercallclaude-http-swiss-caselaw__find_citations
-  - mcp__bettercallclaude-http-swiss-caselaw__get_commentary
-  - mcp__bettercallclaude-http-swiss-caselaw__cite
-  - mcp__bettercallclaude-http-legal-persona__legal_analyze
-  - mcp__bettercallclaude-http-legal-persona__legal_draft
-  - mcp__bettercallclaude-http-legal-persona__legal_strategy
-  - mcp__bettercallclaude-http-legal-persona__compute_deadlines
-  - mcp__bettercallclaude-http-legal-persona__present_adversarial_analysis
-  - mcp__bettercallclaude-http-legal-persona__present_intake_form
-  - mcp__bettercallclaude-http-tas-jurisprudence__cas_search
-  - mcp__bettercallclaude-http-tas-jurisprudence__cas_get_award
-  - mcp__bettercallclaude-http-tas-jurisprudence__cas_recent
-  - mcp__bettercallclaude-http-tas-jurisprudence__cas_by_sport
-  - mcp__bettercallclaude-ollama__ollama_check_status
-  - mcp__bettercallclaude-ollama__ollama_list_models
-  - mcp__bettercallclaude-ollama__ollama_generate
-  - mcp__bettercallclaude-ollama__ollama_classify_privacy
-  - mcp__bettercallclaude-ollama__ollama_chat
+  - mcp__plugin_bettercallclaude_bge-search__search_bge
+  - mcp__plugin_bettercallclaude_bge-search__get_bge_decision
+  - mcp__plugin_bettercallclaude_entscheidsuche__search_decisions
+  - mcp__plugin_bettercallclaude_entscheidsuche__get_decision_details
+  - mcp__plugin_bettercallclaude_fedlex-sparql__search_legislation
+  - mcp__plugin_bettercallclaude_fedlex-sparql__get_article
+  - mcp__plugin_bettercallclaude_legal-citations__validate_citation
+  - mcp__plugin_bettercallclaude_legal-citations__format_citation
+  - mcp__plugin_bettercallclaude_onlinekommentar__search_commentaries
+  - mcp__plugin_bettercallclaude_swiss-caselaw__get_decision
+  - mcp__plugin_bettercallclaude_swiss-caselaw__find_citations
+  - mcp__plugin_bettercallclaude_swiss-caselaw__get_commentary
+  - mcp__plugin_bettercallclaude_swiss-caselaw__cite
+  - mcp__plugin_bettercallclaude_legal-persona__legal_analyze
+  - mcp__plugin_bettercallclaude_legal-persona__legal_draft
+  - mcp__plugin_bettercallclaude_legal-persona__legal_strategy
+  - mcp__plugin_bettercallclaude_legal-persona__compute_deadlines
+  - mcp__plugin_bettercallclaude_legal-persona__present_adversarial_analysis
+  - mcp__plugin_bettercallclaude_legal-persona__present_intake_form
+  - mcp__plugin_bettercallclaude_tas-jurisprudence__cas_search
+  - mcp__plugin_bettercallclaude_tas-jurisprudence__cas_get_award
+  - mcp__plugin_bettercallclaude_tas-jurisprudence__cas_recent
+  - mcp__plugin_bettercallclaude_tas-jurisprudence__cas_by_sport
+  - mcp__plugin_bettercallclaude_ollama__ollama_check_status
+  - mcp__plugin_bettercallclaude_ollama__ollama_list_models
+  - mcp__plugin_bettercallclaude_ollama__ollama_generate
+  - mcp__plugin_bettercallclaude_ollama__ollama_classify_privacy
+  - mcp__plugin_bettercallclaude_ollama__ollama_chat
 ---
 
 # BetterCallClaude MCP Server Setup

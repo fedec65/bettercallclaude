@@ -7,9 +7,9 @@ tools:
   - Bash
   - WebSearch
   - WebFetch
-  - mcp__bettercallclaude-http-swiss-caselaw__search_decisions
-  - mcp__bettercallclaude-http-fedlex-sparql__search_legislation
-  - mcp__bettercallclaude-http-legal-citations__validate_citation
+  - mcp__plugin_bettercallclaude_swiss-caselaw__search_decisions
+  - mcp__plugin_bettercallclaude_fedlex-sparql__search_legislation
+  - mcp__plugin_bettercallclaude_legal-citations__validate_citation
 ---
 
 # /legal-goal — Define a Legal Success Condition

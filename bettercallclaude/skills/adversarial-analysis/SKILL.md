@@ -8,12 +8,12 @@ tools:
   - Bash
   - WebSearch
   - WebFetch
-  - mcp__bettercallclaude-http-bge-search__search_bge
-  - mcp__bettercallclaude-http-entscheidsuche__find_similar_cases
-  - mcp__bettercallclaude-http-entscheidsuche__analyze_precedent_success_rate
-  - mcp__bettercallclaude-http-swiss-caselaw__find_leading_cases
-  - mcp__bettercallclaude-http-swiss-caselaw__cite
-  - mcp__bettercallclaude-http-legal-persona__present_adversarial_analysis
+  - mcp__plugin_bettercallclaude_bge-search__search_bge
+  - mcp__plugin_bettercallclaude_entscheidsuche__find_similar_cases
+  - mcp__plugin_bettercallclaude_entscheidsuche__analyze_precedent_success_rate
+  - mcp__plugin_bettercallclaude_swiss-caselaw__find_leading_cases
+  - mcp__plugin_bettercallclaude_swiss-caselaw__cite
+  - mcp__plugin_bettercallclaude_legal-persona__present_adversarial_analysis
 ---
 
 # Adversarial Legal Analysis

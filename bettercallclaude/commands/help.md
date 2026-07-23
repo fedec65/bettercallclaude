@@ -7,7 +7,7 @@ tools:
   - Bash
   - WebSearch
   - WebFetch
-  - mcp__bettercallclaude-http-swiss-caselaw__cite
+  - mcp__plugin_bettercallclaude_swiss-caselaw__cite
 ---
 
 # BetterCallClaude Command Reference
@@ -208,7 +208,7 @@ Skills activate automatically when Claude detects relevant context.
 
 ---
 
-**BetterCallClaude v4.9.2 -- Swiss Legal Intelligence for Cowork Desktop**
+**BetterCallClaude v4.9.3 -- Swiss Legal Intelligence for Cowork Desktop**
 
 If the user provided additional input, respond to it in the context of this help reference.
 

@@ -8,41 +8,13 @@ tools:
   - Glob
   - Bash
   - WebSearch
-  - mcp__bettercallclaude-http-bge-search__search_bge
-  - mcp__bettercallclaude-http-bge-search__get_bge_decision
-  - mcp__bettercallclaude-http-entscheidsuche__search_decisions
-  - mcp__bettercallclaude-http-entscheidsuche__search_canton
-  - mcp__bettercallclaude-http-entscheidsuche__get_decision_details
-  - mcp__bettercallclaude-http-entscheidsuche__find_similar_cases
-  - mcp__bettercallclaude-http-entscheidsuche__get_legal_provision_interpretation
-  - mcp__bettercallclaude-http-entscheidsuche__analyze_precedent_success_rate
-  - mcp__bettercallclaude-http-fedlex-sparql__search_legislation
-  - mcp__bettercallclaude-http-fedlex-sparql__get_article
-  - mcp__bettercallclaude-http-fedlex-sparql__lookup_statute
-  - mcp__bettercallclaude-http-fedlex-sparql__find_related
-  - mcp__bettercallclaude-http-legal-citations__validate_citation
-  - mcp__bettercallclaude-http-legal-citations__format_citation
-  - mcp__bettercallclaude-http-legal-citations__parse_citation
-  - mcp__bettercallclaude-http-legal-citations__get_provision_text
-  - mcp__bettercallclaude-http-legal-citations__standardize_document_citations
-  - mcp__bettercallclaude-http-legal-citations__convert_citation
-  - mcp__bettercallclaude-http-onlinekommentar__search_commentaries
-  - mcp__bettercallclaude-http-onlinekommentar__get_commentary_for_article
-  - mcp__bettercallclaude-http-onlinekommentar__list_legislative_acts
-  - mcp__bettercallclaude-http-swiss-caselaw__search_decisions
-  - mcp__bettercallclaude-http-swiss-caselaw__get_decision
-  - mcp__bettercallclaude-http-swiss-caselaw__get_erwaegung
-  - mcp__bettercallclaude-http-swiss-caselaw__get_regeste
-  - mcp__bettercallclaude-http-swiss-caselaw__get_case_brief
-  - mcp__bettercallclaude-http-swiss-caselaw__find_leading_cases
-  - mcp__bettercallclaude-http-swiss-caselaw__find_citations
-  - mcp__bettercallclaude-http-swiss-caselaw__get_law
-  - mcp__bettercallclaude-http-swiss-caselaw__get_legislation
-  - mcp__bettercallclaude-http-swiss-caselaw__get_doctrine
-  - mcp__bettercallclaude-http-swiss-caselaw__get_commentary
-  - mcp__bettercallclaude-http-swiss-caselaw__search_laws
-  - mcp__bettercallclaude-http-swiss-caselaw__get_materialien
-  - mcp__bettercallclaude-http-swiss-caselaw__cite
+  - WebFetch
+  - mcp__plugin_bettercallclaude_entscheidsuche__search_decisions
+  - mcp__plugin_bettercallclaude_fedlex-sparql__get_article
+  - mcp__plugin_bettercallclaude_onlinekommentar__search_commentaries
+  - mcp__plugin_bettercallclaude_onlinekommentar__get_commentary_for_article
+  - mcp__plugin_bettercallclaude_swiss-caselaw__find_leading_cases
+  - mcp__plugin_bettercallclaude_swiss-caselaw__cite
 ---
 
 # Swiss Compliance Officer Agent

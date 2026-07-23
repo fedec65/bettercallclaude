@@ -8,7 +8,7 @@ tools:
   - Bash
   - WebSearch
   - WebFetch
-  - mcp__bettercallclaude-http-swiss-caselaw__cite
+  - mcp__plugin_bettercallclaude_swiss-caselaw__cite
 ---
 
 # BetterCallClaude Output Conventions

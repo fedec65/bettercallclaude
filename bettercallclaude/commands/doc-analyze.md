@@ -7,13 +7,13 @@ tools:
   - Bash
   - WebSearch
   - WebFetch
-  - mcp__bettercallclaude-http-entscheidsuche__get_decision_details
-  - mcp__bettercallclaude-http-fedlex-sparql__get_article
-  - mcp__bettercallclaude-http-legal-citations__validate_citation
-  - mcp__bettercallclaude-http-legal-citations__standardize_document_citations
-  - mcp__bettercallclaude-http-swiss-caselaw__get_case_brief
-  - mcp__bettercallclaude-http-swiss-caselaw__find_citations
-  - mcp__bettercallclaude-http-swiss-caselaw__get_law
+  - mcp__plugin_bettercallclaude_entscheidsuche__get_decision_details
+  - mcp__plugin_bettercallclaude_fedlex-sparql__get_article
+  - mcp__plugin_bettercallclaude_legal-citations__validate_citation
+  - mcp__plugin_bettercallclaude_legal-citations__standardize_document_citations
+  - mcp__plugin_bettercallclaude_swiss-caselaw__get_case_brief
+  - mcp__plugin_bettercallclaude_swiss-caselaw__find_citations
+  - mcp__plugin_bettercallclaude_swiss-caselaw__get_law
 ---
 
 You are invoked via `/bettercallclaude:doc-analyze`. Apply the swiss-document-analysis skill methodology in full to the user's request.

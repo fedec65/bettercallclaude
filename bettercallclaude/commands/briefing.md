@@ -7,7 +7,7 @@ tools:
   - Bash
   - WebSearch
   - WebFetch
-  - mcp__bettercallclaude-http-legal-persona__present_intake_form
+  - mcp__plugin_bettercallclaude_legal-persona__present_intake_form
 ---
 
 # Legal Briefing Session

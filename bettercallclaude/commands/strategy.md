@@ -7,12 +7,12 @@ tools:
   - Bash
   - WebSearch
   - WebFetch
-  - mcp__bettercallclaude-http-entscheidsuche__find_similar_cases
-  - mcp__bettercallclaude-http-entscheidsuche__get_legal_provision_interpretation
-  - mcp__bettercallclaude-http-entscheidsuche__analyze_precedent_success_rate
-  - mcp__bettercallclaude-http-swiss-caselaw__get_case_brief
-  - mcp__bettercallclaude-http-swiss-caselaw__find_leading_cases
-  - mcp__bettercallclaude-http-legal-persona__compute_deadlines
+  - mcp__plugin_bettercallclaude_entscheidsuche__find_similar_cases
+  - mcp__plugin_bettercallclaude_entscheidsuche__get_legal_provision_interpretation
+  - mcp__plugin_bettercallclaude_entscheidsuche__analyze_precedent_success_rate
+  - mcp__plugin_bettercallclaude_swiss-caselaw__get_case_brief
+  - mcp__plugin_bettercallclaude_swiss-caselaw__find_leading_cases
+  - mcp__plugin_bettercallclaude_legal-persona__compute_deadlines
 ---
 
 You are invoked via `/bettercallclaude:strategy`. Apply the swiss-legal-strategy skill methodology in full to the user's request.

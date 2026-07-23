@@ -8,12 +8,12 @@ tools:
   - Bash
   - WebSearch
   - WebFetch
-  - mcp__bettercallclaude-http-entscheidsuche__find_similar_cases
-  - mcp__bettercallclaude-http-entscheidsuche__analyze_precedent_success_rate
-  - mcp__bettercallclaude-http-swiss-caselaw__get_erwaegung
-  - mcp__bettercallclaude-http-swiss-caselaw__find_citations
-  - mcp__bettercallclaude-http-swiss-caselaw__get_law
-  - mcp__bettercallclaude-http-swiss-caselaw__cite
+  - mcp__plugin_bettercallclaude_entscheidsuche__find_similar_cases
+  - mcp__plugin_bettercallclaude_entscheidsuche__analyze_precedent_success_rate
+  - mcp__plugin_bettercallclaude_swiss-caselaw__get_erwaegung
+  - mcp__plugin_bettercallclaude_swiss-caselaw__find_citations
+  - mcp__plugin_bettercallclaude_swiss-caselaw__get_law
+  - mcp__plugin_bettercallclaude_swiss-caselaw__cite
 ---
 
 # BetterCallClaude 5-Step Legal Framework

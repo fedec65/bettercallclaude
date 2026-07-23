@@ -8,11 +8,11 @@ tools:
   - Bash
   - WebSearch
   - WebFetch
-  - mcp__bettercallclaude-http-fedlex-sparql__get_article
-  - mcp__bettercallclaude-http-fedlex-sparql__lookup_statute
-  - mcp__bettercallclaude-http-legal-citations__format_citation
-  - mcp__bettercallclaude-http-legal-citations__convert_citation
-  - mcp__bettercallclaude-http-swiss-caselaw__get_law
+  - mcp__plugin_bettercallclaude_fedlex-sparql__get_article
+  - mcp__plugin_bettercallclaude_fedlex-sparql__lookup_statute
+  - mcp__plugin_bettercallclaude_legal-citations__format_citation
+  - mcp__plugin_bettercallclaude_legal-citations__convert_citation
+  - mcp__plugin_bettercallclaude_swiss-caselaw__get_law
 ---
 
 # Swiss Legal Translation

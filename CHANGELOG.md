@@ -4,6 +4,17 @@ All notable changes to BetterCallClaude will be documented in this file.
 
 ---
 
+## [4.9.3] - 2026-07-18
+
+### Fixed
+- **Critical: Cowork MCP tool naming** — all 20 agents, 14 skills, and 26 commands now use the correct plugin-scoped tool names (`mcp__plugin_bettercallclaude_<server>__<tool>`) required by Claude Cowork Desktop. The previous `mcp__bettercallclaude-http-<server>__` prefix was rejected by Cowork, leaving agents without access to Swiss legal databases and forcing them to fall back to web search for citation verification.
+- **`scripts/generate-tool-frontmatter.js`** — updated to emit the correct `mcp__plugin_bettercallclaude_` prefix.
+
+### Notes for maintainers
+- Cowork's GitHub-synced marketplace auto-sync bug (`git fetch` without `git pull`) may still prevent the update from appearing automatically. Users on Pro plans should manually `git pull` in the Cowork cache or remove/re-add the marketplace; see `docs/plugin-update-guide.md`.
+
+---
+
 ## [4.9.2] - 2026-07-17
 
 ### Fixed

@@ -4,18 +4,16 @@ description: "Generates professional Swiss legal documents including contracts u
 model: sonnet
 tools:
   - Read
-  - Write
-  - Edit
   - Grep
   - Glob
   - Bash
-  - mcp__bettercallclaude-http-fedlex-sparql__get_article
-  - mcp__bettercallclaude-http-legal-citations__validate_citation
-  - mcp__bettercallclaude-http-legal-citations__format_citation
-  - mcp__bettercallclaude-http-legal-citations__convert_citation
-  - mcp__bettercallclaude-http-legal-citations__standardize_document_citations
-  - mcp__bettercallclaude-http-swiss-caselaw__cite
-  - mcp__bettercallclaude-http-swiss-caselaw__get_law
+  - WebSearch
+  - WebFetch
+  - mcp__plugin_bettercallclaude_legal-citations__validate_citation
+  - mcp__plugin_bettercallclaude_legal-citations__format_citation
+  - mcp__plugin_bettercallclaude_legal-citations__standardize_document_citations
+  - mcp__plugin_bettercallclaude_legal-citations__convert_citation
+  - mcp__plugin_bettercallclaude_swiss-caselaw__cite
 ---
 
 # Swiss Legal Drafter Agent
