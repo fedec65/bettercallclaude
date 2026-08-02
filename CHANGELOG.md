@@ -4,6 +4,26 @@ All notable changes to BetterCallClaude will be documented in this file.
 
 ---
 
+## [4.9.4] - 2026-08-02
+
+### Added
+- **Substantive citation verification** (BCC-SPEC-CITATION-VERIFY-001) — new skill `citation-content-verify` that checks every citation in a draft against the live source on two axes: existence AND content support (entailment). Per-citation status: `MATCH` / `PARTIAL` / `MISMATCH` / `UNVERIFIED` / `SKIPPED`. Any `UNVERIFIED` or `MISMATCH` citation blocks automatic delivery — the draft must be fixed, explicitly disclaimed, or escalated. Structured per-citation output (`citation_id`, `source_mcp`, `query_used`, `status`, `matched_snippet`, `confidence_score`) is logged to `bcc-output/<date-slug>/citation-verify.json`.
+- **Acceptance eval set** — `legal-briefing-workspace/evals/citation-verify-evals.json` with 39 cases: 12 fabricated citations (must be 100% `UNVERIFIED`), 20 genuine citations (false-positive `MISMATCH` rate < 5%), 4 content mismatches, 2 partial matches, 1 structured-doctrine case.
+
+### Changed
+- **`legal-evaluator` skill** — new pre-score gate (Evaluation Procedure step 4): runs `citation-content-verify` before computing the verdict score. `UNVERIFIED`/`MISMATCH` citations produce FAIL findings regardless of profile; `PARTIAL` produces WARN; a blocked delivery means the verdict cannot pass.
+- **`/legal-loop`** — the verdict step now includes the substantive citation gate.
+- **Orchestrator agent** — `citation-content-verify` is a mandatory quality gate before DELIVER for any deliverable containing citations; the litigation pipeline template routes through it explicitly.
+- **Citation-specialist agent** — new workflow step 2.5 CONTENT-VERIFY between VALIDATE and CROSS-REFERENCE.
+- **`/validate`** — points to `citation-content-verify` for substantive (existence + content) verification of drafts.
+
+### Notes for maintainers
+- The stage reuses existing MCP infrastructure only — no new retrieval tooling: `legal-citations` (extract/parse/validate), `swiss-caselaw` (`cite`, `check_claim_support`, `find_relevant_erwaegung`, `attest_response`), `fedlex-sparql`, `entscheidsuche`, `onlinekommentar`.
+- Entailment for federal case law uses the server-side LLM judge (`check_claim_support`); statutes, cantonal decisions, and doctrine use the verifying agent's own judgment over retrieved text and are scored with lower confidence. Informal doctrine (author/title/margin number) is `SKIPPED` per spec.
+- Privacy: in `strict` mode, claim sentences are never sent to cloud content-checks — existence-only verification with a `(privacy-gated)` note.
+
+---
+
 ## [4.9.3] - 2026-07-18
 
 ### Fixed

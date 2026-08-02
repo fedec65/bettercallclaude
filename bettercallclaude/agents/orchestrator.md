@@ -27,6 +27,7 @@ tools:
   - mcp__plugin_bettercallclaude_legal-citations__get_provision_text
   - mcp__plugin_bettercallclaude_legal-citations__standardize_document_citations
   - mcp__plugin_bettercallclaude_legal-citations__convert_citation
+  - mcp__plugin_bettercallclaude_legal-citations__extract_citations
   - mcp__plugin_bettercallclaude_onlinekommentar__search_commentaries
   - mcp__plugin_bettercallclaude_onlinekommentar__get_commentary_for_article
   - mcp__plugin_bettercallclaude_onlinekommentar__list_legislative_acts
@@ -37,6 +38,9 @@ tools:
   - mcp__plugin_bettercallclaude_swiss-caselaw__get_case_brief
   - mcp__plugin_bettercallclaude_swiss-caselaw__find_leading_cases
   - mcp__plugin_bettercallclaude_swiss-caselaw__find_citations
+  - mcp__plugin_bettercallclaude_swiss-caselaw__find_relevant_erwaegung
+  - mcp__plugin_bettercallclaude_swiss-caselaw__check_claim_support
+  - mcp__plugin_bettercallclaude_swiss-caselaw__attest_response
   - mcp__plugin_bettercallclaude_swiss-caselaw__get_law
   - mcp__plugin_bettercallclaude_swiss-caselaw__get_legislation
   - mcp__plugin_bettercallclaude_swiss-caselaw__get_doctrine
@@ -81,6 +85,7 @@ researcher -> risk -> strategist -> procedure -> drafter
 3. **Strategist**: Develop litigation strategy informed by research and risk.
 4. **Procedure**: Map procedural roadmap, deadlines, and court competence.
 5. **Drafter**: Draft Klageschrift/complaint with verified citations.
+6. **Citation gate**: Run `citation-content-verify` on the final draft before delivery (see Step 4 quality gates).
 
 ### Template 2: DUE DILIGENCE
 ```
@@ -145,6 +150,7 @@ Append summarizer agent to any pipeline to consolidate outputs: deduplicate disc
 - Resolve conflicts between agent recommendations.
 - Ensure citation consistency across all sections.
 - Apply quality gates: citation verification, legal consistency, completeness.
+- **Substantive citation gate (mandatory)**: for any deliverable containing legal citations, run the `citation-content-verify` stage before DELIVER. If it returns `delivery_blocked: true` (any `UNVERIFIED` or `MISMATCH` citation), do NOT deliver the artifact as-is — present the verification report with the blocking citations and the options (fix / disclaim / escalate).
 - **Summarization (default)**: Route combined output through the summarizer agent at `--medium` length. This deduplicates disclaimers, terminology tables, and citations across agents.
 - Use `--short` or `--long` to override the default length mode.
 - Use `--no-summary` to skip summarization and deliver raw concatenated output.

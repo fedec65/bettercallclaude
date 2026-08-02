@@ -15,11 +15,15 @@ tools:
   - mcp__plugin_bettercallclaude_fedlex-sparql__lookup_statute
   - mcp__plugin_bettercallclaude_legal-citations__validate_citation
   - mcp__plugin_bettercallclaude_legal-citations__standardize_document_citations
+  - mcp__plugin_bettercallclaude_legal-citations__extract_citations
   - mcp__plugin_bettercallclaude_onlinekommentar__search_commentaries
   - mcp__plugin_bettercallclaude_swiss-caselaw__get_decision
   - mcp__plugin_bettercallclaude_swiss-caselaw__get_erwaegung
   - mcp__plugin_bettercallclaude_swiss-caselaw__get_regeste
   - mcp__plugin_bettercallclaude_swiss-caselaw__find_citations
+  - mcp__plugin_bettercallclaude_swiss-caselaw__find_relevant_erwaegung
+  - mcp__plugin_bettercallclaude_swiss-caselaw__check_claim_support
+  - mcp__plugin_bettercallclaude_swiss-caselaw__attest_response
   - mcp__plugin_bettercallclaude_swiss-caselaw__get_commentary
   - mcp__plugin_bettercallclaude_swiss-caselaw__cite
   - mcp__plugin_bettercallclaude_ollama__ollama_check_status
@@ -97,9 +101,10 @@ The worker operates under all existing BetterCallClaude rules:
 ### Step 3: Verdict Step
 
 Invoke the evaluator (the `legal-evaluator` skill) which:
-1. Runs the authoritative MCP checks specified in the Goal Record
-2. Applies R1/R2 enforcement on all citations/quotations
-3. Returns a structured Verdict: `pass`, `score`, `findings`
+1. Runs the substantive citation gate (`citation-content-verify` stage): every citation in the artifact is checked against the live source for existence AND content support. Any `UNVERIFIED`/`MISMATCH` citation means the verdict cannot be `pass: true` — the blocked citations are fed to the worker as FAIL findings.
+2. Runs the authoritative MCP checks specified in the Goal Record
+3. Applies R1/R2 enforcement on all citations/quotations
+4. Returns a structured Verdict: `pass`, `score`, `findings`
 
 The evaluator is a DIFFERENT agent/role than the worker — this is the fundamental guarantee.
 

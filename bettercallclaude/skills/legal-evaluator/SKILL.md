@@ -16,10 +16,17 @@ tools:
   - mcp__plugin_bettercallclaude_fedlex-sparql__lookup_statute
   - mcp__plugin_bettercallclaude_legal-citations__validate_citation
   - mcp__plugin_bettercallclaude_legal-citations__standardize_document_citations
+  - mcp__plugin_bettercallclaude_legal-citations__extract_citations
+  - mcp__plugin_bettercallclaude_legal-citations__parse_citation
   - mcp__plugin_bettercallclaude_onlinekommentar__search_commentaries
+  - mcp__plugin_bettercallclaude_onlinekommentar__get_commentary_for_article
+  - mcp__plugin_bettercallclaude_entscheidsuche__get_decision_details
   - mcp__plugin_bettercallclaude_swiss-caselaw__get_decision
   - mcp__plugin_bettercallclaude_swiss-caselaw__get_erwaegung
   - mcp__plugin_bettercallclaude_swiss-caselaw__get_regeste
+  - mcp__plugin_bettercallclaude_swiss-caselaw__find_relevant_erwaegung
+  - mcp__plugin_bettercallclaude_swiss-caselaw__check_claim_support
+  - mcp__plugin_bettercallclaude_swiss-caselaw__attest_response
   - mcp__plugin_bettercallclaude_swiss-caselaw__find_citations
   - mcp__plugin_bettercallclaude_swiss-caselaw__get_commentary
   - mcp__plugin_bettercallclaude_swiss-caselaw__cite
@@ -85,12 +92,13 @@ For each evaluation:
 1. **Load the Goal Record** — read the `success_condition` predicates.
 2. **Privacy pre-check** — if the artifact contains privileged content, verify the privacy mode allows the MCP calls you need to make. If not, halt with a privacy violation finding.
 3. **Run authoritative checks** — invoke the MCP tools specified in the Goal Record's `evaluator` field. Each check produces one or more findings.
-4. **Apply R1/R2** — for any citation or quotation in the artifact:
+4. **Substantive citation gate** — before scoring, run the `citation-content-verify` stage over the artifact: every citation is checked against the live source for existence AND content support (entailment). Each citation reported as `UNVERIFIED` or `MISMATCH` produces a FAIL finding (check: `citation-content-verify`) regardless of profile; `PARTIAL` produces a WARN finding. If the stage returns `delivery_blocked: true`, the verdict cannot be `pass: true`.
+5. **Apply R1/R2** — for any citation or quotation in the artifact:
    - **R1**: every citation string must trace to a retrieval tool result (not self-constructed).
    - **R2**: every quotation must be verbatim from a source field.
    - Violations are FAIL findings regardless of profile.
-5. **Compute score** — based on pass/fail ratio of findings.
-6. **Render verdict** — assemble the structured Verdict.
+6. **Compute score** — based on pass/fail ratio of findings.
+7. **Render verdict** — assemble the structured Verdict.
 
 ## MCP Tools by Check Category
 

@@ -1,0 +1,279 @@
+{
+  "skill_name": "citation-content-verify",
+  "description": "Acceptance eval set for BCC-SPEC-CITATION-VERIFY-001. Groups: fabricated (12, expect 100% UNVERIFIED + delivery_blocked), genuine (20, expect MATCH, false-positive MISMATCH rate < 5% i.e. max 1), mismatch (4, real citation + unsupported claim), partial (2), doctrine-structured (1). Run each prompt against the live MCP servers and compare the per-citation status.",
+  "evals": [
+    {
+      "id": "fab-01",
+      "group": "fabricated",
+      "prompt": "Run citation-content-verify on this draft: \"The Federal Supreme Court held that pre-contractual liability never applies in Switzerland (BGE 999 III 999).\"",
+      "expected_output": "BGE 999 III 999 does not exist -> status UNVERIFIED, delivery_blocked: true.",
+      "files": []
+    },
+    {
+      "id": "fab-02",
+      "group": "fabricated",
+      "prompt": "Run citation-content-verify on this draft: \"Selon l'ATF 300 II 50, le bailleur ne peut jamais résilier le bail.\"",
+      "expected_output": "ATF volume 300 cannot exist -> status UNVERIFIED, delivery_blocked: true.",
+      "files": []
+    },
+    {
+      "id": "fab-03",
+      "group": "fabricated",
+      "prompt": "Run citation-content-verify on this draft: \"Come stabilito in DTF 175 I 200, il diritto di superficie è abrogato.\"",
+      "expected_output": "DTF 175 I 200 does not exist -> status UNVERIFIED, delivery_blocked: true.",
+      "files": []
+    },
+    {
+      "id": "fab-04",
+      "group": "fabricated",
+      "prompt": "Run citation-content-verify on this draft: \"BGE 140 IX 60 confirms the new maritime law section of the BGE.\"",
+      "expected_output": "BGE section IX does not exist (valid: I, Ia, II-VI) -> status UNVERIFIED, delivery_blocked: true.",
+      "files": []
+    },
+    {
+      "id": "fab-05",
+      "group": "fabricated",
+      "prompt": "Run citation-content-verify on this draft: \"Art. 2000 OR introduces a statutory lien for software vendors.\"",
+      "expected_output": "Art. 2000 OR does not exist (OR ends at Art. 1186) -> status UNVERIFIED, delivery_blocked: true.",
+      "files": []
+    },
+    {
+      "id": "fab-06",
+      "group": "fabricated",
+      "prompt": "Run citation-content-verify on this draft: \"Art. 1000 ZGB regelt die Erbfolge bei digitalen Assets.\"",
+      "expected_output": "Art. 1000 ZGB does not exist (ZGB ends at Art. 977) -> status UNVERIFIED, delivery_blocked: true.",
+      "files": []
+    },
+    {
+      "id": "fab-07",
+      "group": "fabricated",
+      "prompt": "Run citation-content-verify on this draft: \"Art. 500 StGB punishes violations of attorney-client privilege with life imprisonment.\"",
+      "expected_output": "Art. 500 StGB does not exist (StGB ends at Art. 398) -> status UNVERIFIED, delivery_blocked: true.",
+      "files": []
+    },
+    {
+      "id": "fab-08",
+      "group": "fabricated",
+      "prompt": "Run citation-content-verify on this draft: \"Art. 999 ZPO introduces mandatory mediation in all civil cases.\"",
+      "expected_output": "Art. 999 ZPO does not exist (ZPO ends at Art. 406) -> status UNVERIFIED, delivery_blocked: true.",
+      "files": []
+    },
+    {
+      "id": "fab-09",
+      "group": "fabricated",
+      "prompt": "Run citation-content-verify on this draft: \"Art. 200 BV guarantees the right to free legal counsel in civil matters.\"",
+      "expected_output": "Art. 200 BV does not exist (BV ends at Art. 197) -> status UNVERIFIED, delivery_blocked: true.",
+      "files": []
+    },
+    {
+      "id": "fab-10",
+      "group": "fabricated",
+      "prompt": "Run citation-content-verify on this draft: \"In 4A_999/2099 the Bundesgericht ruled on crypto-asset seizure.\"",
+      "expected_output": "Docket 4A_999/2099 does not exist -> status UNVERIFIED, delivery_blocked: true.",
+      "files": []
+    },
+    {
+      "id": "fab-11",
+      "group": "fabricated",
+      "prompt": "Run citation-content-verify on this draft: \"Das Bundesstrafgericht hat in 7B_000/1900 die Rechtsprechung zur Geldwäscherei geändert.\"",
+      "expected_output": "Docket 7B_000/1900 is implausible and not found -> status UNVERIFIED, delivery_blocked: true.",
+      "files": []
+    },
+    {
+      "id": "fab-12",
+      "group": "fabricated",
+      "prompt": "Run citation-content-verify on this draft: \"Art. 88 Abs. 99 BV grants the Federal Assembly supervisory powers over cantonal courts.\"",
+      "expected_output": "Art. 88 BV has no Abs. 99 -> status UNVERIFIED, delivery_blocked: true.",
+      "files": []
+    },
+    {
+      "id": "gen-01",
+      "group": "genuine",
+      "prompt": "Run citation-content-verify on this draft: \"A debtor who fails to perform a contractual obligation is liable for the resulting damage (Art. 97 Abs. 1 OR).\"",
+      "expected_output": "Art. 97 Abs. 1 OR exists and supports the claim -> status MATCH, delivery clear.",
+      "files": []
+    },
+    {
+      "id": "gen-02",
+      "group": "genuine",
+      "prompt": "Run citation-content-verify on this draft: \"Any person who unlawfully causes damage to another is obliged to provide compensation (Art. 41 Abs. 1 OR).\"",
+      "expected_output": "Art. 41 Abs. 1 OR exists and supports the claim -> status MATCH, delivery clear.",
+      "files": []
+    },
+    {
+      "id": "gen-03",
+      "group": "genuine",
+      "prompt": "Run citation-content-verify on this draft: \"The injured party bears the burden of proving the damage (Art. 42 Abs. 1 OR).\"",
+      "expected_output": "Art. 42 Abs. 1 OR exists and supports the claim -> status MATCH, delivery clear.",
+      "files": []
+    },
+    {
+      "id": "gen-04",
+      "group": "genuine",
+      "prompt": "Run citation-content-verify on this draft: \"Any advance exclusion of liability for unlawful intent or gross negligence is void (Art. 100 Abs. 1 OR).\"",
+      "expected_output": "Art. 100 Abs. 1 OR exists and supports the claim -> status MATCH, delivery clear.",
+      "files": []
+    },
+    {
+      "id": "gen-05",
+      "group": "genuine",
+      "prompt": "Run citation-content-verify on this draft: \"A contract whose content is impossible or contrary to law or morality is void (Art. 20 Abs. 1 OR).\"",
+      "expected_output": "Art. 20 Abs. 1 OR exists and supports the claim -> status MATCH, delivery clear.",
+      "files": []
+    },
+    {
+      "id": "gen-06",
+      "group": "genuine",
+      "prompt": "Run citation-content-verify on this draft: \"A contract is concluded once the parties have agreed on all essential terms (Art. 1 Abs. 1 OR).\"",
+      "expected_output": "Art. 1 Abs. 1 OR exists and supports the claim -> status MATCH, delivery clear.",
+      "files": []
+    },
+    {
+      "id": "gen-07",
+      "group": "genuine",
+      "prompt": "Run citation-content-verify on this draft: \"The landlord must hand over the rented property in a condition fit for its designated use (Art. 256 Abs. 1 OR).\"",
+      "expected_output": "Art. 256 Abs. 1 OR exists and supports the claim -> status MATCH, delivery clear.",
+      "files": []
+    },
+    {
+      "id": "gen-08",
+      "group": "genuine",
+      "prompt": "Run citation-content-verify on this draft: \"The agent must carry out the mandate faithfully and diligently (Art. 398 OR).\"",
+      "expected_output": "Art. 398 OR exists and supports the claim -> status MATCH, delivery clear.",
+      "files": []
+    },
+    {
+      "id": "gen-09",
+      "group": "genuine",
+      "prompt": "Run citation-content-verify on this draft: \"In the absence of an applicable statutory provision, the judge decides according to customary law (Art. 1 ZGB).\"",
+      "expected_output": "Art. 1 ZGB exists and supports the claim -> status MATCH, delivery clear.",
+      "files": []
+    },
+    {
+      "id": "gen-10",
+      "group": "genuine",
+      "prompt": "Run citation-content-verify on this draft: \"Every person must exercise their rights and fulfil their obligations in good faith (Art. 2 Abs. 1 ZGB).\"",
+      "expected_output": "Art. 2 Abs. 1 ZGB exists and supports the claim -> status MATCH, delivery clear.",
+      "files": []
+    },
+    {
+      "id": "gen-11",
+      "group": "genuine",
+      "prompt": "Run citation-content-verify on this draft: \"Where the law makes legal effects dependent on good faith, good faith is presumed (Art. 3 Abs. 1 ZGB).\"",
+      "expected_output": "Art. 3 Abs. 1 ZGB exists and supports the claim -> status MATCH, delivery clear.",
+      "files": []
+    },
+    {
+      "id": "gen-12",
+      "group": "genuine",
+      "prompt": "Run citation-content-verify on this draft: \"All persons are equal before the law (Art. 8 Abs. 1 BV).\"",
+      "expected_output": "Art. 8 Abs. 1 BV exists and supports the claim -> status MATCH, delivery clear.",
+      "files": []
+    },
+    {
+      "id": "gen-13",
+      "group": "genuine",
+      "prompt": "Run citation-content-verify on this draft: \"Every person has the right to life (Art. 10 Abs. 1 BV).\"",
+      "expected_output": "Art. 10 Abs. 1 BV exists and supports the claim -> status MATCH, delivery clear.",
+      "files": []
+    },
+    {
+      "id": "gen-14",
+      "group": "genuine",
+      "prompt": "Run citation-content-verify on this draft: \"Every person has the right to respect for their private and family life (Art. 13 Abs. 1 BV).\"",
+      "expected_output": "Art. 13 Abs. 1 BV exists and supports the claim -> status MATCH, delivery clear.",
+      "files": []
+    },
+    {
+      "id": "gen-15",
+      "group": "genuine",
+      "prompt": "Run citation-content-verify on this draft: \"Freedom of opinion and information is guaranteed (Art. 16 Abs. 1 BV).\"",
+      "expected_output": "Art. 16 Abs. 1 BV exists and supports the claim -> status MATCH, delivery clear.",
+      "files": []
+    },
+    {
+      "id": "gen-16",
+      "group": "genuine",
+      "prompt": "Run citation-content-verify on this draft: \"Every person has the right to be treated fairly and within a reasonable time in proceedings before courts and administrative authorities (Art. 29 Abs. 1 BV).\"",
+      "expected_output": "Art. 29 Abs. 1 BV exists and supports the claim -> status MATCH, delivery clear.",
+      "files": []
+    },
+    {
+      "id": "gen-17",
+      "group": "genuine",
+      "prompt": "Run citation-content-verify on this draft: \"The Federal Supreme Court and the other law-applying authorities are bound by federal legislation (Art. 190 BV).\"",
+      "expected_output": "Art. 190 BV exists and supports the claim -> status MATCH, delivery clear.",
+      "files": []
+    },
+    {
+      "id": "gen-18",
+      "group": "genuine",
+      "prompt": "Run citation-content-verify on this draft: \"An attorney who breaches professional secrecy is criminally liable (Art. 321 StGB).\"",
+      "expected_output": "Art. 321 StGB exists and supports the claim -> status MATCH, delivery clear.",
+      "files": []
+    },
+    {
+      "id": "gen-19",
+      "group": "genuine",
+      "prompt": "Run citation-content-verify on this draft: \"Lorsque le débiteur n'exécute pas son obligation, il est tenu de réparer le dommage causé (art. 97 al. 1 CO).\"",
+      "expected_output": "art. 97 al. 1 CO exists and supports the claim -> status MATCH, delivery clear.",
+      "files": []
+    },
+    {
+      "id": "gen-20",
+      "group": "genuine",
+      "prompt": "Run citation-content-verify on this draft: \"BGE 140 III 86 is a decision published in the official collection of the Swiss Federal Supreme Court.\"",
+      "expected_output": "BGE 140 III 86 exists and supports the claim -> status MATCH, delivery clear.",
+      "files": []
+    },
+    {
+      "id": "mis-01",
+      "group": "mismatch",
+      "prompt": "Run citation-content-verify on this draft: \"A landlord may never terminate a residential lease (Art. 97 OR).\"",
+      "expected_output": "Art. 97 OR exists but does not support the claim (it governs liability for breach of contract) -> status MISMATCH, delivery_blocked: true.",
+      "files": []
+    },
+    {
+      "id": "mis-02",
+      "group": "mismatch",
+      "prompt": "Run citation-content-verify on this draft: \"Residential rents in Switzerland are free of charge (BGE 140 III 86).\"",
+      "expected_output": "BGE 140 III 86 exists but does not support the claim -> status MISMATCH, delivery_blocked: true.",
+      "files": []
+    },
+    {
+      "id": "mis-03",
+      "group": "mismatch",
+      "prompt": "Run citation-content-verify on this draft: \"The standard VAT rate in Switzerland is set by Art. 10 BV.\"",
+      "expected_output": "Art. 10 BV exists (right to life) but does not support the claim -> status MISMATCH, delivery_blocked: true.",
+      "files": []
+    },
+    {
+      "id": "mis-04",
+      "group": "mismatch",
+      "prompt": "Run citation-content-verify on this draft: \"Landlords are obliged to deliver the rented property within ten days of signing (Art. 1 ZGB).\"",
+      "expected_output": "Art. 1 ZGB exists (application of law) but does not support the claim -> status MISMATCH, delivery_blocked: true.",
+      "files": []
+    },
+    {
+      "id": "par-01",
+      "group": "partial",
+      "prompt": "Run citation-content-verify on this draft: \"Under Art. 398 OR the agent must act faithfully and diligently, and the provision also governs the agent's right to terminate the mandate at any time.\"",
+      "expected_output": "Art. 398 OR supports the faithful/diligent part but termination is governed by Art. 404 OR -> status PARTIAL (disclosed, does not block).",
+      "files": []
+    },
+    {
+      "id": "par-02",
+      "group": "partial",
+      "prompt": "Run citation-content-verify on this draft: \"Art. 20 OR declares unlawful contracts void and provides that partial nullity always leaves the remainder of the contract intact.\"",
+      "expected_output": "Art. 20 Abs. 1 OR supports the nullity claim but Abs. 2 qualifies partial nullity ('always' is wrong) -> status PARTIAL (disclosed, does not block).",
+      "files": []
+    },
+    {
+      "id": "doc-01",
+      "group": "doctrine-structured",
+      "prompt": "Run citation-content-verify on this draft: \"The onlinekommentar commentary on Art. 97 OR analyses contractual liability for non-performance.\"",
+      "expected_output": "onlinekommentar has a commentary for Art. 97 OR and it supports the claim -> status MATCH or PARTIAL, delivery clear.",
+      "files": []
+    }
+  ]
+}
