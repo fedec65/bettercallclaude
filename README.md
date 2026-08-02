@@ -11,7 +11,7 @@
 
 <p align="center"><strong>Swiss Legal Intelligence Plugin for Cowork Desktop</strong></p>
 
-BetterCallClaude transforms legal research, case strategy, and document drafting for Swiss lawyers. It provides deep integration with Swiss legal databases, multi-lingual analysis (DE/FR/IT/EN), and built-in Anwaltsgeheimnis (attorney-client privilege) protection -- 20 agents, 19 commands, 14 skills, and 9 MCP servers covering BGE/ATF/DTF precedent research, litigation strategy, adversarial analysis, legal drafting, citation verification, document intelligence, and CAS/TAS sports arbitration across all 26 Swiss cantons.
+BetterCallClaude transforms legal research, case strategy, and document drafting for Swiss lawyers. It provides deep integration with Swiss legal databases, multi-lingual analysis (DE/FR/IT/EN), and built-in Anwaltsgeheimnis (attorney-client privilege) protection -- 20 agents, 26 commands, 15 skills, and 9 MCP servers covering BGE/ATF/DTF precedent research, litigation strategy, adversarial analysis, legal drafting, citation verification, document intelligence, and CAS/TAS sports arbitration across all 26 Swiss cantons.
 
 > **Claude Code CLI users**: this repository is Cowork Desktop only. The CLI version is at [fedec65/bettercallclaude-cli](https://github.com/fedec65/bettercallclaude-cli).
 
@@ -25,16 +25,17 @@ BetterCallClaude provides a structured methodology for handling legal work with 
 
 ---
 
-## What's New in v4.9.3
+## What's New in v4.9.4
 
-**v4.9.3 — Critical fix: agents can now reach the MCP connectors in Cowork.** The tool names declared in agent, skill, and command frontmatter were corrected to the plugin-scoped format required by Claude Cowork Desktop.
+**v4.9.4 — Substantive citation verification: BCC now checks that citations actually say what your draft claims they say.** Format validation alone cannot catch the most dangerous LLM failure mode in legal work: a perfectly formatted citation that is fabricated, or that exists but does not support the assertion it is attached to.
 
-- **Root cause** — v4.9.1/v4.9.2 added `tools:` frontmatter using `mcp__bettercallclaude-http-<server>__<tool>` names, but Cowork expects `mcp__plugin_bettercallclaude_<server>__<tool>`. Because the declared names didn't match, agents had no MCP tools available and fell back to web search for citation verification.
-- **Fix** — all 20 agents, 14 skills, and 26 commands now declare correctly scoped tool names (737 references updated). Example: `mcp__plugin_bettercallclaude_bge-search__search_bge`.
-- **Result** — after updating to v4.9.3, agents, skills, and commands can directly invoke the Swiss legal databases (BGE/ATF/DTF search, statute lookup, citation verification, and more).
-- **Update note** — Cowork's GitHub-synced marketplace may not auto-sync for Pro plan users. If the update doesn't appear, remove and re-add the marketplace in Cowork, or see `docs/plugin-update-guide.md` for the manual workaround.
+- **New pipeline stage `citation-content-verify`** — a dedicated skill that runs after a draft is produced and before delivery: every citation is resolved to its canonical ID, checked for existence against the live source (statutes via `fedlex-sparql`, federal case law via `swiss-caselaw`/`entscheidsuche`, commentaries via `onlinekommentar`), and then checked for content support with an entailment judgment against the retrieved passage.
+- **Per-citation verdict** — each citation gets a status: `MATCH`, `PARTIAL`, `MISMATCH`, or `UNVERIFIED`, with the matched source snippet and a confidence score, logged to `bcc-output/<date>/citation-verify.json` for the audit trail.
+- **Delivery gate** — any `UNVERIFIED` or `MISMATCH` citation blocks automatic delivery: the citation must be fixed, explicitly disclaimed, or escalated to human review. No silent pass-through of invented precedents.
+- **Wired into the pipeline** — the `legal-evaluator` runs the gate before its PASS/FAIL scoring, `/legal-loop` includes it in every verdict step, the orchestrator applies it before any delivery, and `/validate` now offers substantive verification in addition to format checks.
+- **Privacy-preserving** — in `strict` privacy mode, claim sentences are never sent to cloud content-checks; verification degrades to existence-only with an explicit privacy-gated note.
 
-**Content counts**: 20 agents, 26 commands, 14 skills, 9 MCP servers in `.mcp.json` (7 remote HTTP on `mcp.bettercallclaude.ch` + `swiss-caselaw` SSE on `mcp.opencaselaw.ch` + `ollama` local STDIO).
+**Content counts**: 20 agents, 26 commands, 15 skills, 9 MCP servers in `.mcp.json` (7 remote HTTP on `mcp.bettercallclaude.ch` + `swiss-caselaw` SSE on `mcp.opencaselaw.ch` + `ollama` local STDIO).
 
 [Full changelog →](CHANGELOG.md)
 
