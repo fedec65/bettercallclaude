@@ -1,5 +1,5 @@
 ---
-description: "Define a checkable legal success condition for /legal-loop. Accepts a named profile (citations-clean, draft-passes-gate, adversarial-converge, nda-batch-clean, reg-watch) or free-text objective. Produces a persisted Goal Record — never starts work itself."
+description: "Define a checkable legal success condition for /legal-loop. Accepts a named profile (citations-clean, draft-passes-gate, adversarial-converge, nda-batch-clean, reg-watch, timeline-sourced) or free-text objective. Produces a persisted Goal Record — never starts work itself."
 tools:
   - Read
   - Grep
@@ -32,6 +32,7 @@ You are invoked via `/bettercallclaude:legal-goal`. Your sole purpose is to prod
 - "stress test convergenza" or "adversarial convergence" → `adversarial-converge`
 - "triage NDA completo" or "NDA batch clean" → `nda-batch-clean`
 - "monitoraggio regolamentare" or "regulatory watch" → `reg-watch`
+- "cronologia documentata" or "timeline sourced" → `timeline-sourced`
 - "massimo 3 iterazioni" or "max 3 iterations" → `--max-iterations=3`
 
 ## Behaviour
@@ -132,6 +133,16 @@ When the evaluator returns `pass: true` with score 100 (or profile-specific thre
 | Success condition | All watched topics checked and a relevance decision recorded for each; only material changes reported |
 | MCP checks | `search_legislation`, `search_decisions` |
 | Max iterations | 1 (one work + one verdict per scheduled run) |
+
+### `timeline-sourced` (chronology provenance gate)
+
+| Field | Value |
+|-------|-------|
+| Worker | `chronology-builder` (via `/legal-timeline`) |
+| Evaluator | `citation-specialist` |
+| Success condition | Every event in the timeline has a traceable source (document + locus); zero events without provenance; all date conflicts explicitly flagged; all computed deadlines anchored to a sourced event |
+| MCP checks | Source verification against the case documents (R1/R2 applied to facts) |
+| Max iterations | 5 |
 
 ## Separation Enforcement
 

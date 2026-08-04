@@ -163,6 +163,13 @@ Score = (classified + fully flagged items / total items) * 100. Pass threshold: 
 
 Score = (topics checked with relevance decision / total watched topics) * 100. Pass threshold: 100.
 
+### `timeline-sourced`
+1. Every event in the timeline must have a traceable source (document + locus) — R1/R2 applied to facts. Verify each event's source against the case documents.
+2. Every date conflict must be explicitly flagged with both dates and their sources.
+3. Every deadline marker must anchor to a sourced event (no floating deadlines).
+
+Score = (events with verified source / total events) * 100. Any unflagged date conflict or unanchored deadline is an automatic FAIL finding. Pass threshold: 100 (zero tolerance for unsourced events).
+
 ## Findings Feedback Format
 
 When `pass: false`, the findings list is fed back to the worker as instructions for the next iteration. Each FAIL finding must be actionable:

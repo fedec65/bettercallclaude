@@ -1,4 +1,4 @@
-[![Version](https://img.shields.io/badge/version-4.9.4-blue)](https://github.com/fedec65/bettercallclaude/releases)
+[![Version](https://img.shields.io/badge/version-4.9.5-blue)](https://github.com/fedec65/bettercallclaude/releases)
 [![License: AGPL-3.0](https://img.shields.io/badge/license-AGPL--3.0-green)](LICENSE)
 [![Platform](https://img.shields.io/badge/platform-Cowork%20Desktop-orange)](https://claude.ai)
 [![Website](https://img.shields.io/badge/web-bettercallclaude.ch-brightgreen)](https://bettercallclaude.ch)
@@ -11,7 +11,7 @@
 
 <p align="center"><strong>Swiss Legal Intelligence Plugin for Cowork Desktop</strong></p>
 
-BetterCallClaude transforms legal research, case strategy, and document drafting for Swiss lawyers. It provides deep integration with Swiss legal databases, multi-lingual analysis (DE/FR/IT/EN), and built-in Anwaltsgeheimnis (attorney-client privilege) protection -- 20 agents, 26 commands, 15 skills, and 9 MCP servers covering BGE/ATF/DTF precedent research, litigation strategy, adversarial analysis, legal drafting, citation verification, document intelligence, and CAS/TAS sports arbitration across all 26 Swiss cantons.
+BetterCallClaude transforms legal research, case strategy, and document drafting for Swiss lawyers. It provides deep integration with Swiss legal databases, multi-lingual analysis (DE/FR/IT/EN), and built-in Anwaltsgeheimnis (attorney-client privilege) protection -- 21 agents, 27 commands, 16 skills, and 9 MCP servers covering BGE/ATF/DTF precedent research, litigation strategy, adversarial analysis, legal drafting, citation verification, document intelligence, and CAS/TAS sports arbitration across all 26 Swiss cantons.
 
 > **Claude Code CLI users**: this repository is Cowork Desktop only. The CLI version is at [fedec65/bettercallclaude-cli](https://github.com/fedec65/bettercallclaude-cli).
 
@@ -25,17 +25,17 @@ BetterCallClaude provides a structured methodology for handling legal work with 
 
 ---
 
-## What's New in v4.9.4
+## What's New in v4.9.5
 
-**v4.9.4 — Substantive citation verification: BCC now checks that citations actually say what your draft claims they say.** Format validation alone cannot catch the most dangerous LLM failure mode in legal work: a perfectly formatted citation that is fabricated, or that exists but does not support the assertion it is attached to.
+**v4.9.5 — `/legal-timeline`: the case chronology a lawyer would build, with a source for every single fact.** Point it at a folder of case documents — contracts, correspondence, court filings, expert reports — and get a legal timeline where no event exists without provenance.
 
-- **New pipeline stage `citation-content-verify`** — a dedicated skill that runs after a draft is produced and before delivery: every citation is resolved to its canonical ID, checked for existence against the live source (statutes via `fedlex-sparql`, federal case law via `swiss-caselaw`/`entscheidsuche`, commentaries via `onlinekommentar`), and then checked for content support with an entailment judgment against the retrieved passage.
-- **Per-citation verdict** — each citation gets a status: `MATCH`, `PARTIAL`, `MISMATCH`, or `UNVERIFIED`, with the matched source snippet and a confidence score, logged to `bcc-output/<date>/citation-verify.json` for the audit trail.
-- **Delivery gate** — any `UNVERIFIED` or `MISMATCH` citation blocks automatic delivery: the citation must be fixed, explicitly disclaimed, or escalated to human review. No silent pass-through of invented precedents.
-- **Wired into the pipeline** — the `legal-evaluator` runs the gate before its PASS/FAIL scoring, `/legal-loop` includes it in every verdict step, the orchestrator applies it before any delivery, and `/validate` now offers substantive verification in addition to format checks.
-- **Privacy-preserving** — in `strict` privacy mode, claim sentences are never sent to cloud content-checks; verification degrades to existence-only with an explicit privacy-gated note.
+- **No event without a source** — every timeline entry carries its document and locus (R1/R2 discipline applied to facts). The deterministic render script validates the schema and *refuses* to produce output containing unsourced events.
+- **Contested facts, made visible** — each event is marked `undisputed`, `alleged`, or `contested`, with party attribution ("A alleges delivery on 3.3.; B disputes"). Date conflicts are recorded with BOTH dates and their sources — never silently resolved.
+- **Evidentiary gaps and deadlines** — undocumented periods of 30+ days are flagged as gaps; `--deadlines` computes procedural time limits via the `compute_deadlines` MCP tool (ZPO/BGG, cantonal holiday calendar), each marker anchored to a sourced event.
+- **Three outputs** — a sortable Markdown table, a self-contained interactive HTML timeline (colour-coded by status, gap bands, deadline markers), and a Word export for the case file, all under `bcc-output/timeline/`.
+- **Self-verifying** — the new `timeline-sourced` goal-loop profile pairs the `chronology-builder` worker with the citation-specialist evaluator: the loop does not close until every event has a traceable source, every conflict is flagged, and every deadline is anchored.
 
-**Content counts**: 20 agents, 26 commands, 15 skills, 9 MCP servers in `.mcp.json` (7 remote HTTP on `mcp.bettercallclaude.ch` + `swiss-caselaw` SSE on `mcp.opencaselaw.ch` + `ollama` local STDIO).
+**Content counts**: 21 agents, 27 commands, 16 skills, 9 MCP servers in `.mcp.json` (7 remote HTTP on `mcp.bettercallclaude.ch` + `swiss-caselaw` SSE on `mcp.opencaselaw.ch` + `ollama` local STDIO).
 
 [Full changelog →](CHANGELOG.md)
 

@@ -26,7 +26,7 @@ BetterCallClaude provides Swiss legal intelligence through three interfaces:
 
 ---
 
-## Commands (19)
+## Commands (27)
 
 ### Core Commands
 
@@ -50,6 +50,7 @@ BetterCallClaude provides Swiss legal intelligence through three interfaces:
 | Command | Description |
 |---------|-------------|
 | `/bettercallclaude:doc-analyze` | Analyze legal documents: issues, clauses, citations, compliance |
+| `/bettercallclaude:legal-timeline` | Build a sourced case chronology: provenance per event, contested facts, date conflicts, gaps, deadlines |
 | `/bettercallclaude:precedent` | Search and analyze BGE precedent chains and evolution |
 | `/bettercallclaude:validate` | Batch validate Swiss legal citations for format and existence |
 | `/bettercallclaude:adversarial` | Three-agent adversarial analysis: advocate, adversary, judge |
@@ -75,7 +76,7 @@ BetterCallClaude provides Swiss legal intelligence through three interfaces:
 
 ---
 
-## Agents (20)
+## Agents (21)
 
 ### Core Pipeline Agents
 
@@ -86,6 +87,7 @@ BetterCallClaude provides Swiss legal intelligence through three interfaces:
 | drafter | Legal document drafting in Swiss format |
 | citation | BGE citation verification and multi-lingual formatting |
 | compliance | FINMA, AML/KYC, regulatory compliance checks |
+| chronology-builder | Sourced timeline event extraction from case documents |
 
 ### Specialized Domain Agents
 
@@ -109,7 +111,7 @@ BetterCallClaude provides Swiss legal intelligence through three interfaces:
 
 ---
 
-## Skills (14)
+## Skills (16)
 
 Skills activate automatically when Claude detects relevant context.
 
@@ -119,16 +121,18 @@ Skills activate automatically when Claude detects relevant context.
 | swiss-legal-drafting | Document creation, contract drafting requests |
 | swiss-legal-strategy | Litigation planning, risk assessment questions |
 | swiss-legal-translation | Translation requests between DE/FR/IT/EN legal texts |
-| swiss-document-analysis | Legal document review, clause analysis, compliance checks |
+| swiss-document-analysis | Legal document review, clause analysis, NDA triage |
 | swiss-citation-formats | Citation formatting, BGE/ATF/DTF references in text |
-| swiss-jurisdictions | Canton-specific questions, federal vs. cantonal law |
+| citation-content-verify | Substantive check that citations exist AND support the claim (pre-delivery gate) |
+| legal-chronology | Case chronology from documents: sourced events, contested facts, date conflicts, gaps, deadlines |
 | adversarial-analysis | Three-agent adversarial legal analysis requests |
-| output-summarization | Multi-agent pipeline output consolidation |
-| legal-query-refinement | Vague legal queries needing Socratic refinement |
 | data-protection-law | DSG/FADP, GDPR adequacy, privacy compliance questions |
 | compliance-frameworks | FINMA, AML/KYC, financial regulatory compliance |
 | privacy-routing | Sensitive client data patterns detected (Anwaltsgeheimnis) |
-| legal-briefing | Complex queries needing structured intake before agent execution |
+| legal-intake | Complex queries needing structured intake or refinement before execution |
+| legal-5step-framework | End-to-end 5-step legal analysis pipeline |
+| legal-evaluator | Verdict engine for /legal-loop worker-evaluator cycles |
+| shared (output-conventions) | Deliverable-as-file output conventions for all commands |
 
 ---
 
@@ -208,7 +212,7 @@ Skills activate automatically when Claude detects relevant context.
 
 ---
 
-**BetterCallClaude v4.9.4 -- Swiss Legal Intelligence for Cowork Desktop**
+**BetterCallClaude v4.9.5 -- Swiss Legal Intelligence for Cowork Desktop**
 
 If the user provided additional input, respond to it in the context of this help reference.
 

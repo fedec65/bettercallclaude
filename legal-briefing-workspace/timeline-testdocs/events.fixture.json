@@ -1,0 +1,97 @@
+{
+  "case": {
+    "title": "Meier ./. Muster AG (test fixture — fictitious)",
+    "canton": "ZH"
+  },
+  "events": [
+    {
+      "id": "evt-0001",
+      "date": "2024-01-15",
+      "precision": "day",
+      "event": "Kaufvertrag über eine CNC-Fräsmaschine FX-200 zwischen Muster AG und Peter Meier geschlossen.",
+      "source": [{"doc": "01-vertrag", "locus": "Ziff. 1"}],
+      "status": "undisputed",
+      "parties": ["Muster AG", "Meier"],
+      "tags": ["contract"]
+    },
+    {
+      "id": "evt-0002",
+      "date": "2024-03-03",
+      "precision": "day",
+      "event": "Lieferung der Maschine an das Werk des Käufers in Wädenswil (vertraglich vereinbarter Termin).",
+      "source": [
+        {"doc": "01-vertrag", "locus": "Ziff. 4.1"},
+        {"doc": "02-brief", "locus": "p. 1, al. 1"}
+      ],
+      "status": "contested",
+      "attribution": "Muster AG asserts delivery took place (on 10.3. per its letter); the contractual date is 3.3.2024.",
+      "parties": ["Muster AG", "Meier"],
+      "conflicts": [
+        {"date": "2024-03-03", "source": {"doc": "01-vertrag", "locus": "Ziff. 4.1"}, "note": "contractual delivery date"},
+        {"date": "2024-03-10", "source": {"doc": "02-brief", "locus": "p. 1, al. 1"}, "note": "delivery date as stated by Muster AG"}
+      ],
+      "tags": ["delivery"]
+    },
+    {
+      "id": "evt-0003",
+      "date": "2024-03-12",
+      "precision": "day",
+      "event": "Muster AG informe Meier que la livraison a été effectuée (lettre du 12 mars 2024).",
+      "source": [{"doc": "02-brief", "locus": "p. 1"}],
+      "status": "undisputed",
+      "parties": ["Muster AG", "Meier"],
+      "tags": ["correspondence"]
+    },
+    {
+      "id": "evt-0004",
+      "date": "2024-03-20",
+      "precision": "day",
+      "event": "Der Kläger stellt einen Mangel an der Hauptspindel fest und meldet ihn der Beklagten.",
+      "source": [{"doc": "03-klageschrift", "locus": "Sachverhalt Ziff. 2"}],
+      "status": "alleged",
+      "attribution": "Meier alleges defect discovered and reported on 20.3.2024; Muster AG has not addressed this date.",
+      "parties": ["Meier", "Muster AG"],
+      "tags": ["defect", "notice"]
+    },
+    {
+      "id": "evt-0005",
+      "date": "2024-04-02",
+      "precision": "day",
+      "event": "Klageerhebung durch Meier beim Bezirksgericht Horgen (Wandlung, eventualiter Minderung).",
+      "source": [{"doc": "03-klageschrift", "locus": "Rubrum"}],
+      "status": "undisputed",
+      "parties": ["Meier", "Muster AG"],
+      "tags": ["filing"]
+    },
+    {
+      "id": "evt-0006",
+      "date": "2024-04-18",
+      "precision": "day",
+      "event": "Die Beklagte bestreitet in der Klageantwort, dass die Maschine bei Lieferung mangelhaft gewesen sei.",
+      "source": [{"doc": "03-klageschrift", "locus": "Sachverhalt Ziff. 3"}],
+      "status": "contested",
+      "attribution": "Meier alleges the machine was defective at delivery; Muster AG disputes this.",
+      "parties": ["Muster AG", "Meier"],
+      "tags": ["defect", "answer"]
+    },
+    {
+      "id": "evt-0007",
+      "date": "2024-04-15",
+      "precision": "day",
+      "event": "Förmliche Eröffnung des Urteils des Bezirksgerichts Horgen an die Parteien (Zustellung per Einschreiben).",
+      "source": [{"doc": "04-urteil-notifikation", "locus": "Zustellungsnachweis"}],
+      "status": "undisputed",
+      "parties": ["Meier", "Muster AG"],
+      "deadline_markers": [
+        {
+          "kind": "procedural",
+          "label": "Berufung an das Obergericht ZH (30 Tage, Art. 311 Abs. 1 ZPO)",
+          "due": "2024-05-15",
+          "basis": "compute_deadlines",
+          "anchored_to": "evt-0007"
+        }
+      ],
+      "tags": ["notification", "judgment"]
+    }
+  ]
+}

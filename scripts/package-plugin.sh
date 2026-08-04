@@ -125,6 +125,15 @@ else
 fi
 cp "$REPO_ROOT/scripts/fetch-onlinekommentar-data.js" "$STAGING_DIR/scripts/" 2>/dev/null || true
 
+# Copy the legal-chronology renderer (deterministic validator + md/html/docx
+# renderer used by /legal-timeline). Required at runtime by the command.
+if [ -f "$PLUGIN_ROOT/scripts/timeline-render.mjs" ]; then
+  cp "$PLUGIN_ROOT/scripts/timeline-render.mjs" "$STAGING_DIR/scripts/"
+else
+  echo "ERROR: Missing required renderer: bettercallclaude/scripts/timeline-render.mjs"
+  exit 1
+fi
+
 # Copy plugin-facing documentation. Prefer the copies inside bettercallclaude/
 # (they are written for end users of the plugin); fall back to repo-root files.
 for doc in README.md CONNECTORS.md LICENSE; do

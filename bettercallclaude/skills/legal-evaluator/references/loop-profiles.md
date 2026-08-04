@@ -162,6 +162,36 @@ notes: |
 
 ---
 
+## Profile: `timeline-sourced`
+
+**Chronology provenance gate**
+
+```yaml
+profile: timeline-sourced
+title: "Timeline Provenance — Zero Unsourced Events"
+worker: chronology-builder (via /legal-timeline)
+evaluator: citation-specialist
+success_condition: |
+  Every event in the timeline has a traceable source (document + locus);
+  zero events without provenance (R1/R2 applied to facts);
+  all date conflicts explicitly flagged with both dates and their sources;
+  all computed deadline markers anchored to a sourced event.
+mcp_checks:
+  - source verification against the case documents (document + locus lookup)
+  - validate_citation (for any legal citation appearing in event text)
+max_iterations: 5
+pass_threshold: 100
+scoring: "(events with verified source / total events) * 100; any unflagged date conflict or unanchored deadline is an automatic FAIL"
+notes: |
+  The chronology-builder extracts; the citation-specialist verifies provenance.
+  R1/R2 discipline applied to facts: an event without document+locus is the
+  factual analogue of a fabricated citation and can never pass.
+  On fail: each unsourced event, unflagged conflict, or floating deadline is
+  returned to the worker as an actionable finding.
+```
+
+---
+
 ## Custom Goals (Free-Text)
 
 When `/legal-goal` receives free-text instead of a profile name, it should:

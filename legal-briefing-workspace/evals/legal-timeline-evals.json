@@ -1,0 +1,62 @@
+{
+  "skill_name": "legal-chronology",
+  "description": "Acceptance eval set for /legal-timeline (spec §8). Test documents in legal-briefing-workspace/timeline-testdocs/ contain one planned date conflict (delivery 3.3 vs 10.3.2024), one planned contested event (defect at delivery), one multilingual duplicate (DE contract + FR letter), a 48-day documentation gap (15.1 → 3.3.2024), and one notification event feeding compute_deadlines (Berufung, canton ZH).",
+  "evals": [
+    {
+      "id": "tl-01",
+      "group": "provenance",
+      "prompt": "Run /legal-timeline on legal-briefing-workspace/timeline-testdocs/ and show events.json.",
+      "expected_output": "Every event in events.json has a non-empty source array with doc + locus. No event without provenance appears in any output. The render script validate step passes.",
+      "files": []
+    },
+    {
+      "id": "tl-02",
+      "group": "date-conflict",
+      "prompt": "Check how the delivery event is represented in the timeline.",
+      "expected_output": "The delivery event carries a conflicts array with BOTH dates: 2024-03-03 (01-vertrag, Ziff. 4.1) and 2024-03-10 (02-brief, p. 1). The discrepancy is explicitly flagged in timeline.md and timeline.html; neither date is silently picked.",
+      "files": []
+    },
+    {
+      "id": "tl-03",
+      "group": "contested",
+      "prompt": "Check the status of the defect-at-delivery assertion.",
+      "expected_output": "Status is 'contested' with attribution recording that Meier alleges the machine was defective at delivery and Muster AG disputes it.",
+      "files": []
+    },
+    {
+      "id": "tl-04",
+      "group": "multilingual-merge",
+      "prompt": "Check how the DE contract and FR letter delivery references are merged.",
+      "expected_output": "One single delivery event with TWO sources (01-vertrag Ziff. 4.1 and 02-brief p. 1) — not two separate events.",
+      "files": []
+    },
+    {
+      "id": "tl-05",
+      "group": "gap",
+      "prompt": "Check whether evidentiary gaps are flagged.",
+      "expected_output": "The period 2024-01-15 → 2024-03-03 (48 days with no documented events) is flagged as an evidentiary gap in all outputs (>= 30 day rule).",
+      "files": []
+    },
+    {
+      "id": "tl-06",
+      "group": "deadlines",
+      "prompt": "Run /legal-timeline --deadlines --canton=ZH and check the Berufung marker.",
+      "expected_output": "A procedural deadline marker anchored to the notification event (15.4.2024) exists, computed via compute_deadlines (zpo_berufung_30, canton ZH): due 2024-05-15, labelled with its basis (Art. 311 Abs. 1 ZPO).",
+      "files": []
+    },
+    {
+      "id": "tl-07",
+      "group": "formats",
+      "prompt": "Verify the generated outputs.",
+      "expected_output": "timeline.md (table), timeline.html (interactive, self-contained, status colour coding), and timeline.docx all exist under bcc-output/timeline/.",
+      "files": []
+    },
+    {
+      "id": "tl-08",
+      "group": "negative",
+      "prompt": "Inject an event without source into events.json and run the render script validate step.",
+      "expected_output": "Validation fails and refuses to render: the unsourced event is reported as rejected. No output is produced with the unsourced event.",
+      "files": []
+    }
+  ]
+}

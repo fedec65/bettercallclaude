@@ -4,6 +4,24 @@ All notable changes to BetterCallClaude will be documented in this file.
 
 ---
 
+## [4.9.5] - 2026-08-02
+
+### Added
+- **`/legal-timeline` — sourced legal chronology from case documents.** Turns a folder of case documents (contracts, correspondence, court filings, expert reports) into a legal timeline the way a lawyer reads a case. New command `commands/legal-timeline.md`, skill `skills/legal-chronology` (+ 4 references: event schema, date normalisation DE/FR/IT/EN, deadline mapping, party register), and agent `agents/chronology-builder.md` (isolated extraction worker).
+- **Mandatory provenance (R1/R2 applied to facts)** — every event carries document + locus; an event without a source never appears in any output. The deterministic renderer `scripts/timeline-render.mjs` (Node, zero dependencies) validates the schema and refuses to render unsourced events.
+- **Contested-fact model** — per-event status `undisputed` / `alleged` / `contested` with party attribution; date conflicts recorded with BOTH dates and their sources, never silently resolved; evidentiary gaps (≥ 30 undocumented days) flagged.
+- **Deadline markers** — procedural deadlines computed via `legal-persona` `compute_deadlines` (ZPO 142-149, BGG 46/100-101, cantonal holiday calendar); substantive limitation (Verjährung) from the skill's mapping table, always labelled indicative. Every marker anchors to a sourced event.
+- **Three output formats** under `bcc-output/timeline/`: `timeline.md` (table), `timeline.html` (self-contained interactive view, colour-coded by status, gap bands, deadline markers, source click-through), `timeline.docx` (case-file export, minimal OOXML writer in pure JS).
+- **`timeline-sourced` goal-loop profile** — worker `chronology-builder`, evaluator `citation-specialist`: the loop closes only when every event has a traceable source, all conflicts are flagged, and all deadlines are anchored. Added to `/legal-goal`, `legal-evaluator` and `references/loop-profiles.md`.
+- **Acceptance test set** — `legal-briefing-workspace/timeline-testdocs/` (fictitious case with one planned date conflict, one contested event, a DE/FR duplicate, a 48-day gap, one notification event) + `legal-briefing-workspace/evals/legal-timeline-evals.json` (8 cases mapped to the acceptance criteria).
+
+### Notes for maintainers
+- Output location follows the spec (`bcc-output/timeline/`) as a documented exception to the dated-folder convention: the chronology is a living case artifact updated via `--merge`.
+- `compute_deadlines` does not cover substantive Verjährung; Verjährung markers are computed from the mapping table and explicitly marked indicative in every output.
+- The docx writer is intentionally minimal (table + summary); md/html remain the authoritative outputs.
+
+---
+
 ## [4.9.4] - 2026-08-02
 
 ### Added
