@@ -4,6 +4,17 @@ All notable changes to BetterCallClaude will be documented in this file.
 
 ---
 
+## [4.9.6] - 2026-08-04
+
+### Fixed
+- **Privacy hook silently broken on plugin paths containing spaces** — `hooks/hooks.json` invoked `node ${CLAUDE_PLUGIN_ROOT}/scripts/privacy-check.js` without quoting the variable. On installations whose plugin root path contains spaces (user names with spaces, system paths), the shell split the command and the PreToolUse Anwaltsgeheimnis scan did not run, with no visible error. The hook command now quotes `"${CLAUDE_PLUGIN_ROOT}/..."`. Same bug class fixed in the Italian plugin v1.2.6 — thanks to that report.
+- **Same quoting bug in v4.9.5 timeline commands** — the `timeline-render.mjs` invocations in `commands/legal-timeline.md` and `skills/legal-chronology/SKILL.md` are now quoted too. (`.mcp.json` uses argv-array form and was never affected.)
+
+### Added
+- **Regression guards** — new standalone tests in `scripts/privacy-check.test.js` (hooks.json command quoting + no unquoted `${CLAUDE_PLUGIN_ROOT}` in shipped shell snippets) and a CI step that fails the build on any unquoted occurrence.
+
+---
+
 ## [4.9.5] - 2026-08-02
 
 ### Added

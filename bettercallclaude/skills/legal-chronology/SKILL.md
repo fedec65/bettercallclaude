@@ -56,8 +56,8 @@ Merge candidates:
 Events go to `bcc-output/timeline/events.json`, then render deterministically:
 
 ```bash
-node ${CLAUDE_PLUGIN_ROOT}/scripts/timeline-render.mjs validate bcc-output/timeline/events.json
-node ${CLAUDE_PLUGIN_ROOT}/scripts/timeline-render.mjs render bcc-output/timeline/events.json --outdir bcc-output/timeline --formats all
+node "${CLAUDE_PLUGIN_ROOT}/scripts/timeline-render.mjs" validate bcc-output/timeline/events.json
+node "${CLAUDE_PLUGIN_ROOT}/scripts/timeline-render.mjs" render bcc-output/timeline/events.json --outdir bcc-output/timeline --formats all
 ```
 
 Outputs (per `--format`, default `all`):

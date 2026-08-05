@@ -81,6 +81,22 @@ jobs:
             servers.forEach(s => console.log(' -', s));
           "
 
+      - name: Check hook command quoting
+        run: |
+          node -e "
+            const fs = require('fs');
+            const files = ['bettercallclaude/hooks/hooks.json','bettercallclaude/commands/legal-timeline.md','bettercallclaude/skills/legal-chronology/SKILL.md'];
+            let bad = 0;
+            for (const f of files) {
+              const text = fs.readFileSync(f, 'utf8');
+              const all = (text.match(/\$\{CLAUDE_PLUGIN_ROOT\}/g) || []).length;
+              const quoted = (text.match(/\"\$\{CLAUDE_PLUGIN_ROOT\}/g) || []).length;
+              if (all !== quoted) { console.error('FAIL: unquoted \${CLAUDE_PLUGIN_ROOT} in', f); bad = 1; }
+              else console.log('OK:', f);
+            }
+            process.exit(bad);
+          "
+
       - name: Check skill frontmatter
         run: |
           for skill_dir in bettercallclaude/skills/*/; do

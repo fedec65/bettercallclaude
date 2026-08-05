@@ -578,6 +578,54 @@ t('standard README with "confidential" term is NOT flagged', () => {
   assert.strictEqual(classify(content, '/home/u/repo/README.md'), null);
 });
 
+// -------------------------------------------------------------------------
+// hooks.json command quoting (regression: unquoted CLAUDE_PLUGIN_ROOT breaks
+// the hook on plugin paths containing spaces — same bug fixed in the Italian
+// plugin v1.2.6)
+// -------------------------------------------------------------------------
+
+console.log('privacy-check: hooks.json quoting');
+
+t('hooks.json PreToolUse command quotes ${CLAUDE_PLUGIN_ROOT}', () => {
+  const fs = require('node:fs');
+  const path = require('node:path');
+  const hooksPath = path.join(__dirname, '..', 'hooks', 'hooks.json');
+  const hooks = JSON.parse(fs.readFileSync(hooksPath, 'utf8'));
+  const commands = (hooks.hooks.PreToolUse || [])
+    .flatMap((m) => m.hooks || [])
+    .map((h) => h.command)
+    .filter(Boolean);
+  assert.ok(commands.length > 0, 'no PreToolUse commands found');
+  for (const cmd of commands) {
+    assert.ok(
+      cmd.includes('"${CLAUDE_PLUGIN_ROOT}'),
+      'unquoted ${CLAUDE_PLUGIN_ROOT} in hook command: ' + cmd
+    );
+  }
+});
+
+t('no unquoted ${CLAUDE_PLUGIN_ROOT} in shipped shell snippets', () => {
+  const fs = require('node:fs');
+  const path = require('node:path');
+  const root = path.join(__dirname, '..');
+  const targets = [
+    path.join(root, 'hooks', 'hooks.json'),
+    path.join(root, 'commands', 'legal-timeline.md'),
+    path.join(root, 'skills', 'legal-chronology', 'SKILL.md'),
+  ];
+  for (const file of targets) {
+    const text = fs.readFileSync(file, 'utf8');
+    // every ${CLAUDE_PLUGIN_ROOT} occurrence must be preceded by a double quote
+    const occurrences = text.match(/\$\{CLAUDE_PLUGIN_ROOT\}/g) || [];
+    const quoted = text.match(/"\$\{CLAUDE_PLUGIN_ROOT\}/g) || [];
+    assert.strictEqual(
+      occurrences.length,
+      quoted.length,
+      'unquoted ${CLAUDE_PLUGIN_ROOT} found in ' + file
+    );
+  }
+});
+
 console.log('');
 console.log(passed + ' passed, ' + failed + ' failed');
 process.exit(failed === 0 ? 0 : 1);

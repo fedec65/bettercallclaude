@@ -52,8 +52,8 @@ Map events per `references/deadline-mapping.md`:
 Write `bcc-output/timeline/events.json`, then:
 
 ```bash
-node ${CLAUDE_PLUGIN_ROOT}/scripts/timeline-render.mjs validate bcc-output/timeline/events.json
-node ${CLAUDE_PLUGIN_ROOT}/scripts/timeline-render.mjs render bcc-output/timeline/events.json --outdir bcc-output/timeline --formats <table|visual|docx|all>
+node "${CLAUDE_PLUGIN_ROOT}/scripts/timeline-render.mjs" validate bcc-output/timeline/events.json
+node "${CLAUDE_PLUGIN_ROOT}/scripts/timeline-render.mjs" render bcc-output/timeline/events.json --outdir bcc-output/timeline --formats <table|visual|docx|all>
 ```
 
 If `validate` rejects events (missing source), fix or drop them before rendering — never bypass.
