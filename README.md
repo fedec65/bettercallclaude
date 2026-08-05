@@ -25,15 +25,15 @@ BetterCallClaude provides a structured methodology for handling legal work with 
 
 ---
 
-## What's New in v4.9.5
+## What's New in v4.9.6
 
-**v4.9.5 — `/legal-timeline`: the case chronology a lawyer would build, with a source for every single fact.** Point it at a folder of case documents — contracts, correspondence, court filings, expert reports — and get a legal timeline where no event exists without provenance.
+**v4.9.6 — Critical privacy fix: the Anwaltsgeheimnis hook now works on every installation path.** We found and fixed a silent failure: if your plugin path contains spaces (e.g. a user name with a space), the PreToolUse privacy scan did not run at all — with no error shown. The hook command now quotes the plugin root correctly. If you handle privileged client content, update now.
 
-- **No event without a source** — every timeline entry carries its document and locus (R1/R2 discipline applied to facts). The deterministic render script validates the schema and *refuses* to produce output containing unsourced events.
-- **Contested facts, made visible** — each event is marked `undisputed`, `alleged`, or `contested`, with party attribution ("A alleges delivery on 3.3.; B disputes"). Date conflicts are recorded with BOTH dates and their sources — never silently resolved.
-- **Evidentiary gaps and deadlines** — undocumented periods of 30+ days are flagged as gaps; `--deadlines` computes procedural time limits via the `compute_deadlines` MCP tool (ZPO/BGG, cantonal holiday calendar), each marker anchored to a sourced event.
-- **Three outputs** — a sortable Markdown table, a self-contained interactive HTML timeline (colour-coded by status, gap bands, deadline markers), and a Word export for the case file, all under `bcc-output/timeline/`.
-- **Self-verifying** — the new `timeline-sourced` goal-loop profile pairs the `chronology-builder` worker with the citation-specialist evaluator: the loop does not close until every event has a traceable source, every conflict is flagged, and every deadline is anchored.
+- **What happened** — `hooks/hooks.json` invoked the privacy scanner without quoting `${CLAUDE_PLUGIN_ROOT}`. On spaced paths the shell split the command, the hook failed to load, and privilege detection was silently off.
+- **What else was fixed** — the same quoting bug in the v4.9.5 `/legal-timeline` render commands; regression guards added (standalone tests + a CI check that fails the build on any unquoted occurrence).
+- **Thanks** — the same bug was first spotted and fixed in the Italian plugin (v1.2.6); their report brought it to our attention here.
+
+**Also in recent releases — v4.9.5 `/legal-timeline`**: build a sourced case chronology from your case documents: every event carries its document and locus, contested facts and date conflicts are made visible (never silently resolved), evidentiary gaps of 30+ days are flagged, and procedural deadlines are computed via MCP with cantonal holiday calendars. Three outputs (Markdown table, interactive HTML, Word export) under `bcc-output/timeline/`.
 
 **Content counts**: 21 agents, 27 commands, 16 skills, 9 MCP servers in `.mcp.json` (7 remote HTTP on `mcp.bettercallclaude.ch` + `swiss-caselaw` SSE on `mcp.opencaselaw.ch` + `ollama` local STDIO).
 
