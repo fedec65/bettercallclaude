@@ -52,6 +52,9 @@ in chat the resolution summary and the updated frontier. See `skills/shared/SKIL
 
 ## Pre-Flight Checks
 
+0. **List mode.** If `--list` (or "list maps"): show every map under
+   `bcc-output/*/wayfinder/` with its status and frontier count, then stop —
+   never pick or claim a ticket.
 1. **Map exists.** If none found: `ERROR: No wayfinder map found. Run /bettercallclaude:legal-chart first.`
 2. **Map not handed off.** If `status: handed-off`, show the map summary and stop — the matter is in execution.
 3. **Privacy mode loaded** from map frontmatter; `classifier` respected without re-probing.

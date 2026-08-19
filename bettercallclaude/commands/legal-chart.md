@@ -5,6 +5,7 @@ tools:
   - Grep
   - Glob
   - Bash
+  - Task
   - WebSearch
   - WebFetch
   - mcp__plugin_bettercallclaude_bge-search__search_bge
