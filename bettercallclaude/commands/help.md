@@ -26,7 +26,7 @@ BetterCallClaude provides Swiss legal intelligence through three interfaces:
 
 ---
 
-## Commands (27)
+## Commands (29)
 
 ### Core Commands
 
@@ -61,6 +61,8 @@ BetterCallClaude provides Swiss legal intelligence through three interfaces:
 |---------|-------------|
 | `/bettercallclaude:workflow` | Define and execute multi-agent pipelines |
 | `/bettercallclaude:briefing` | Structured pre-execution briefing with specialist panel and plan building |
+| `/bettercallclaude:legal-chart` | Chart a big/foggy matter as a wayfinder decision map |
+| `/bettercallclaude:legal-way` | Work one decision ticket from a wayfinder map |
 | `/bettercallclaude:translate` | Translate legal documents between DE, FR, IT, EN |
 
 ### Reference Commands
@@ -111,7 +113,7 @@ BetterCallClaude provides Swiss legal intelligence through three interfaces:
 
 ---
 
-## Skills (16)
+## Skills (17)
 
 Skills activate automatically when Claude detects relevant context.
 
@@ -132,6 +134,7 @@ Skills activate automatically when Claude detects relevant context.
 | legal-intake | Complex queries needing structured intake or refinement before execution |
 | legal-5step-framework | End-to-end 5-step legal analysis pipeline |
 | legal-evaluator | Verdict engine for /legal-loop worker-evaluator cycles |
+| legal-wayfinder | Decision-map decomposition for matters too big or foggy for one session |
 | shared (output-conventions) | Deliverable-as-file output conventions for all commands |
 
 ---
@@ -212,7 +215,7 @@ Skills activate automatically when Claude detects relevant context.
 
 ---
 
-**BetterCallClaude v4.9.6 -- Swiss Legal Intelligence for Cowork Desktop**
+**BetterCallClaude v4.10.0 -- Swiss Legal Intelligence for Cowork Desktop**
 
 If the user provided additional input, respond to it in the context of this help reference.
 

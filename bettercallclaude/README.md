@@ -6,7 +6,7 @@ BetterCallClaude is a plugin for legal professionals working in Cowork or Claude
 
 The plugin covers the full spectrum of Swiss legal work: BGE/ATF/DTF precedent research, case strategy development with risk assessment, adversarial legal analysis, compliance and data protection advisory, fiscal and corporate law expertise, real estate law, legal drafting with jurisdiction-aware templates, legal translation, and citation verification across all 26 Swiss cantons. Privacy compliance with Anwaltsgeheimnis (Art. 321 StGB) is enforced automatically through a pre-tool-use hook that detects privileged content before it leaves the local environment.
 
-**Version**: 4.9.6 -- 21 agents, 27 commands, 16 skills, 9 MCP servers.
+**Version**: 4.10.0 -- 21 agents, 29 commands, 17 skills, 9 MCP servers.
 
 > Love BetterCallClaude? Support the project — [**Buy me a coffee**](https://buymeacoffee.com/federicocesconi) ☕
 
@@ -18,7 +18,7 @@ BetterCallClaude can be installed through several channels.
 
 ### Claude Cowork (Recommended)
 
-Visit the installation page at **[bettercallclaude.ai/desktop](https://bettercallclaude.ai/desktop)** for guided setup instructions. The page walks you through installing the plugin directly in Claude Cowork with a few clicks.
+Follow the **[BetterCallClaude Tutorial](https://github.com/fedec65/bettercallclaude_tutorial)** for guided setup instructions with screenshots. The tutorial walks you through installing the plugin directly in Claude Cowork with a few clicks.
 
 ### From GitHub (Claude Code CLI)
 
@@ -92,6 +92,8 @@ claude --plugin-dir bettercallclaude/
 | `/bettercallclaude:cantonal` | Analyze a legal question under cantonal law for a specific canton. |
 | `/bettercallclaude:adversarial` | Run three-agent adversarial analysis -- advocate builds the case, adversary challenges it, judicial analyst synthesizes. |
 | `/bettercallclaude:briefing` | Structured pre-execution briefing session -- assembles a specialist panel, collects case context, and builds an execution plan before agents start working. Supports resume and depth control. |
+| `/bettercallclaude:legal-chart` | Chart a big or foggy matter as a wayfinder decision map -- destination, decisions so far, fog, out-of-scope -- with one ticket per open decision. Planning only; charting resolves no decisions itself. |
+| `/bettercallclaude:legal-way` | Work one decision ticket from a wayfinder map (research, grilling, prototype, task); emits the handoff pack to execution when every decision is made. Supports `--list` and `--gate`. |
 | `/bettercallclaude:workflow` | Define and execute multi-agent legal workflows (due diligence, litigation prep, contract lifecycle, real estate closing). |
 | `/bettercallclaude:translate` | Translate Swiss legal documents between DE, FR, IT, and EN while preserving legal terminology precision. |
 | `/bettercallclaude:doc-analyze` | Analyze Swiss legal documents -- identify legal issues, extract key clauses, verify citations, assess compliance. |
@@ -148,6 +150,7 @@ Skills are activated automatically when Claude detects relevant legal context in
 | `compliance-frameworks` | FINMA supervision, GwG/AMLA anti-money laundering, FIDLEG/FINIG financial institution licensing, banking secrecy, and cross-border compliance. |
 | `data-protection-law` | nDSG/FADP framework, GDPR adequacy, cantonal data protection laws (IDG/KDSG/LIPAD), DPIA methodology, and cross-border data transfers. |
 | `legal-briefing` | Auto-detects complex queries that benefit from structured intake before agent execution. Suggests briefing sessions when complexity, ambiguity, or pipeline coordination is detected. |
+| `legal-wayfinder` | Decision-map decomposition for matters too big or foggy for one execution plan -- ticket protocol, frontier computation, fog checks, honest termination, and the handoff pack to execution. |
 
 ---
 
@@ -280,6 +283,40 @@ The **briefing session** adds a collaborative intake phase between your query an
 
 # Force briefing on a query that would normally route directly
 /bettercallclaude:legal --briefing Find BGE on Art. 97 OR foreseeability
+```
+
+---
+
+### Wayfinder Decision Maps (New in v4.10.0)
+
+The briefing session assumes the route to your deliverable can be planned now: it collects context and builds an execution plan. Some matters break that assumption. When the case is too big or too **foggy** -- limitation period unclear, forum contested, key evidence not yet obtainable, client's risk appetite unknown -- open decisions must be *made* before any execution plan can be trusted. A plan built over fog just guesses earlier.
+
+**Briefing vs. wayfinder in one line**: `/briefing` plans the *work* when the decisions are clear; `/legal-chart` maps the *decisions* when they are not. They feed each other: a fog check in the briefing routes oversized matters to the chart, and the chart's early exit (matter is actually clear) sends you back to briefing or `/legal-5step`.
+
+**How it works**:
+
+1. **Chart** (`/legal-chart`) -- grill the attorney breadth-first to pin the deliverable ("file-ready Klageschrift", "DD report for the SPA"), then write a file-based map under `bcc-output/YYYY-MM-DD-<slug>/wayfinder/`: destination, decisions so far, fog (not yet specified), out-of-scope. Every open decision becomes a ticket (`research`, `grilling`, `prototype`, or `task` type) with explicit `blocked-by` dependencies. Research tickets are fired as parallel subagents during charting; nothing else is resolved.
+
+2. **Work** (`/legal-way`) -- one ticket per invocation. The command claims the lowest-numbered **frontier** ticket (open, unclaimed, all blockers resolved or ruled out) and resolves it by type: AFK research via MCP servers, or human-in-the-loop grilling/prototype for facts only you or the client can supply. Each resolution is recorded on the ticket and as a one-line decision on the map; newly sharp fog graduates into new tickets.
+
+3. **Hand off** -- only when *every* ticket is resolved or ruled out and no fog remains, `/legal-way` emits a **handoff pack** (destination + decisions + linked assets) and routes to `/legal-5step` or the orchestrator. The map never hands off over an unresolved decision -- that is the feature's core guarantee. With `--gate`, a `/legal-goal` record is pre-built so execution runs under the worker-evaluator loop.
+
+**Usage examples**:
+
+```
+# Chart a foggy matter into a decision map
+/bettercallclaude:legal-chart Enforcement of a CHF 2M guarantee against two
+  co-debtors, one possibly insolvent, forum dispute ZH vs. seat of company
+
+# Work the next open decision (or a named one)
+/bettercallclaude:legal-way
+/bettercallclaude:legal-way t03 --privacy=strict
+
+# List existing maps with frontier counts
+/bettercallclaude:legal-way --list
+
+# Hand off under the worker-evaluator loop when the map is clear
+/bettercallclaude:legal-way --gate
 ```
 
 ---

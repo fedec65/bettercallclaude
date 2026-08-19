@@ -4,6 +4,11 @@ All notable changes to BetterCallClaude will be documented in this file.
 
 ---
 
+## [4.10.0] - 2026-08-19
+
+### Added
+- **Wayfinder decision maps for big legal matters** — new `/legal-chart` and `/legal-way` commands plus the `legal-wayfinder` skill: chart a matter too big or too foggy for one session as a file-based map (destination, decisions so far, fog, out-of-scope) with decision tickets under `bcc-output/<matter>/wayfinder/`, work one ticket per invocation, hand off to `/legal-5step` or the orchestrator when the route is clear. Privacy follows the existing routing matrix including a no-ollama degradation path (fail-closed). `/briefing` now offers charting for foggy high-complexity matters.
+
 ## [4.9.6] - 2026-08-04
 
 ### Fixed

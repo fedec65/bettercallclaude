@@ -164,6 +164,12 @@ Persist state after each round.
 
 ### Step 6: BUILD EXECUTION PLAN
 
+**Fog check first.** If the matter is too foggy for a static plan — complexity 8+, or
+open decisions that depend on other open decisions — stop plan-building and offer the
+attorney: *"This matter is too foggy for a static plan — chart it instead?"* →
+`/bettercallclaude:legal-chart`. Only construct the execution plan when the way is
+clear or the attorney declines charting.
+
 Using the classification and all collected answers, construct the execution plan.
 
 **User-facing table** (always present this):

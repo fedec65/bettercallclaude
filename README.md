@@ -1,4 +1,4 @@
-[![Version](https://img.shields.io/badge/version-4.9.6-blue)](https://github.com/fedec65/bettercallclaude/releases)
+[![Version](https://img.shields.io/badge/version-4.10.0-blue)](https://github.com/fedec65/bettercallclaude/releases)
 [![License: AGPL-3.0](https://img.shields.io/badge/license-AGPL--3.0-green)](LICENSE)
 [![Platform](https://img.shields.io/badge/platform-Cowork%20Desktop-orange)](https://claude.ai)
 [![Website](https://img.shields.io/badge/web-bettercallclaude.ch-brightgreen)](https://bettercallclaude.ch)
@@ -11,7 +11,7 @@
 
 <p align="center"><strong>Swiss Legal Intelligence Plugin for Cowork Desktop</strong></p>
 
-BetterCallClaude transforms legal research, case strategy, and document drafting for Swiss lawyers. It provides deep integration with Swiss legal databases, multi-lingual analysis (DE/FR/IT/EN), and built-in Anwaltsgeheimnis (attorney-client privilege) protection -- 21 agents, 27 commands, 16 skills, and 9 MCP servers covering BGE/ATF/DTF precedent research, litigation strategy, adversarial analysis, legal drafting, citation verification, document intelligence, and CAS/TAS sports arbitration across all 26 Swiss cantons.
+BetterCallClaude transforms legal research, case strategy, and document drafting for Swiss lawyers. It provides deep integration with Swiss legal databases, multi-lingual analysis (DE/FR/IT/EN), and built-in Anwaltsgeheimnis (attorney-client privilege) protection -- 21 agents, 29 commands, 17 skills, and 9 MCP servers covering BGE/ATF/DTF precedent research, litigation strategy, adversarial analysis, legal drafting, citation verification, document intelligence, and CAS/TAS sports arbitration across all 26 Swiss cantons.
 
 > **Claude Code CLI users**: this repository is Cowork Desktop only. The CLI version is at [fedec65/bettercallclaude-cli](https://github.com/fedec65/bettercallclaude-cli).
 
@@ -25,17 +25,15 @@ BetterCallClaude provides a structured methodology for handling legal work with 
 
 ---
 
-## What's New in v4.9.6
+## What's New in v4.10.0
 
-**v4.9.6 — Critical privacy fix: the Anwaltsgeheimnis hook now works on every installation path.** We found and fixed a silent failure: if your plugin path contains spaces (e.g. a user name with a space), the PreToolUse privacy scan did not run at all — with no error shown. The hook command now quotes the plugin root correctly. If you handle privileged client content, update now.
+**v4.10.0 — Legal wayfinder: decision maps for matters too big or too foggy for one plan.** `/legal-chart` decomposes a matter into a decision map — destination, decisions so far, fog, out-of-scope — with one ticket per open decision. `/legal-way` then works the map ticket by ticket (research, grilling, prototype, task) until the route to the deliverable is clear and hands off to execution. A fog check in `/briefing` routes oversized matters to the chart instead of forcing a static execution plan.
 
-- **What happened** — `hooks/hooks.json` invoked the privacy scanner without quoting `${CLAUDE_PLUGIN_ROOT}`. On spaced paths the shell split the command, the hook failed to load, and privilege detection was silently off.
-- **What else was fixed** — the same quoting bug in the v4.9.5 `/legal-timeline` render commands; regression guards added (standalone tests + a CI check that fails the build on any unquoted occurrence).
-- **Thanks** — the same bug was first spotted and fixed in the Italian plugin (v1.2.6); their report brought it to our attention here.
+**Also in recent releases — v4.9.6 privacy fix**: the Anwaltsgeheimnis PreToolUse hook silently failed on plugin paths containing spaces (e.g. a user name with a space) — privilege detection was off with no error shown. The hook command now quotes the plugin root correctly, with regression guards (standalone tests + a CI check). If you handle privileged client content, update.
 
 **Also in recent releases — v4.9.5 `/legal-timeline`**: build a sourced case chronology from your case documents: every event carries its document and locus, contested facts and date conflicts are made visible (never silently resolved), evidentiary gaps of 30+ days are flagged, and procedural deadlines are computed via MCP with cantonal holiday calendars. Three outputs (Markdown table, interactive HTML, Word export) under `bcc-output/timeline/`.
 
-**Content counts**: 21 agents, 27 commands, 16 skills, 9 MCP servers in `.mcp.json` (7 remote HTTP on `mcp.bettercallclaude.ch` + `swiss-caselaw` SSE on `mcp.opencaselaw.ch` + `ollama` local STDIO).
+**Content counts**: 21 agents, 29 commands, 17 skills, 9 MCP servers in `.mcp.json` (7 remote HTTP on `mcp.bettercallclaude.ch` + `swiss-caselaw` SSE on `mcp.opencaselaw.ch` + `ollama` local STDIO).
 
 [Full changelog →](CHANGELOG.md)
 
