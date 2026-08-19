@@ -1,4 +1,4 @@
-[![Version](https://img.shields.io/badge/version-4.10.0-blue)](https://github.com/fedec65/bettercallclaude/releases)
+[![Version](https://img.shields.io/badge/version-4.10.1-blue)](https://github.com/fedec65/bettercallclaude/releases)
 [![License: AGPL-3.0](https://img.shields.io/badge/license-AGPL--3.0-green)](LICENSE)
 [![Platform](https://img.shields.io/badge/platform-Cowork%20Desktop-orange)](https://claude.ai)
 [![Website](https://img.shields.io/badge/web-bettercallclaude.ch-brightgreen)](https://bettercallclaude.ch)
@@ -25,9 +25,11 @@ BetterCallClaude provides a structured methodology for handling legal work with 
 
 ---
 
-## What's New in v4.10.0
+## What's New in v4.10.1
 
-**v4.10.0 — Legal wayfinder: decision maps for matters too big or too foggy for one plan.** `/legal-chart` decomposes a matter into a decision map — destination, decisions so far, fog, out-of-scope — with one ticket per open decision. `/legal-way` then works the map ticket by ticket (research, grilling, prototype, task) until the route to the deliverable is clear and hands off to execution. A fog check in `/briefing` routes oversized matters to the chart instead of forcing a static execution plan.
+**v4.10.1 — Documentation completeness patch.** The command, agent, and skill listings in this README, the plugin README, and `/help` now cover everything that ships in the plugin: all 29 commands, 21 agents, and 17 skills. No functional changes.
+
+**Also in recent releases — v4.10.0 legal wayfinder**: `/legal-chart` decomposes a matter into a decision map — destination, decisions so far, fog, out-of-scope — with one ticket per open decision. `/legal-way` then works the map ticket by ticket (research, grilling, prototype, task) until the route to the deliverable is clear and hands off to execution. A fog check in `/briefing` routes oversized matters to the chart instead of forcing a static execution plan.
 
 **Also in recent releases — v4.9.6 privacy fix**: the Anwaltsgeheimnis PreToolUse hook silently failed on plugin paths containing spaces (e.g. a user name with a space) — privilege detection was off with no error shown. The hook command now quotes the plugin root correctly, with regression guards (standalone tests + a CI check). If you handle privileged client content, update.
 

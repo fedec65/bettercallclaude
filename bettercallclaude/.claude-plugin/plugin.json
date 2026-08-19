@@ -1,6 +1,6 @@
 {
   "name": "bettercallclaude",
-  "version": "4.10.0",
+  "version": "4.10.1",
   "description": "Swiss Legal Intelligence -- BGE/ATF/DTF precedent research, case strategy, legal drafting, and citation verification across all 26 Swiss cantons with Anwaltsgeheimnis privacy protection.",
   "author": { "name": "Federico Cesconi" },
   "userConfig": {

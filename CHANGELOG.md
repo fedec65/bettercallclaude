@@ -4,6 +4,11 @@ All notable changes to BetterCallClaude will be documented in this file.
 
 ---
 
+## [4.10.1] - 2026-08-19
+
+### Fixed
+- **Documentation completeness** — the command/agent/skill listings in the plugin README, the repository README, and `/help` were incomplete after recent additions. All 29 commands, 21 agents, and 17 skills are now listed in every surface. No functional changes.
+
 ## [4.10.0] - 2026-08-19
 
 ### Added
