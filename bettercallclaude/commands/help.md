@@ -26,7 +26,7 @@ BetterCallClaude provides Swiss legal intelligence through three interfaces:
 
 ---
 
-## Commands (27)
+## Commands (29)
 
 ### Core Commands
 
@@ -113,7 +113,7 @@ BetterCallClaude provides Swiss legal intelligence through three interfaces:
 
 ---
 
-## Skills (16)
+## Skills (17)
 
 Skills activate automatically when Claude detects relevant context.
 

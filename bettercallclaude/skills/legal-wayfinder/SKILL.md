@@ -1,6 +1,6 @@
 ---
 name: legal-wayfinder
-description: "Decision-map decomposition for legal matters too big or too foggy for one session. Charts a map (destination, decisions so far, fog, out-of-scope) plus decision tickets under bcc-output/<matter>/wayfinder/, then works tickets one at a time until the route to the deliverable is clear, then hands off to execution. Trigger when: charting a big legal matter (/legal-chart), working the next decision ticket (/legal-way), or a briefing is too foggy for a static execution plan. Do NOT trigger for: normal matters that fit /briefing or /legal-5step, quality-gate loops (legal-goal / legal-loop), or single-question research."
+description: "Decision-map decomposition for legal matters too big or too foggy for one session. Charts a map (destination, decisions so far, fog, out-of-scope) plus decision tickets under bcc-output/YYYY-MM-DD-<slug>/wayfinder/, then works tickets one at a time until the route to the deliverable is clear, then hands off to execution. Trigger when: charting a big legal matter (/legal-chart), working the next decision ticket (/legal-way), or a briefing is too foggy for a static execution plan. Do NOT trigger for: normal matters that fit /briefing or /legal-5step, quality-gate loops (legal-goal / legal-loop), or single-question research."
 tools:
   - Read
   - Grep
@@ -111,7 +111,7 @@ claimed-in: ""
 ## Frontier and claiming
 
 The **frontier** is every ticket with `status: open`, empty `claimed-in`, and all
-`blocked-by` tickets `status: resolved`. `/legal-way` picks the lowest-numbered frontier
+`blocked-by` tickets `status: resolved` or `ruled-out`. `/legal-way` picks the lowest-numbered frontier
 ticket unless the attorney names one. Claim by setting `claimed-in` to a session stamp
 (ISO date + time) **before any work**; refuse a ticket already claimed. One ticket per
 `/legal-way` invocation — research tickets are the only exception (they may be batched

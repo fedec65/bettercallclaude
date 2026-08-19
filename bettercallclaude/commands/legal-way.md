@@ -47,7 +47,7 @@ the map, and hand off when the route is clear.
 - "con gate" or "with gate" → `--gate`
 
 **Output convention**: update the ticket file and `map.md` in place under
-`bcc-output/<matter>/wayfinder/`; write research memos and prototypes to `assets/`. Give
+`bcc-output/YYYY-MM-DD-<slug>/wayfinder/`; write research memos and prototypes to `assets/`. Give
 in chat the resolution summary and the updated frontier. See `skills/shared/SKILL.md`.
 
 ## Pre-Flight Checks
@@ -61,7 +61,7 @@ in chat the resolution summary and the updated frontier. See `skills/shared/SKIL
 1. **Load the map** — the low-res view: Destination, Notes, Decisions so far, fog,
    Out of scope. Do not open every ticket body; zoom into related tickets on demand.
 2. **Pick the ticket.** If the attorney named one, use it. Otherwise take the
-   lowest-numbered frontier ticket (open, unclaimed, all blockers resolved).
+   lowest-numbered frontier ticket (open, unclaimed, all blockers resolved or ruled out).
    **Claim it first**: set `claimed-in` to an ISO timestamp before any work.
    If the ticket is already claimed: refuse and show the frontier.
 3. **Resolve by type:**

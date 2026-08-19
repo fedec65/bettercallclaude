@@ -72,7 +72,8 @@ ticket list by name with types, fog count). See `skills/shared/SKILL.md`.
    MCP servers in the standard priority order, R1/R2 enforced, privacy pre-check per
    the map's privacy mode. Memos land in `assets/`. Research resolutions are recorded
    on the tickets by those subagents.
-7. **Stop.** Report the charted map and end the session. Charting hand-resolves nothing.
+7. **Stop.** Report the charted map and end the session. The charting session itself
+   resolves no decisions — only the fired research tickets record resolutions.
 
 ## Charting Rules
 

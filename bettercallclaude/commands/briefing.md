@@ -22,6 +22,7 @@ Parse flags from the user's input to determine the mode:
 2. **Resume** (`--resume [id]`): Resume a previously saved or paused briefing. If no ID provided, load `briefing_latest`.
 3. **List** (`--list`): Display all saved briefings from `briefing_index`.
 4. **Skip** (`--skip-briefing`): Bypass the briefing flow entirely and route the query straight to `/bettercallclaude:legal --skip-briefing`. The briefing coordinator is **not** invoked. Used by the `legal-intake` skill on the user's "Skip briefing" choice and by users who explicitly want to bypass intake on a `/briefing` invocation.
+5. **Chart** (`--chart`): Bypass the briefing flow entirely and route the query straight to `/bettercallclaude:legal-chart`. The briefing coordinator is **not** invoked. Used for matters too big or too foggy for one static execution plan.
 
 ## Flags
 
@@ -45,6 +46,7 @@ Parse flags from the user's input to determine the mode:
 - "briefing veloce" or "quick briefing" → `--depth quick`
 - "briefing approfondito" or "deep briefing" → `--depth deep`
 - "salta il briefing" or "skip the briefing" → `--skip-briefing`
+- "traccia la mappa" or "chart it" → `--chart`
 - "output breve / medio / dettagliato" → `--short` / `--medium` / `--long`
 
 **Flag parsing tip**: Flags appear anywhere in the input. Extract them before passing the query text to the briefing coordinator. Example: `"Advise on termination --depth quick"` → flag: `--depth quick`, query: `"Advise on termination"`.
@@ -98,6 +100,15 @@ If the user skips, proceed with the original query and flag the gaps in the exec
 3. Route the original query directly to `/bettercallclaude:legal --skip-briefing [remaining flags] [query]`. The downstream `/legal` command will see the flag and will not re-activate the `legal-intake` skill on the same query.
 4. Stop. Do not continue into the New / Resume / List branches below.
 
+### Pre-flight: Chart
+
+**Before any other branch except Pre-flight: Skip**, check for `--chart` in the parsed flags. If present:
+
+1. Do **not** invoke the briefing coordinator, the vagueness check, or the specialist panel.
+2. Strip the `--chart` flag from the parsed flag list (it has been consumed here).
+3. Route the original query directly to `/bettercallclaude:legal-chart [remaining flags] [query]`.
+4. Stop. Do not continue into the New / Resume / List branches below.
+
 ### New Briefing
 
 1. Run the pre-flight vagueness check (if applicable — see above).
@@ -109,8 +120,8 @@ If the user skips, proceed with the original query and flag the gaps in the exec
    - Classify the query (domain, jurisdiction, complexity, language)
    - Select and consult a specialist panel (skipped if `--depth quick`)
    - Compile and ask clarifying questions in adaptive rounds
-   - Build a structured execution plan
    - **Fog check**: if the matter is too foggy for a static plan (complexity 8+, or open decisions that depend on other open decisions), stop plan-building and offer: *"This matter is too foggy for a static plan — chart it instead?"* → `/bettercallclaude:legal-chart`
+   - Build a structured execution plan
    - Present the plan for user review and refinement
 4. On plan approval:
    - **Execute immediately**: Hand off to orchestrator with checkpoints
