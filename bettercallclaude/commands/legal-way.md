@@ -84,7 +84,8 @@ in chat the resolution summary and the updated frontier. See `skills/shared/SKIL
      plus one line in **Out of scope**.
    - If the decision invalidates other tickets, update or delete them.
    - Set map `status: working` if it was still `charting`.
-6. **Check for handoff.** If the frontier is empty AND **Not yet specified** is empty:
+6. **Check for handoff.** If every ticket is `resolved` or `ruled-out` (a claimed
+   ticket in another session still counts as open) AND **Not yet specified** is empty:
    set `status: ready-for-handoff`, then emit the **handoff pack** — destination +
    Decisions so far + linked assets — and route to `/legal-5step` or the orchestrator
    (ask the attorney which). With `--gate`, first build the Goal Record via the

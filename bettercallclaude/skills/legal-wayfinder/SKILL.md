@@ -164,7 +164,9 @@ terms, then proceed as CONFIDENTIAL. Fail closed; never "just send it".
 
 ## Handoff
 
-When `/legal-way` resolves the last ticket and graduates the last fog, set
+Hand off only when every ticket is `resolved` or `ruled-out` and the fog is empty.
+A claimed ticket still counts as open — in-flight work in another session blocks
+handoff. When `/legal-way` reaches that state, set
 `status: ready-for-handoff` and — instead of stopping — emit a **handoff pack**:
 destination + Decisions so far + linked assets, shaped to feed the orchestrator's
 Briefing-Sourced Execution protocol. Route to `/legal-5step` or the orchestrator. With
