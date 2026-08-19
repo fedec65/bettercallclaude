@@ -37,6 +37,7 @@ Parse flags from the user's input to determine the mode:
 | `--medium` | Set execution plan output length to medium (default, 3–5 pages) |
 | `--long` | Set execution plan output length to long (full detail) |
 | `--skip-briefing` | Bypass briefing and route directly (pass through to `/legal`) |
+| `--chart` | Route to `/bettercallclaude:legal-chart` (wayfinder decision map) instead of a static execution plan — for matters too big or too foggy for one plan |
 
 **Natural language equivalents**: You can also say:
 - "riprendi il briefing precedente" or "resume the last briefing" → `--resume`
@@ -109,6 +110,7 @@ If the user skips, proceed with the original query and flag the gaps in the exec
    - Select and consult a specialist panel (skipped if `--depth quick`)
    - Compile and ask clarifying questions in adaptive rounds
    - Build a structured execution plan
+   - **Fog check**: if the matter is too foggy for a static plan (complexity 8+, or open decisions that depend on other open decisions), stop plan-building and offer: *"This matter is too foggy for a static plan — chart it instead?"* → `/bettercallclaude:legal-chart`
    - Present the plan for user review and refinement
 4. On plan approval:
    - **Execute immediately**: Hand off to orchestrator with checkpoints
