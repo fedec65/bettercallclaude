@@ -77,3 +77,6 @@ AGENTS.md
 legal-briefing-review-*.html
 legal-briefing-trigger-eval-review.html
 bettercallclaude/skills/*-workspace/
+
+# Local-only marketing material (internal use — NEVER push to GitHub)
+marketing/
