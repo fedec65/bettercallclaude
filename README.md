@@ -73,11 +73,21 @@ MCP servers connect automatically via HTTP. No Node.js, no local setup, no API k
 | `/bettercallclaude:cantonal` | Analyze a legal question under cantonal law for a specific canton. |
 | `/bettercallclaude:adversarial` | Run three-agent adversarial analysis -- advocate builds the case, adversary challenges it, judicial analyst synthesizes. |
 | `/bettercallclaude:briefing` | Structured pre-execution briefing -- assembles a specialist panel, collects case context, and builds an execution plan before agents start working. |
+| `/bettercallclaude:legal-chart` | Chart a big or foggy matter as a wayfinder decision map -- one ticket per open decision, planning only. |
+| `/bettercallclaude:legal-way` | Work one decision ticket from a wayfinder map; hands off to execution only when every decision is made. |
 | `/bettercallclaude:workflow` | Define and execute multi-agent legal workflows (due diligence, litigation prep, contract lifecycle, real estate closing). |
+| `/bettercallclaude:legal-5step` | Execute the 5-step Swiss legal framework end to end: intake, research, strategy, adversarial stress test, verified drafting. |
+| `/bettercallclaude:legal-goal` | Define a checkable legal success condition for `/legal-loop`. |
+| `/bettercallclaude:legal-loop` | Iterate a worker-evaluator cycle against a Goal Record until the success condition is met or a stop limit is reached. |
 | `/bettercallclaude:translate` | Translate Swiss legal documents between DE, FR, IT, and EN while preserving legal terminology precision. |
 | `/bettercallclaude:doc-analyze` | Analyze Swiss legal documents -- identify legal issues, extract key clauses, verify citations, assess compliance. |
+| `/bettercallclaude:legal-timeline` | Build a sourced legal chronology from case documents -- provenance per event, contested-fact status, date conflicts, gaps, deadlines. |
+| `/bettercallclaude:nda-triage` | Triage NDAs against Swiss law -- GREEN / YELLOW / RED using playbook thresholds; single file or batch mode. |
 | `/bettercallclaude:summarize` | Consolidate multi-agent pipeline output -- deduplicate disclaimers, terminology, and citations with length control (`--short`/`--medium`/`--long`). |
+| `/bettercallclaude:start` | First-use onboarding -- checks MCP connectivity, guides playbook creation, shows tailored usage examples. |
 | `/bettercallclaude:setup` | Check MCP server connectivity and display status for all 9 servers. |
+| `/bettercallclaude:doctor` | Diagnose MCP server connectivity per server, with plain-language status, impact, and suggested fixes. |
+| `/bettercallclaude:privacy` | View or change the privacy mode (strict / balanced / cloud) for Anwaltsgeheimnis handling. |
 | `/bettercallclaude:version` | Display plugin version, installed components, and system status. |
 | `/bettercallclaude:help` | Show complete command reference, available agents, skills, and usage examples. |
 
@@ -104,6 +114,38 @@ MCP servers connect automatically via HTTP. No Node.js, no local setup, no API k
 
 /bettercallclaude:doc-analyze @contract.pdf Review this commercial lease agreement
 ```
+
+---
+
+## Agents
+
+| Agent | Domain |
+|-------|--------|
+| **Research & Drafting** | |
+| researcher | Swiss legal research, BGE/ATF/DTF search, statutory analysis |
+| strategist | Litigation strategy, risk assessment, cost-benefit analysis |
+| drafter | Legal document drafting in Swiss format |
+| citation | BGE citation verification and multi-lingual formatting |
+| compliance | FINMA, AML/KYC, regulatory compliance checks |
+| chronology-builder | Sourced timeline event extraction from case documents |
+| **Domain Specialists** | |
+| data-protection | GDPR, nDSG/FADP privacy analysis |
+| risk | Case outcome probability, damages quantification, Monte Carlo simulation |
+| procedure | ZPO/StPO deadlines, procedural rules, forum selection |
+| translator | DE/FR/IT legal terminology and document translation |
+| fiscal | Tax law, DTAs, transfer pricing, fiscal structuring |
+| corporate | AG/GmbH governance, M&A, commercial contracts |
+| cantonal | All 26 Swiss cantonal legal systems |
+| realestate | Property law, Grundbuch, Lex Koller |
+| **Adversarial Analysis** | |
+| advocate | Builds the strongest case for a position |
+| adversary | Challenges and stress-tests the case |
+| judicial | Synthesizes advocate and adversary into balanced assessment |
+| **Briefing & Orchestration** | |
+| briefing | Pre-execution intake, specialist panel consultation, execution plan building |
+| orchestrator | Multi-agent pipeline coordination and workflow management |
+| summarizer | Pipeline output consolidation, deduplication, length-calibrated summaries |
+| prompt-engineer | Prompt refinement — transforms vague queries into precise, effective legal prompts |
 
 ---
 

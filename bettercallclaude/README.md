@@ -94,13 +94,22 @@ claude --plugin-dir bettercallclaude/
 | `/bettercallclaude:briefing` | Structured pre-execution briefing session -- assembles a specialist panel, collects case context, and builds an execution plan before agents start working. Supports resume and depth control. |
 | `/bettercallclaude:legal-chart` | Chart a big or foggy matter as a wayfinder decision map -- destination, decisions so far, fog, out-of-scope -- with one ticket per open decision. Planning only; charting resolves no decisions itself. |
 | `/bettercallclaude:legal-way` | Work one decision ticket from a wayfinder map (research, grilling, prototype, task); emits the handoff pack to execution when every decision is made. Supports `--list` and `--gate`. |
+| `/bettercallclaude:legal-5step` | Execute the 5-step Swiss legal framework end to end: intake, research, strategy, adversarial stress test, verified drafting. |
+| `/bettercallclaude:legal-goal` | Define a checkable legal success condition for `/legal-loop` -- named profile or free-text objective. |
+| `/bettercallclaude:legal-loop` | Iterate a worker-evaluator cycle against a Goal Record until the success condition is met or a stop limit is reached. |
 | `/bettercallclaude:workflow` | Define and execute multi-agent legal workflows (due diligence, litigation prep, contract lifecycle, real estate closing). |
 | `/bettercallclaude:translate` | Translate Swiss legal documents between DE, FR, IT, and EN while preserving legal terminology precision. |
 | `/bettercallclaude:doc-analyze` | Analyze Swiss legal documents -- identify legal issues, extract key clauses, verify citations, assess compliance. |
+| `/bettercallclaude:legal-timeline` | Build a sourced legal chronology from case documents -- provenance per event, contested-fact status, date conflicts, evidentiary gaps, deadline markers. |
+| `/bettercallclaude:nda-triage` | Triage NDAs against Swiss law -- GREEN (standard) / YELLOW (review) / RED (issues) using playbook thresholds; single file or batch mode. |
 | `/bettercallclaude:help` | Show complete command reference, available agents, skills, and usage examples. |
 | `/bettercallclaude:version` | Display plugin version, installed components, and system status. |
+| `/bettercallclaude:refine` | Refine vague legal queries into structured prompts through Socratic dialogue, with workflow recommendations and multi-lingual terminology guidance. |
 | `/bettercallclaude:summarize` | Consolidate multi-agent pipeline output -- deduplicate disclaimers, terminology, and citations with length control (`--short`/`--medium`/`--long`). |
+| `/bettercallclaude:start` | Welcome and first-use onboarding -- checks MCP connectivity, guides playbook creation, shows usage examples tailored to your profile. |
 | `/bettercallclaude:setup` | Check MCP server status and auto-install servers to Claude Desktop if needed. |
+| `/bettercallclaude:doctor` | Diagnose MCP server connectivity -- tests each server, reports status and impact in plain language, suggests fixes. |
+| `/bettercallclaude:privacy` | View or change the BetterCallClaude privacy mode (strict/balanced/cloud). |
 
 ### Usage examples
 
@@ -151,12 +160,20 @@ Skills are activated automatically when Claude detects relevant legal context in
 | `data-protection-law` | nDSG/FADP framework, GDPR adequacy, cantonal data protection laws (IDG/KDSG/LIPAD), DPIA methodology, and cross-border data transfers. |
 | `legal-briefing` | Auto-detects complex queries that benefit from structured intake before agent execution. Suggests briefing sessions when complexity, ambiguity, or pipeline coordination is detected. |
 | `legal-wayfinder` | Decision-map decomposition for matters too big or foggy for one execution plan -- ticket protocol, frontier computation, fog checks, honest termination, and the handoff pack to execution. |
+| `legal-intake` | Swiss legal intake -- transforms vague or complex queries into actionable execution plans. Refine mode (single-domain, Socratic) and Briefing mode (multi-domain, specialist panel). |
+| `legal-5step-framework` | End-to-end 5-step Swiss legal pipeline: intake, BGE/statute research, strategy/risk, adversarial stress test, verified drafting. |
+| `legal-chronology` | Turns case documents into a sourced legal timeline -- mandatory provenance per event, disputed-fact status, date conflicts, evidentiary gaps, deadline markers. |
+| `legal-evaluator` | Verdict engine -- judges artifacts against a Goal Record using MCP verification tools; structured pass/fail with itemized findings. Enforces worker-evaluator separation. |
+| `citation-content-verify` | Substantive citation verifier -- checks every citation against the live source for existence AND content support (entailment) before delivery. |
+| `swiss-document-analysis` | Structured analysis of contracts, court decisions, statutes, submissions. Includes NDA triage (GREEN/YELLOW/RED) and playbook-aware contract review. |
+| `swiss-legal-translation` | Translates Swiss legal texts between DE, FR, IT, and EN with correct terminology and register. |
+| `shared` (output conventions) | Deliverable-as-file output conventions for all commands: `bcc-output` folder structure, file naming, chat summary template. |
 
 ---
 
 ## Agents
 
-The plugin includes 18 specialized subagents that handle complex multi-step legal workflows.
+The plugin includes 21 specialized subagents that handle complex multi-step legal workflows.
 
 ### Core Agents
 
@@ -165,6 +182,7 @@ The plugin includes 18 specialized subagents that handle complex multi-step lega
 | **Researcher** | Six-step research workflow: parse question, search BGE/ATF/DTF, search cantonal courts, evaluate sources, identify doctrine, compile memorandum with verified citations. |
 | **Strategist** | Five-step strategy workflow: analyze facts, assess claim strength, map procedural pathways, evaluate settlement value, produce strategy memorandum. |
 | **Drafter** | Six-step drafting workflow: determine document type, select template, draft with proper terminology, insert citations, run compliance checks, produce final document. |
+| **Chronology Builder** | Isolated worker that reads case documents iteratively and extracts sourced timeline events -- date, neutral fact, document+locus provenance, undisputed/alleged/contested status, party attribution. |
 
 ### Domain Specialist Agents
 
@@ -190,6 +208,8 @@ The plugin includes 18 specialized subagents that handle complex multi-step lega
 | **Advocate** | Builds the strongest possible case in favor of a legal position with supporting BGE precedents and doctrine. |
 | **Adversary** | Challenges a legal position by finding weaknesses, counter-precedents, and opposing arguments. |
 | **Judicial Analyst** | Neutral synthesis of advocate and adversary positions using Swiss Erwagung (consideration) structure with risk probabilities. |
+| **Prompt Engineer** | Transforms vague legal queries into structured prompts through Socratic dialogue, recommends optimal workflows, and guides system navigation with persistent cross-session learning. |
+| **Summarizer** | Consolidates multi-agent pipeline outputs by deduplicating disclaimers, terminology tables, and citations, then calibrates output length to `--short`/`--medium`/`--long`. |
 
 ### Adversarial Analysis Workflow
 

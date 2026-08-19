@@ -52,6 +52,7 @@ BetterCallClaude provides Swiss legal intelligence through three interfaces:
 | `/bettercallclaude:doc-analyze` | Analyze legal documents: issues, clauses, citations, compliance |
 | `/bettercallclaude:legal-timeline` | Build a sourced case chronology: provenance per event, contested facts, date conflicts, gaps, deadlines |
 | `/bettercallclaude:precedent` | Search and analyze BGE precedent chains and evolution |
+| `/bettercallclaude:nda-triage` | Triage NDAs against Swiss law: GREEN / YELLOW / RED (single or batch) |
 | `/bettercallclaude:validate` | Batch validate Swiss legal citations for format and existence |
 | `/bettercallclaude:adversarial` | Three-agent adversarial analysis: advocate, adversary, judge |
 
@@ -63,6 +64,9 @@ BetterCallClaude provides Swiss legal intelligence through three interfaces:
 | `/bettercallclaude:briefing` | Structured pre-execution briefing with specialist panel and plan building |
 | `/bettercallclaude:legal-chart` | Chart a big/foggy matter as a wayfinder decision map |
 | `/bettercallclaude:legal-way` | Work one decision ticket from a wayfinder map |
+| `/bettercallclaude:legal-5step` | End-to-end 5-step pipeline: intake, research, strategy, adversarial, draft |
+| `/bettercallclaude:legal-goal` | Define a checkable success condition for /legal-loop (named profile or free text) |
+| `/bettercallclaude:legal-loop` | Iterate a worker-evaluator cycle against a Goal Record until pass or stop limit |
 | `/bettercallclaude:translate` | Translate legal documents between DE, FR, IT, EN |
 
 ### Reference Commands
@@ -70,8 +74,11 @@ BetterCallClaude provides Swiss legal intelligence through three interfaces:
 | Command | Description |
 |---------|-------------|
 | `/bettercallclaude:cite` | Format and verify individual Swiss legal citations |
-| `/bettercallclaude:setup` | Check MCP server connectivity |
 | `/bettercallclaude:refine` | Refine vague legal queries into precise, effective prompts |
+| `/bettercallclaude:start` | First-use onboarding: MCP check, playbook setup, tailored examples |
+| `/bettercallclaude:setup` | Check MCP server connectivity |
+| `/bettercallclaude:doctor` | Diagnose MCP server connectivity per server, with plain-language fixes |
+| `/bettercallclaude:privacy` | View or change privacy mode (strict / balanced / cloud) |
 | `/bettercallclaude:version` | Display plugin version, components, and system status |
 | `/bettercallclaude:summarize` | Consolidate multi-agent pipeline output with length control (--short/--medium/--long) |
 | `/bettercallclaude:help` | This command reference |
