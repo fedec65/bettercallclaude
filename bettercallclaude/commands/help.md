@@ -61,6 +61,8 @@ BetterCallClaude provides Swiss legal intelligence through three interfaces:
 |---------|-------------|
 | `/bettercallclaude:workflow` | Define and execute multi-agent pipelines |
 | `/bettercallclaude:briefing` | Structured pre-execution briefing with specialist panel and plan building |
+| `/bettercallclaude:legal-chart` | Chart a big/foggy matter as a wayfinder decision map |
+| `/bettercallclaude:legal-way` | Work one decision ticket from a wayfinder map |
 | `/bettercallclaude:translate` | Translate legal documents between DE, FR, IT, EN |
 
 ### Reference Commands
@@ -132,6 +134,7 @@ Skills activate automatically when Claude detects relevant context.
 | legal-intake | Complex queries needing structured intake or refinement before execution |
 | legal-5step-framework | End-to-end 5-step legal analysis pipeline |
 | legal-evaluator | Verdict engine for /legal-loop worker-evaluator cycles |
+| legal-wayfinder | Decision-map decomposition for matters too big or foggy for one session |
 | shared (output-conventions) | Deliverable-as-file output conventions for all commands |
 
 ---

@@ -6,7 +6,7 @@ BetterCallClaude is a plugin for legal professionals working in Cowork or Claude
 
 The plugin covers the full spectrum of Swiss legal work: BGE/ATF/DTF precedent research, case strategy development with risk assessment, adversarial legal analysis, compliance and data protection advisory, fiscal and corporate law expertise, real estate law, legal drafting with jurisdiction-aware templates, legal translation, and citation verification across all 26 Swiss cantons. Privacy compliance with Anwaltsgeheimnis (Art. 321 StGB) is enforced automatically through a pre-tool-use hook that detects privileged content before it leaves the local environment.
 
-**Version**: 4.9.6 -- 21 agents, 27 commands, 16 skills, 9 MCP servers.
+**Version**: 4.10.0 -- 21 agents, 29 commands, 17 skills, 9 MCP servers.
 
 > Love BetterCallClaude? Support the project — [**Buy me a coffee**](https://buymeacoffee.com/federicocesconi) ☕
 
@@ -18,7 +18,7 @@ BetterCallClaude can be installed through several channels.
 
 ### Claude Cowork (Recommended)
 
-Visit the installation page at **[bettercallclaude.ai/desktop](https://bettercallclaude.ai/desktop)** for guided setup instructions. The page walks you through installing the plugin directly in Claude Cowork with a few clicks.
+Follow the **[BetterCallClaude Tutorial](https://github.com/fedec65/bettercallclaude_tutorial)** for guided setup instructions with screenshots. The tutorial walks you through installing the plugin directly in Claude Cowork with a few clicks.
 
 ### From GitHub (Claude Code CLI)
 
