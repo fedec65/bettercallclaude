@@ -7,6 +7,8 @@ tools:
   - Bash
   - WebSearch
   - WebFetch
+  - mcp__plugin_bettercallclaude_workflows-ch__list_workflows
+  - mcp__plugin_bettercallclaude_workflows-ch__get_workflow
 ---
 
 # Multi-Agent Legal Workflows
@@ -91,6 +93,17 @@ Identify which template to use from the user's input, or let them choose:
 #### 6. custom
 **Purpose**: User-defined agent sequence.
 **Pipeline**: User specifies agent order.
+
+#### Your Saved Workflows
+
+Before presenting the template list, call `list_workflows` with:
+
+- `user_id`: the value of `${user_config.user_id}`; if that placeholder did not resolve or is empty, use `default`.
+- `include_public`: `true`
+
+Present any returned workflows in the same numbered format as the fixed templates above (slug, name, description), numbered continuing after the fixed ones. If the call returns an empty list or fails (e.g. server unreachable), omit this subsection entirely without commenting on it.
+
+When the user selects a saved workflow, call `get_workflow` with the same `user_id` and the chosen `slug`, then execute the returned `pipeline` with the stage-execution logic below — identical to a fixed template. Each pipeline step's `agent_id` names a plugin agent, `purpose` describes its task, and `checkpoint: true` means pause for user confirmation after that stage.
 
 ## Execute the Workflow
 
