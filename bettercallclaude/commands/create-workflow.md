@@ -2,6 +2,7 @@
 description: "Create a reusable custom workflow by combining BetterCallClaude agents. Interview-based: pick agents, order them, define the output. Saved for future use with /bettercallclaude:workflow."
 tools:
   - Read
+  - Bash
   - mcp__plugin_bettercallclaude_workflows-ch__list_agents
   - mcp__plugin_bettercallclaude_workflows-ch__validate_pipeline
   - mcp__plugin_bettercallclaude_workflows-ch__save_workflow
@@ -11,9 +12,14 @@ tools:
 
 You guide the user through designing a reusable multi-agent workflow, validate it against the Swiss plugin's agent manifest, and save it for later execution with `/bettercallclaude:workflow <slug>`.
 
-## Current user
+## Resolve the user ID
 
-Use `${user_config.user_id}` as the `user_id` argument in every workflows-ch tool call. If that placeholder did not resolve (it appears literally) or resolved to an empty string, use `default` instead, and mention once — briefly — that the user can set a persistent **User ID for custom workflows** in the plugin settings to keep workflows private under their own ID.
+Every workflows-ch tool call takes a `user_id`. Resolve it in this order:
+
+1. **Plugin setting**: if `${user_config.user_id}` resolved to a non-empty value (i.e. the placeholder does not appear literally), use it.
+2. **Local config**: read `~/.betterask/config.yaml` if it exists. If it contains a `user_id:` line, use that value.
+3. **Generate once, then persist**: generate 8 random bytes of hex (e.g. `openssl rand -hex 8`) and build the ID `bcc-<hex>`. Persist it by **appending** the line `user_id: bcc-<hex>` to `~/.betterask/config.yaml` (run `mkdir -p ~/.betterask` first; append only — the file may already hold the user's privacy mode). Then tell the user once, briefly: "No User ID was set, so I generated a personal one (`bcc-…`) and saved it to `~/.betterask/config.yaml`. Your workflows are stored under this ID — keep it private: anyone who knows it can read your workflows."
+4. If the file cannot be written, ask the user to set the **User ID for custom workflows** plugin setting (or add a `user_id:` line to `~/.betterask/config.yaml` themselves) and stop. **Never** fall back to a shared `default` ID.
 
 ## Procedure
 

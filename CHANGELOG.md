@@ -4,6 +4,14 @@ All notable changes to BetterCallClaude will be documented in this file.
 
 ---
 
+## [4.11.1] - 2026-08-26
+
+### Fixed
+- **Unique per-user workflow namespace** — `/bettercallclaude:create-workflow` and `/bettercallclaude:workflow` no longer fall back to the shared `default` user ID when the `user_id` plugin setting is unset (Cowork Desktop exposes no userConfig editor, so every user would have shared one namespace). Resolution order is now: plugin setting → `user_id:` line in `~/.betterask/config.yaml` → generate a unique `bcc-<random>` ID once and persist it to that file. Every user gets a private namespace automatically, with no settings UI required.
+- Workflows previously saved under `default` are unaffected on the server but no longer listed; set the plugin setting (or the config-file line) to `default` explicitly if you need to reach them.
+
+---
+
 ## [4.11.0] - 2026-08-26
 
 ### Added
