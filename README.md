@@ -168,6 +168,27 @@ MCP servers connect automatically via HTTP. No Node.js, no local setup, no API k
 
 ---
 
+## Custom Workflows and Your User ID
+
+With `/bettercallclaude:create-workflow` you can save your own agent pipelines and reuse them via `/bettercallclaude:workflow`. Saved workflows live on the `workflows-ch` server under a **personal user ID** — your private namespace, guaranteed unique by the server (no two users can ever share one).
+
+**You don't need to do anything to get an ID.** The first time you use a workflow feature, one is generated for you (`bcc-…`), reserved on the server, and shown to you once in a short message.
+
+**Make your ID permanent (Cowork Desktop, one minute).** Cowork wipes its sandbox on every restart, which would otherwise reset a generated ID. To keep yours forever:
+
+1. Copy your ID from the generation message (or ask any time: *"what is my BetterCallClaude workflow user ID?"*).
+2. Open Cowork → **Settings → General → Instructions for Claude**.
+3. Add this line: `BetterCallClaude workflow user ID: bcc-…` (your ID).
+
+Done. Every future session reads the ID from your instructions — restarts, updates, and new conversations included. Add the same line on a second machine and your workflows are there too.
+
+Two things to know:
+
+- **Keep the ID private.** It is the only key to your namespace — anyone who knows it can read your saved workflows.
+- **Claude Code CLI** users can set the **User ID for custom workflows** plugin setting instead of the instructions line; the plugin setting takes precedence.
+
+---
+
 ## MCP Servers
 
 All servers connect automatically after installation. No configuration required.
