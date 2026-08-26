@@ -1,6 +1,6 @@
 {
   "name": "bettercallclaude",
-  "version": "4.10.1",
+  "version": "4.11.0",
   "description": "Swiss Legal Intelligence -- BGE/ATF/DTF precedent research, case strategy, legal drafting, and citation verification across all 26 Swiss cantons with Anwaltsgeheimnis privacy protection.",
   "author": { "name": "Federico Cesconi" },
   "userConfig": {
@@ -23,6 +23,13 @@
       "title": "Output language",
       "description": "Preferred output language for agents and drafter output. One of: DE, FR, IT, EN.",
       "default": "DE",
+      "sensitive": false
+    },
+    "user_id": {
+      "type": "string",
+      "title": "User ID for custom workflows",
+      "description": "Stable identifier that owns your saved custom workflows (workflows-ch server). Pick something non-trivial (e.g. firm acronym + random suffix) — saved workflows are visible to anyone who knows the ID. Leave blank to use 'default'.",
+      "default": "",
       "sensitive": false
     },
     "api_token": {
