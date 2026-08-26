@@ -14,6 +14,7 @@ tools:
   - mcp__plugin_bettercallclaude_onlinekommentar__search_commentaries
   - mcp__plugin_bettercallclaude_legal-persona__legal_analyze
   - mcp__plugin_bettercallclaude_tas-jurisprudence__cas_search
+  - mcp__plugin_bettercallclaude_workflows-ch__list_workflows
   - mcp__plugin_bettercallclaude_ollama__ollama_check_status
 ---
 
@@ -31,7 +32,7 @@ Check the HTTP MCP gateway:
 
 ## Step 2: Probe Each Server
 
-For each of the 9 MCP servers, use a **two-stage approach**:
+For each of the 10 MCP servers, use a **two-stage approach**:
 
 **Stage A — Tool availability**: Check whether the server's tools appear in your available tool list. If they do not appear, mark the server as "non connesso" immediately.
 
@@ -46,6 +47,7 @@ For each of the 9 MCP servers, use a **two-stage approach**:
 | onlinekommentar | Commentari giuridici online | `search_commentaries` (minimal) |
 | legal-persona | Analisi, strategia e drafting documenti legali svizzeri | `legal_analyze` (minimal) |
 | tas-jurisprudence | Lodi arbitrali CAS/TAS | `cas_search` (minimal) |
+| workflows-ch | Flussi di lavoro personalizzati | `list_workflows` (no args) |
 | swiss-caselaw | Giurisprudenza, catene citazioni, dottrina | `search_decisions` (minimal) |
 | ollama | Classificatore privacy locale | `ollama_check_status` |
 
@@ -67,11 +69,12 @@ Present results in the user's language, without technical jargon. Example (IT):
   Commentari online              ✓ attivo     —
   Analisi documenti (MCP)        ✓ attivo     —
   Arbitrato sportivo (TAS)       ✓ attivo     —
+  Flussi personalizzati          ✓ attivo     —
   Giurisprudenza svizzera        ✓ attivo     —
   Classificatore privacy         ✗ assente    Traduzioni/riassunti non filtrati localmente
 
   Gateway: https://mcp.bettercallclaude.ch — online
-  Servizi attivi: 8/9
+  Servizi attivi: 9/10
 
 ╚══════════════════════════════════════════════════════════╝
 ```
@@ -95,6 +98,7 @@ For each unavailable server, explain in plain language:
 | onlinekommentar | I commentari dottrinali non sono accessibili. |
 | legal-persona | L'analisi documenti, la strategia legale e il drafting automatizzato non sono disponibili via MCP. |
 | tas-jurisprudence | La ricerca di lodi CAS/TAS non è disponibile. |
+| workflows-ch | I flussi di lavoro personalizzati non possono essere salvati o eseguiti. |
 | swiss-caselaw | Ricerca giurisprudenziale, catene di citazioni e analisi dottrinale non disponibili. |
 | ollama | La classificazione di privacy locale non è attiva. Traduzioni e riassunti non vengono filtrati localmente. |
 

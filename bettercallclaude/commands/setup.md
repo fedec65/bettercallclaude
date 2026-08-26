@@ -30,6 +30,8 @@ tools:
   - mcp__plugin_bettercallclaude_tas-jurisprudence__cas_get_award
   - mcp__plugin_bettercallclaude_tas-jurisprudence__cas_recent
   - mcp__plugin_bettercallclaude_tas-jurisprudence__cas_by_sport
+  - mcp__plugin_bettercallclaude_workflows-ch__list_workflows
+  - mcp__plugin_bettercallclaude_workflows-ch__list_agents
   - mcp__plugin_bettercallclaude_ollama__ollama_check_status
   - mcp__plugin_bettercallclaude_ollama__ollama_list_models
   - mcp__plugin_bettercallclaude_ollama__ollama_generate
@@ -53,7 +55,7 @@ If the health check succeeds, the HTTP service is online. If it fails, note the 
 
 ## Step 2: Probe MCP Servers
 
-Check connectivity for each of the 9 MCP servers using a **two-stage non-blocking approach**:
+Check connectivity for each of the 10 MCP servers using a **two-stage non-blocking approach**:
 
 **Stage A — Check tool availability (non-blocking)**
 
@@ -68,6 +70,7 @@ Look at your currently available tools. For each server, check whether its tools
 | onlinekommentar | `search_commentaries`, `get_commentary`, etc. |
 | legal-persona | `legal_analyze`, `legal_draft`, `legal_strategy`, `compute_deadlines`, `present_adversarial_analysis`, `present_intake_form` |
 | tas-jurisprudence | `cas_search`, `cas_get_award`, `cas_recent`, `cas_by_sport` |
+| workflows-ch | `list_agents`, `validate_pipeline`, `save_workflow`, `list_workflows`, `get_workflow`, `delete_workflow`, `log_run` |
 | swiss-caselaw | `search_decisions`, `find_citations`, `find_appeal_chain`, `cite`, `get_decision`, etc. |
 | ollama | `ollama_check_status`, `ollama_list_models`, `ollama_generate`, `ollama_classify_privacy`, `ollama_chat` |
 
@@ -86,6 +89,7 @@ For each server whose tools ARE available, make one lightweight call to confirm 
 | onlinekommentar | `search_commentaries` with a minimal query |
 | legal-persona | `legal_analyze` with a minimal legal question |
 | tas-jurisprudence | `cas_search` with a minimal query |
+| workflows-ch | `list_workflows` (no arguments) |
 | swiss-caselaw | `search_decisions` with a minimal query |
 | ollama | `ollama_check_status` (or `ollama_list_models`) |
 
@@ -111,12 +115,13 @@ Output the following formatted status report, replacing status indicators and tr
   onlinekommentar           [x] Connected       HTTP
   legal-persona             [x] Connected       HTTP
   tas-jurisprudence         [x] Connected       HTTP
+  workflows-ch              [x] Connected       HTTP
   swiss-caselaw             [x] Connected       SSE
   ollama                    [x] Connected       Local
 
   HTTP Service: https://mcp.bettercallclaude.ch
   Health: OK / Unreachable
-  Connected: X/9 servers
+  Connected: X/10 servers
 ==============================================
 ```
 
@@ -124,10 +129,10 @@ Mark each server as `[x] Connected`, `[ ] Not connected`, or `[ ] Timeout` based
 
 ## Step 4: Provide Guidance Based on Results
 
-### If all 9 servers are connected:
+### If all 10 servers are connected:
 
 ```
-All 9 MCP servers are operational. No action needed.
+All 10 MCP servers are operational. No action needed.
 BetterCallClaude is running at full capability.
 ```
 

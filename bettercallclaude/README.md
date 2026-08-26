@@ -437,9 +437,9 @@ The plugin ships pre-configured MCP servers that provide direct integration with
 
 ### Requirements
 
-- Node.js >= 20 (only required for local Ollama invocation; the other six MCP servers are reached over HTTPS / SSE and run no code on your machine).
+- Node.js >= 20 (only required for local Ollama invocation; the other nine MCP servers are reached over HTTPS / SSE and run no code on your machine).
 
-Six of the seven MCP servers are hosted remotely (five HTTP servers at `mcp.bettercallclaude.ch`, one SSE server at `mcp.opencaselaw.ch`) and are reached by Cowork Desktop without any local build step. Only the local `ollama` server runs from a committed compiled bundle at `bettercallclaude/mcp-servers/ollama/dist/index.js`; to use it you need a running Ollama daemon (default `http://localhost:11434`, overridable via the `ollama_host` userConfig key).
+Nine of the ten MCP servers are hosted remotely (eight HTTP servers at `mcp.bettercallclaude.ch`, one SSE server at `mcp.opencaselaw.ch`) and are reached by Cowork Desktop without any local build step. Only the local `ollama` server runs from a committed compiled bundle at `bettercallclaude/mcp-servers/ollama/dist/index.js`; to use it you need a running Ollama daemon (default `http://localhost:11434`, overridable via the `ollama_host` userConfig key).
 
 All server paths and URLs are configured in `.mcp.json` using the `${CLAUDE_PLUGIN_ROOT}` and `${user_config.*}` interpolations for portability and self-hosting (see [`docs/PRIVACY.md`](../docs/PRIVACY.md)).
 
