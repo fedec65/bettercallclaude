@@ -1,4 +1,4 @@
-[![Version](https://img.shields.io/badge/version-4.11.1-blue)](https://github.com/fedec65/bettercallclaude/releases)
+[![Version](https://img.shields.io/badge/version-4.11.2-blue)](https://github.com/fedec65/bettercallclaude/releases)
 [![License: AGPL-3.0](https://img.shields.io/badge/license-AGPL--3.0-green)](LICENSE)
 [![Platform](https://img.shields.io/badge/platform-Cowork%20Desktop-orange)](https://claude.ai)
 [![Website](https://img.shields.io/badge/web-bettercallclaude.ch-brightgreen)](https://bettercallclaude.ch)
@@ -25,7 +25,9 @@ BetterCallClaude provides a structured methodology for handling legal work with 
 
 ---
 
-## What's New in v4.11.1
+## What's New in v4.11.2
+
+**v4.11.2 — Server-enforced unique workflow namespaces.** The new `claim_user_id` tool on the workflows-ch server reserves your User ID in the database (UNIQUE constraint), so no two users can ever share a workflow namespace. Generated `bcc-…` IDs are claimed before they're saved, with automatic retry on collision.
 
 **v4.11.1 — Private workflow namespaces for everyone.** Custom workflows are now stored under a unique per-user ID: if you don't set the **User ID** plugin setting, a random `bcc-…` ID is generated once and saved to `~/.betterask/config.yaml`. No shared `default` namespace anymore.
 

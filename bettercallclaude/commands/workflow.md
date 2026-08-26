@@ -7,6 +7,7 @@ tools:
   - Bash
   - WebSearch
   - WebFetch
+  - mcp__plugin_bettercallclaude_workflows-ch__claim_user_id
   - mcp__plugin_bettercallclaude_workflows-ch__list_workflows
   - mcp__plugin_bettercallclaude_workflows-ch__get_workflow
 ---
@@ -100,8 +101,10 @@ First resolve the `user_id`, in this order:
 
 1. **Plugin setting**: if `${user_config.user_id}` resolved to a non-empty value (i.e. the placeholder does not appear literally), use it.
 2. **Local config**: read `~/.betterask/config.yaml` if it exists; if it contains a `user_id:` line, use that value.
-3. **Generate once, then persist**: generate 8 random bytes of hex (e.g. `openssl rand -hex 8`), build `bcc-<hex>`, and **append** `user_id: bcc-<hex>` to `~/.betterask/config.yaml` (`mkdir -p ~/.betterask` first; append only — the file may hold the user's privacy mode). Mention the generated ID to the user once, briefly.
+3. **Generate once, claim, then persist**: generate 8 random bytes of hex (e.g. `openssl rand -hex 8`), build the candidate `bcc-<hex>`, and claim it server-side with `claim_user_id` — on `claimed: false` (collision) generate a new candidate and retry, up to 3 attempts. Then **append** `user_id: bcc-<hex>` (the claimed ID) to `~/.betterask/config.yaml` (`mkdir -p ~/.betterask` first; append only — the file may hold the user's privacy mode). Mention the generated ID to the user once, briefly.
 4. If the file cannot be written, skip this subsection entirely — **never** use a shared `default` ID.
+
+For an ID from the plugin setting (step 1) or the config file (step 2), call `claim_user_id` once before listing; on `claimed: false`, show a one-time note that the ID is already registered on the server (fine if it's the user's own ID from another machine) and continue.
 
 Then call `list_workflows` with that `user_id` and `include_public: true`.
 

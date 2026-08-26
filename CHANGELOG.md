@@ -4,6 +4,13 @@ All notable changes to BetterCallClaude will be documented in this file.
 
 ---
 
+## [4.11.2] - 2026-08-26
+
+### Added
+- **Database-enforced unique user namespaces** — new `claim_user_id` tool on the `workflows-ch` server (8th tool) reserves a user ID via a `claimed_ids` table with a UNIQUE primary key, so two users can never share a workflow namespace. `/bettercallclaude:create-workflow` and `/bettercallclaude:workflow` now claim generated `bcc-…` IDs before persisting them (regenerate and retry on collision, up to 3 attempts) and claim IDs coming from the plugin setting or config file once, warning if the ID is already registered on the server.
+
+---
+
 ## [4.11.1] - 2026-08-26
 
 ### Fixed
