@@ -1,8 +1,8 @@
-[![Version](https://img.shields.io/badge/version-4.10.1-blue)](https://github.com/fedec65/bettercallclaude/releases)
+[![Version](https://img.shields.io/badge/version-4.11.0-blue)](https://github.com/fedec65/bettercallclaude/releases)
 [![License: AGPL-3.0](https://img.shields.io/badge/license-AGPL--3.0-green)](LICENSE)
 [![Platform](https://img.shields.io/badge/platform-Cowork%20Desktop-orange)](https://claude.ai)
 [![Website](https://img.shields.io/badge/web-bettercallclaude.ch-brightgreen)](https://bettercallclaude.ch)
-[![MCP Servers](https://img.shields.io/badge/MCP%20servers-9-purple)](https://mcp.bettercallclaude.ch/health)
+[![MCP Servers](https://img.shields.io/badge/MCP%20servers-10-purple)](https://mcp.bettercallclaude.ch/health)
 [![Buy Me a Coffee](https://img.shields.io/badge/support-Buy%20Me%20a%20Coffee-yellow)](https://buymeacoffee.com/federicocesconi)
 
 <p align="center">
@@ -11,7 +11,7 @@
 
 <p align="center"><strong>Swiss Legal Intelligence Plugin for Cowork Desktop</strong></p>
 
-BetterCallClaude transforms legal research, case strategy, and document drafting for Swiss lawyers. It provides deep integration with Swiss legal databases, multi-lingual analysis (DE/FR/IT/EN), and built-in Anwaltsgeheimnis (attorney-client privilege) protection -- 21 agents, 29 commands, 17 skills, and 9 MCP servers covering BGE/ATF/DTF precedent research, litigation strategy, adversarial analysis, legal drafting, citation verification, document intelligence, and CAS/TAS sports arbitration across all 26 Swiss cantons.
+BetterCallClaude transforms legal research, case strategy, and document drafting for Swiss lawyers. It provides deep integration with Swiss legal databases, multi-lingual analysis (DE/FR/IT/EN), and built-in Anwaltsgeheimnis (attorney-client privilege) protection -- 21 agents, 30 commands, 17 skills, and 10 MCP servers covering BGE/ATF/DTF precedent research, litigation strategy, adversarial analysis, legal drafting, citation verification, document intelligence, and CAS/TAS sports arbitration across all 26 Swiss cantons.
 
 > **Claude Code CLI users**: this repository is Cowork Desktop only. The CLI version is at [fedec65/bettercallclaude-cli](https://github.com/fedec65/bettercallclaude-cli).
 
@@ -25,9 +25,9 @@ BetterCallClaude provides a structured methodology for handling legal work with 
 
 ---
 
-## What's New in v4.10.1
+## What's New in v4.11.0
 
-**v4.10.1 — Documentation completeness patch.** The command, agent, and skill listings in this README, the plugin README, and `/help` now cover everything that ships in the plugin: all 29 commands, 21 agents, and 17 skills. No functional changes.
+**v4.11.0 — Custom workflows.** Build your own multi-agent pipelines once and reuse them: `/bettercallclaude:create-workflow` interviews you, validates the agent chain server-side (compatible hand-offs only), and saves it; `/bettercallclaude:workflow` then lists your saved workflows next to the built-in templates and runs them with the same engine. Backed by the new `workflows-ch` MCP server (30 commands, 10 MCP servers total).
 
 **Also in recent releases — v4.10.0 legal wayfinder**: `/legal-chart` decomposes a matter into a decision map — destination, decisions so far, fog, out-of-scope — with one ticket per open decision. `/legal-way` then works the map ticket by ticket (research, grilling, prototype, task) until the route to the deliverable is clear and hands off to execution. A fog check in `/briefing` routes oversized matters to the chart instead of forcing a static execution plan.
 
@@ -35,13 +35,13 @@ BetterCallClaude provides a structured methodology for handling legal work with 
 
 **Also in recent releases — v4.9.5 `/legal-timeline`**: build a sourced case chronology from your case documents: every event carries its document and locus, contested facts and date conflicts are made visible (never silently resolved), evidentiary gaps of 30+ days are flagged, and procedural deadlines are computed via MCP with cantonal holiday calendars. Three outputs (Markdown table, interactive HTML, Word export) under `bcc-output/timeline/`.
 
-**Content counts**: 21 agents, 29 commands, 17 skills, 9 MCP servers in `.mcp.json` (7 remote HTTP on `mcp.bettercallclaude.ch` + `swiss-caselaw` SSE on `mcp.opencaselaw.ch` + `ollama` local STDIO).
+**Content counts**: 21 agents, 30 commands, 17 skills, 10 MCP servers in `.mcp.json` (8 remote HTTP on `mcp.bettercallclaude.ch` + `swiss-caselaw` SSE on `mcp.opencaselaw.ch` + `ollama` local STDIO).
 
 [Full changelog →](CHANGELOG.md)
 
 **Cowork Desktop dedicated release** -- This repository is exclusively for Claude Cowork Desktop. The Claude Code CLI version is at [fedec65/bettercallclaude-cli](https://github.com/fedec65/bettercallclaude-cli).
 
-- **HTTP-only transport**: 8 of 9 MCP servers connect via `mcp.bettercallclaude.ch` / `mcp.opencaselaw.ch` -- no local Node.js build required for those
+- **HTTP-only transport**: 9 of 10 MCP servers connect via `mcp.bettercallclaude.ch` / `mcp.opencaselaw.ch` -- no local Node.js build required for those
 - **Local STDIO server** (`ollama`): bundled and only touches `http://localhost:11434` for privacy-routed translation/summarisation
 - **Simplified setup**: `/setup` checks connectivity only -- no transport switching needed in Cowork
 
@@ -77,7 +77,8 @@ MCP servers connect automatically via HTTP. No Node.js, no local setup, no API k
 | `/bettercallclaude:briefing` | Structured pre-execution briefing -- assembles a specialist panel, collects case context, and builds an execution plan before agents start working. |
 | `/bettercallclaude:legal-chart` | Chart a big or foggy matter as a wayfinder decision map -- one ticket per open decision, planning only. |
 | `/bettercallclaude:legal-way` | Work one decision ticket from a wayfinder map; hands off to execution only when every decision is made. |
-| `/bettercallclaude:workflow` | Define and execute multi-agent legal workflows (due diligence, litigation prep, contract lifecycle, real estate closing). |
+| `/bettercallclaude:workflow` | Define and execute multi-agent legal workflows (due diligence, litigation prep, contract lifecycle, real estate closing), including saved custom workflows. |
+| `/bettercallclaude:create-workflow` | Create a reusable custom workflow by combining agents -- interview-based: pick agents, order them, define the output; saved for future use with `/workflow`. |
 | `/bettercallclaude:legal-5step` | Execute the 5-step Swiss legal framework end to end: intake, research, strategy, adversarial stress test, verified drafting. |
 | `/bettercallclaude:legal-goal` | Define a checkable legal success condition for `/legal-loop`. |
 | `/bettercallclaude:legal-loop` | Iterate a worker-evaluator cycle against a Goal Record until the success condition is met or a stop limit is reached. |
@@ -87,7 +88,7 @@ MCP servers connect automatically via HTTP. No Node.js, no local setup, no API k
 | `/bettercallclaude:nda-triage` | Triage NDAs against Swiss law -- GREEN / YELLOW / RED using playbook thresholds; single file or batch mode. |
 | `/bettercallclaude:summarize` | Consolidate multi-agent pipeline output -- deduplicate disclaimers, terminology, and citations with length control (`--short`/`--medium`/`--long`). |
 | `/bettercallclaude:start` | First-use onboarding -- checks MCP connectivity, guides playbook creation, shows tailored usage examples. |
-| `/bettercallclaude:setup` | Check MCP server connectivity and display status for all 9 servers. |
+| `/bettercallclaude:setup` | Check MCP server connectivity and display status for all 10 servers. |
 | `/bettercallclaude:doctor` | Diagnose MCP server connectivity per server, with plain-language status, impact, and suggested fixes. |
 | `/bettercallclaude:privacy` | View or change the privacy mode (strict / balanced / cloud) for Anwaltsgeheimnis handling. |
 | `/bettercallclaude:version` | Display plugin version, installed components, and system status. |

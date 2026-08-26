@@ -28,6 +28,10 @@
       "type": "http",
       "url": "https://mcp.bettercallclaude.ch/tas-jurisprudence/mcp"
     },
+    "workflows-ch": {
+      "type": "http",
+      "url": "https://mcp.bettercallclaude.ch/workflows-ch/mcp"
+    },
     "swiss-caselaw": {
       "type": "sse",
       "url": "https://mcp.opencaselaw.ch"
