@@ -4,6 +4,13 @@ All notable changes to BetterCallClaude will be documented in this file.
 
 ---
 
+## [4.11.3] - 2026-08-26
+
+### Fixed
+- **Workflow user IDs now survive Cowork restarts** — Cowork Desktop wipes its sandbox filesystem on restart, so the `~/.betterask/config.yaml` ID from v4.11.1 was regenerated on every launch (and Cowork renders no userConfig settings UI, so the plugin setting is CLI-only). The ID resolution in `/bettercallclaude:create-workflow` and `/bettercallclaude:workflow` now also checks the session's custom instructions for a `BetterCallClaude workflow user ID: …` line (Settings → General → Instructions for Claude — stored by the app, survives restarts). New resolution order: plugin setting → custom-instructions line → local config file → generate + claim + persist, and the one-time generation message tells users how to make the ID permanent.
+
+---
+
 ## [4.11.2] - 2026-08-26
 
 ### Added
