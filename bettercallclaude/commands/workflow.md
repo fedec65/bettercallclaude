@@ -96,10 +96,14 @@ Identify which template to use from the user's input, or let them choose:
 
 #### Your Saved Workflows
 
-Before presenting the template list, call `list_workflows` with:
+First resolve the `user_id`, in this order:
 
-- `user_id`: the value of `${user_config.user_id}`; if that placeholder did not resolve or is empty, use `default`.
-- `include_public`: `true`
+1. **Plugin setting**: if `${user_config.user_id}` resolved to a non-empty value (i.e. the placeholder does not appear literally), use it.
+2. **Local config**: read `~/.betterask/config.yaml` if it exists; if it contains a `user_id:` line, use that value.
+3. **Generate once, then persist**: generate 8 random bytes of hex (e.g. `openssl rand -hex 8`), build `bcc-<hex>`, and **append** `user_id: bcc-<hex>` to `~/.betterask/config.yaml` (`mkdir -p ~/.betterask` first; append only — the file may hold the user's privacy mode). Mention the generated ID to the user once, briefly.
+4. If the file cannot be written, skip this subsection entirely — **never** use a shared `default` ID.
+
+Then call `list_workflows` with that `user_id` and `include_public: true`.
 
 Present any returned workflows in the same numbered format as the fixed templates above (slug, name, description), numbered continuing after the fixed ones. If the call returns an empty list or fails (e.g. server unreachable), omit this subsection entirely without commenting on it.
 

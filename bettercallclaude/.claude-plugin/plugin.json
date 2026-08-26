@@ -1,8 +1,10 @@
 {
   "name": "bettercallclaude",
-  "version": "4.11.0",
+  "version": "4.11.1",
   "description": "Swiss Legal Intelligence -- BGE/ATF/DTF precedent research, case strategy, legal drafting, and citation verification across all 26 Swiss cantons with Anwaltsgeheimnis privacy protection.",
-  "author": { "name": "Federico Cesconi" },
+  "author": {
+    "name": "Federico Cesconi"
+  },
   "userConfig": {
     "ollama_host": {
       "type": "string",
@@ -28,7 +30,7 @@
     "user_id": {
       "type": "string",
       "title": "User ID for custom workflows",
-      "description": "Stable identifier that owns your saved custom workflows (workflows-ch server). Pick something non-trivial (e.g. firm acronym + random suffix) — saved workflows are visible to anyone who knows the ID. Leave blank to use 'default'.",
+      "description": "Stable identifier that owns your saved custom workflows (workflows-ch server). Leave blank and a unique random ID is generated once and stored in ~/.betterask/config.yaml, so every user gets their own namespace automatically. Keep your ID private: saved workflows are visible to anyone who knows it.",
       "default": "",
       "sensitive": false
     },

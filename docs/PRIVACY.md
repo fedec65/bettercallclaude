@@ -157,7 +157,12 @@ Values declared in [`plugin.json` under `userConfig`](../bettercallclaude/.claud
 | `ollama_host`          | `settings.json` (plaintext)                     |
 | `default_jurisdiction` | `settings.json` (plaintext)                     |
 | `output_language`      | `settings.json` (plaintext)                     |
+| `user_id`              | `settings.json` (plaintext); if unset, a generated `bcc-<random>` ID in `~/.betterask/config.yaml` |
 | `api_token`            | OS keychain (macOS Keychain / Windows Credential Manager / libsecret) |
+
+The `user_id` value owns your saved custom workflows on the workflows-ch
+server. It is not a credential, but it is the only access key to your
+workflow namespace — treat it as semi-sensitive and do not share it.
 
 Gateway URLs (`mcp.bettercallclaude.ch`, `mcp.opencaselaw.ch`) are hardcoded
 in [`.mcp.json`](../bettercallclaude/.mcp.json); self-hosters fork and edit.
