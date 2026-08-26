@@ -77,7 +77,8 @@ MCP servers connect automatically via HTTP. No Node.js, no local setup, no API k
 | `/bettercallclaude:briefing` | Structured pre-execution briefing -- assembles a specialist panel, collects case context, and builds an execution plan before agents start working. |
 | `/bettercallclaude:legal-chart` | Chart a big or foggy matter as a wayfinder decision map -- one ticket per open decision, planning only. |
 | `/bettercallclaude:legal-way` | Work one decision ticket from a wayfinder map; hands off to execution only when every decision is made. |
-| `/bettercallclaude:workflow` | Define and execute multi-agent legal workflows (due diligence, litigation prep, contract lifecycle, real estate closing). |
+| `/bettercallclaude:workflow` | Define and execute multi-agent legal workflows (due diligence, litigation prep, contract lifecycle, real estate closing), including saved custom workflows. |
+| `/bettercallclaude:create-workflow` | Create a reusable custom workflow by combining agents -- interview-based: pick agents, order them, define the output; saved for future use with `/workflow`. |
 | `/bettercallclaude:legal-5step` | Execute the 5-step Swiss legal framework end to end: intake, research, strategy, adversarial stress test, verified drafting. |
 | `/bettercallclaude:legal-goal` | Define a checkable legal success condition for `/legal-loop`. |
 | `/bettercallclaude:legal-loop` | Iterate a worker-evaluator cycle against a Goal Record until the success condition is met or a stop limit is reached. |
@@ -87,7 +88,7 @@ MCP servers connect automatically via HTTP. No Node.js, no local setup, no API k
 | `/bettercallclaude:nda-triage` | Triage NDAs against Swiss law -- GREEN / YELLOW / RED using playbook thresholds; single file or batch mode. |
 | `/bettercallclaude:summarize` | Consolidate multi-agent pipeline output -- deduplicate disclaimers, terminology, and citations with length control (`--short`/`--medium`/`--long`). |
 | `/bettercallclaude:start` | First-use onboarding -- checks MCP connectivity, guides playbook creation, shows tailored usage examples. |
-| `/bettercallclaude:setup` | Check MCP server connectivity and display status for all 9 servers. |
+| `/bettercallclaude:setup` | Check MCP server connectivity and display status for all 10 servers. |
 | `/bettercallclaude:doctor` | Diagnose MCP server connectivity per server, with plain-language status, impact, and suggested fixes. |
 | `/bettercallclaude:privacy` | View or change the privacy mode (strict / balanced / cloud) for Anwaltsgeheimnis handling. |
 | `/bettercallclaude:version` | Display plugin version, installed components, and system status. |
