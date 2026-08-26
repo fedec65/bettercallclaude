@@ -433,6 +433,10 @@ The plugin ships pre-configured MCP servers that provide direct integration with
 | `legal-citations` | Validate citation format and existence, convert citations between DE/FR/IT/EN formats. |
 | `fedlex-sparql` | Look up Swiss federal legislation via the Fedlex SPARQL endpoint. Retrieve statutes by SR number, search legislation, find related acts, get article text. |
 | `onlinekommentar` | Search and retrieve Swiss legal commentaries (Kommentare). Find scholarly analysis by article reference, keyword, or legislative act. |
+| `legal-persona` | Swiss judicial personas, legal analysis/drafting/strategy, and deadline computation. |
+| `tas-jurisprudence` | Search CAS/TAS sports arbitration awards, filter by sport, recent awards. |
+| `swiss-caselaw` | Case-law search, citation graphs, and doctrine via opencaselaw.ch (SSE transport). |
+| `ollama` | Local privacy classification (Anwaltsgeheimnis, Art. 321 StGB) via a local Ollama daemon. |
 | `workflows-ch` | Custom workflow definitions -- validate agent chains against the Swiss agents manifest, save and list user workflows, log runs. |
 
 ### Requirements

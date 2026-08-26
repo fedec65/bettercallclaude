@@ -89,7 +89,7 @@ For each server whose tools ARE available, make one lightweight call to confirm 
 | onlinekommentar | `search_commentaries` with a minimal query |
 | legal-persona | `legal_analyze` with a minimal legal question |
 | tas-jurisprudence | `cas_search` with a minimal query |
-| workflows-ch | `list_workflows` (no arguments) |
+| workflows-ch | `list_workflows` with `{"user_id": "default"}` |
 | swiss-caselaw | `search_decisions` with a minimal query |
 | ollama | `ollama_check_status` (or `ollama_list_models`) |
 

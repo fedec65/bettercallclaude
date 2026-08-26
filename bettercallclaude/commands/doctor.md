@@ -47,7 +47,7 @@ For each of the 10 MCP servers, use a **two-stage approach**:
 | onlinekommentar | Commentari giuridici online | `search_commentaries` (minimal) |
 | legal-persona | Analisi, strategia e drafting documenti legali svizzeri | `legal_analyze` (minimal) |
 | tas-jurisprudence | Lodi arbitrali CAS/TAS | `cas_search` (minimal) |
-| workflows-ch | Flussi di lavoro personalizzati | `list_workflows` (no args) |
+| workflows-ch | Flussi di lavoro personalizzati | `list_workflows` with `{"user_id": "default"}` |
 | swiss-caselaw | Giurisprudenza, catene citazioni, dottrina | `search_decisions` (minimal) |
 | ollama | Classificatore privacy locale | `ollama_check_status` |
 
