@@ -107,6 +107,35 @@ Before marking a PR ready for review:
       concrete testing section.
 - [ ] No secrets, `.env`, or `settings.json` committed.
 
+## Version bump checklist
+
+Every release — including patch releases — must bump the version in **all**
+of these places, or they drift (4.11.1–4.11.3 forgot the plugin README and
+`help.md` until 4.11.3 shipped):
+
+- [ ] `package.json` — `"version"`
+- [ ] `.claude-plugin/marketplace.json` — `"version"`
+- [ ] `bettercallclaude/.claude-plugin/plugin.json` — `"version"`
+- [ ] `bettercallclaude/README.md` — `**Version**: X.Y.Z -- …` header line
+      (this is the README Cowork displays for the installed plugin)
+- [ ] `bettercallclaude/commands/help.md` — `**BetterCallClaude vX.Y.Z …` line
+- [ ] `bettercallclaude/commands/version.md` — `Version:      X.Y.Z` line
+- [ ] `README.md` — version badge line 1 (and refresh "What's New" on
+      minor releases)
+- [ ] `CHANGELOG.md` — new entry at the top
+
+Verify with:
+
+```bash
+grep -rn "<old version>" --include="*.json" --include="*.md" . \
+  | grep -v node_modules | grep -v CHANGELOG | grep -v dist/ \
+  | grep -v htmlcov | grep -v marketing/ | grep -v legal-briefing-workspace \
+  | grep -v .superpowers | grep -v docs/project-management
+```
+
+Expected: no output. Historical mentions in CHANGELOG, marketing, docs, and
+"What's New" history entries stay on purpose.
+
 ## Style notes specific to this repo
 
 - **Agents must declare `model:`.** Inheriting the caller's model gives
