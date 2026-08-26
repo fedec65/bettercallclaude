@@ -4,6 +4,14 @@ All notable changes to BetterCallClaude will be documented in this file.
 
 ---
 
+## [4.11.0] - 2026-08-26
+
+### Added
+- **Custom workflows (BCC-SPEC-WORKFLOWS-CH-001)** — create, save, and reuse your own multi-agent pipelines. New `workflows-ch` MCP server (Postgres-backed) with pipeline validation against the Swiss agents manifest (agent existence + output/input type chaining). New `/bettercallclaude:create-workflow` command (interview → validate → save); `/bettercallclaude:workflow` now lists your saved workflows next to the 5 fixed templates and executes them with the unchanged engine.
+- New optional plugin setting **User ID for custom workflows** (`user_id`) that owns your saved workflows; defaults to `default`.
+
+---
+
 ## [4.10.1] - 2026-08-19
 
 ### Fixed

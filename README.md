@@ -1,4 +1,4 @@
-[![Version](https://img.shields.io/badge/version-4.10.1-blue)](https://github.com/fedec65/bettercallclaude/releases)
+[![Version](https://img.shields.io/badge/version-4.11.0-blue)](https://github.com/fedec65/bettercallclaude/releases)
 [![License: AGPL-3.0](https://img.shields.io/badge/license-AGPL--3.0-green)](LICENSE)
 [![Platform](https://img.shields.io/badge/platform-Cowork%20Desktop-orange)](https://claude.ai)
 [![Website](https://img.shields.io/badge/web-bettercallclaude.ch-brightgreen)](https://bettercallclaude.ch)
@@ -25,9 +25,9 @@ BetterCallClaude provides a structured methodology for handling legal work with 
 
 ---
 
-## What's New in v4.10.1
+## What's New in v4.11.0
 
-**v4.10.1 — Documentation completeness patch.** The command, agent, and skill listings in this README, the plugin README, and `/help` now cover everything that ships in the plugin: all 29 commands, 21 agents, and 17 skills. No functional changes.
+**v4.11.0 — Custom workflows.** Build your own multi-agent pipelines once and reuse them: `/bettercallclaude:create-workflow` interviews you, validates the agent chain server-side (compatible hand-offs only), and saves it; `/bettercallclaude:workflow` then lists your saved workflows next to the built-in templates and runs them with the same engine. Backed by the new `workflows-ch` MCP server (30 commands, 10 MCP servers total).
 
 **Also in recent releases — v4.10.0 legal wayfinder**: `/legal-chart` decomposes a matter into a decision map — destination, decisions so far, fog, out-of-scope — with one ticket per open decision. `/legal-way` then works the map ticket by ticket (research, grilling, prototype, task) until the route to the deliverable is clear and hands off to execution. A fog check in `/briefing` routes oversized matters to the chart instead of forcing a static execution plan.
 

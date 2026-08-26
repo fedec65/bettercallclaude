@@ -26,7 +26,7 @@ BetterCallClaude provides Swiss legal intelligence through three interfaces:
 
 ---
 
-## Commands (29)
+## Commands (30)
 
 ### Core Commands
 
@@ -60,7 +60,8 @@ BetterCallClaude provides Swiss legal intelligence through three interfaces:
 
 | Command | Description |
 |---------|-------------|
-| `/bettercallclaude:workflow` | Define and execute multi-agent pipelines |
+| `/bettercallclaude:workflow` | Define and execute multi-agent pipelines, including your saved custom workflows |
+| `/bettercallclaude:create-workflow` | Create a custom multi-agent pipeline: interview, server-side chain validation, save |
 | `/bettercallclaude:briefing` | Structured pre-execution briefing with specialist panel and plan building |
 | `/bettercallclaude:legal-chart` | Chart a big/foggy matter as a wayfinder decision map |
 | `/bettercallclaude:legal-way` | Work one decision ticket from a wayfinder map |
@@ -146,7 +147,7 @@ Skills activate automatically when Claude detects relevant context.
 
 ---
 
-## MCP Servers (9)
+## MCP Servers (10)
 
 | Server | Purpose | Transport |
 |--------|---------|-----------|
@@ -157,6 +158,7 @@ Skills activate automatically when Claude detects relevant context.
 | onlinekommentar | Swiss legal commentary access | HTTP |
 | legal-persona | Swiss judicial personas — profiles, voting patterns, doctrinal positions | HTTP |
 | tas-jurisprudence | CAS/TAS sports arbitration awards and jurisprudence | HTTP |
+| workflows-ch | Custom workflow definitions: validation, persistence, run logging | HTTP |
 | swiss-caselaw | Case law search, citation graphs, appeal chains, doctrine (opencaselaw.ch) | SSE |
 | ollama | Local privacy classification for privileged content | Local |
 
@@ -222,7 +224,7 @@ Skills activate automatically when Claude detects relevant context.
 
 ---
 
-**BetterCallClaude v4.10.1 -- Swiss Legal Intelligence for Cowork Desktop**
+**BetterCallClaude v4.11.0 -- Swiss Legal Intelligence for Cowork Desktop**
 
 If the user provided additional input, respond to it in the context of this help reference.
 
