@@ -6,7 +6,7 @@ BetterCallClaude is a plugin for legal professionals working in Cowork or Claude
 
 The plugin covers the full spectrum of Swiss legal work: BGE/ATF/DTF precedent research, case strategy development with risk assessment, adversarial legal analysis, compliance and data protection advisory, fiscal and corporate law expertise, real estate law, legal drafting with jurisdiction-aware templates, legal translation, and citation verification across all 26 Swiss cantons. Privacy compliance with Anwaltsgeheimnis (Art. 321 StGB) is enforced automatically through a pre-tool-use hook that detects privileged content before it leaves the local environment.
 
-**Version**: 4.11.4 -- 21 agents, 30 commands, 17 skills, 10 MCP servers.
+**Version**: 4.11.5 -- 21 agents, 30 commands, 17 skills, 10 MCP servers.
 
 > Love BetterCallClaude? Support the project — [**Buy me a coffee**](https://buymeacoffee.com/federicocesconi) ☕
 
@@ -443,9 +443,9 @@ The plugin ships pre-configured MCP servers that provide direct integration with
 
 - Node.js >= 20 (only required for local Ollama invocation; the other nine MCP servers are reached over HTTPS / SSE and run no code on your machine).
 
-Nine of the ten MCP servers are hosted remotely (eight HTTP servers at `mcp.bettercallclaude.ch`, one SSE server at `mcp.opencaselaw.ch`) and are reached by Cowork Desktop without any local build step. Only the local `ollama` server runs from a committed compiled bundle at `bettercallclaude/mcp-servers/ollama/dist/index.js`; to use it you need a running Ollama daemon (default `http://localhost:11434`, overridable via the `ollama_host` userConfig key).
+Nine of the ten MCP servers are hosted remotely (eight HTTP servers at `mcp.bettercallclaude.ch`, one SSE server at `mcp.opencaselaw.ch`) and are reached by Cowork Desktop without any local build step. Only the local `ollama` server runs from a committed compiled bundle at `bettercallclaude/mcp-servers/ollama/dist/index.js`; to use it you need a running Ollama daemon (default `http://localhost:11434`, configured in `.mcp.json` — self-hosters edit `bettercallclaude/.mcp.json` to point at a different host).
 
-All server paths and URLs are configured in `.mcp.json` using the `${CLAUDE_PLUGIN_ROOT}` and `${user_config.*}` interpolations for portability and self-hosting (see [`docs/PRIVACY.md`](../docs/PRIVACY.md)).
+All server paths and URLs are configured in `.mcp.json` using the `${CLAUDE_PLUGIN_ROOT}` interpolation for portability and self-hosting (see [`docs/PRIVACY.md`](../docs/PRIVACY.md)).
 
 ---
 

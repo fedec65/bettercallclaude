@@ -61,11 +61,10 @@ One server runs **locally**:
 | `ollama` | STDIO     | `node ${CLAUDE_PLUGIN_ROOT}/mcp-servers/ollama/dist/index.js` |
 
 The Ollama subserver talks to a local Ollama daemon you operate (default
-`http://localhost:11434`, overridable via the `ollama_host`
-[userConfig](../bettercallclaude/.claude-plugin/plugin.json) key). It does not
-send data to the plugin author or to `bettercallclaude.ch`. It does send data
-to wherever you point `ollama_host`; if you change it to a remote host, the
-privacy properties of that host are your responsibility.
+`http://localhost:11434`, configurable in
+[`.mcp.json`](../bettercallclaude/.mcp.json)). It does not send data to the
+plugin author or to `bettercallclaude.ch`. If you point it at a remote host,
+the privacy properties of that host are your responsibility.
 
 ### 1.3 Anthropic
 
@@ -154,7 +153,6 @@ Values declared in [`plugin.json` under `userConfig`](../bettercallclaude/.claud
 
 | Key                    | Stored where                                    |
 | ---------------------- | ----------------------------------------------- |
-| `ollama_host`          | `settings.json` (plaintext)                     |
 | `default_jurisdiction` | `settings.json` (plaintext)                     |
 | `output_language`      | `settings.json` (plaintext)                     |
 | `user_id`              | `settings.json` (plaintext); if unset, a generated `bcc-<random>` ID in `~/.betterask/config.yaml` |

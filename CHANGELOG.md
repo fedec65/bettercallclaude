@@ -4,6 +4,13 @@ All notable changes to BetterCallClaude will be documented in this file.
 
 ---
 
+## [4.11.5] - 2026-08-30
+
+### Fixed
+- **Ollama MCP server dropped entirely on Cowork Desktop** — `.mcp.json` passed `${user_config.ollama_host}` to the bundled ollama server, but Cowork Desktop's host bridge does not support `user_config` substitution in *any* field: it logged `config references plugin user configuration (ollama_host) — user_config is not supported on the desktop host bridge; dropping server` and never started the server, so the v4.11.4 in-server fallback never ran. The `env` block and the dead `ollama_host` plugin setting are removed; the server always runs against the default `http://localhost:11434`, and self-hosters edit `bettercallclaude/.mcp.json` directly.
+
+---
+
 ## [4.11.4] - 2026-08-30
 
 ### Fixed
