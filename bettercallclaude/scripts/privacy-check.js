@@ -342,7 +342,13 @@ function classify(content, pathHint) {
 
 /** Check if a tool name refers to the local Ollama MCP server. */
 function isOllamaTool(toolName) {
-  return typeof toolName === 'string' && toolName.startsWith('mcp__ollama__');
+  return (
+    typeof toolName === 'string' &&
+    // Claude Code CLI prefix
+    (toolName.startsWith('mcp__ollama__') ||
+      // Cowork Desktop prefix (plugin-scoped server names)
+      toolName.startsWith('mcp__plugin_bettercallclaude_ollama__'))
+  );
 }
 
 /**
