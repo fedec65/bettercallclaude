@@ -1,4 +1,4 @@
-[![Version](https://img.shields.io/badge/version-4.11.4-blue)](https://github.com/fedec65/bettercallclaude/releases)
+[![Version](https://img.shields.io/badge/version-4.11.5-blue)](https://github.com/fedec65/bettercallclaude/releases)
 [![License: AGPL-3.0](https://img.shields.io/badge/license-AGPL--3.0-green)](LICENSE)
 [![Platform](https://img.shields.io/badge/platform-Cowork%20Desktop-orange)](https://claude.ai)
 [![Website](https://img.shields.io/badge/web-bettercallclaude.ch-brightgreen)](https://bettercallclaude.ch)
@@ -25,7 +25,9 @@ BetterCallClaude provides a structured methodology for handling legal work with 
 
 ---
 
-## What's New in v4.11.4
+## What's New in v4.11.5
+
+**v4.11.5 — Ollama server actually starts on Cowork Desktop.** The v4.11.4 fallback never ran: Cowork's host bridge drops any server whose `.mcp.json` entry references `${user_config.*}` (`user_config is not supported on the desktop host bridge; dropping server`), so the whole ollama server was rejected at load. The template and the dead `ollama_host` plugin setting are removed — the bundled server now starts and talks to your local Ollama daemon at `http://localhost:11434` directly. Update the plugin, restart Cowork, then run `/bettercallclaude:setup` to see the ollama server connected.
 
 **v4.11.4 — Ollama connector fixed on Cowork Desktop.** Since v4.3.0 the bundled ollama server received an empty `ollama_host` setting on Cowork (the app exposes no userConfig settings UI), which broke every local translation/summarisation call with `Failed to parse URL from /api/version`. The server now falls back to the default `http://localhost:11434` automatically — reinstall or update the plugin and no action is needed.
 

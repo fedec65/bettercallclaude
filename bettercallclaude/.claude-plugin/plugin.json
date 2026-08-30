@@ -1,18 +1,11 @@
 {
   "name": "bettercallclaude",
-  "version": "4.11.4",
+  "version": "4.11.5",
   "description": "Swiss Legal Intelligence -- BGE/ATF/DTF precedent research, case strategy, legal drafting, and citation verification across all 26 Swiss cantons with Anwaltsgeheimnis privacy protection.",
   "author": {
     "name": "Federico Cesconi"
   },
   "userConfig": {
-    "ollama_host": {
-      "type": "string",
-      "title": "Ollama host URL",
-      "description": "URL of the Ollama host used by the bundled ollama MCP server for local-only translation and summarisation.",
-      "default": "http://localhost:11434",
-      "sensitive": false
-    },
     "default_jurisdiction": {
       "type": "string",
       "title": "Default Swiss canton",

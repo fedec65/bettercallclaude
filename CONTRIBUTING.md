@@ -143,13 +143,13 @@ Expected: no output. Historical mentions in CHANGELOG, marketing, docs, and
   `haiku` for mechanical formatting, `sonnet` for everything else.
 - **Agents that spawn subagents must list `Task` as a tool.** The prompt
   alone is not enough; the subagent-runtime checks the tool list.
-- **Do not use `${user_config.*}` inside `url:` fields in `.mcp.json`.**
-  Cowork's server-side plugin validator rejects URL templating before the
-  user is prompted for `userConfig` values (see anthropic/claude-code#39455).
-  Hardcode the gateway URLs (`https://mcp.bettercallclaude.ch/...`,
-  `https://mcp.opencaselaw.ch`) and keep `${user_config.*}` substitution for
-  `env:`, `args:`, and `headers:` only. Self-hosters fork and edit
-  `.mcp.json` directly.
+- **Do not use `${user_config.*}` anywhere in `.mcp.json`.** Cowork Desktop's
+  host bridge does not resolve user_config substitution: a server whose entry
+  references it — in `url:`, `env:`, `args:`, or `headers:` — is **dropped
+  entirely** at load (`config references plugin user configuration (…) —
+  user_config is not supported on the desktop host bridge; dropping server`).
+  Hardcode the gateway URLs and the local defaults; self-hosters fork and
+  edit `.mcp.json` directly.
 - **Do not hardcode privacy patterns in the hook's strong list without
   word boundaries.** Weak markers (bare `confidential`, `vertraulich`,
   etc.) must be gated on a discriminator — see

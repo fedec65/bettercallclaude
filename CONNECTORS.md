@@ -67,10 +67,7 @@ All nine servers auto-register via the `.mcp.json` file at the plugin root:
     },
     "ollama": {
       "command": "node",
-      "args": ["${CLAUDE_PLUGIN_ROOT}/mcp-servers/ollama/dist/index.js"],
-      "env": {
-        "OLLAMA_HOST": "${user_config.ollama_host}"
-      }
+      "args": ["${CLAUDE_PLUGIN_ROOT}/mcp-servers/ollama/dist/index.js"]
     }
   }
 }
