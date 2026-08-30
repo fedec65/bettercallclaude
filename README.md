@@ -1,4 +1,4 @@
-[![Version](https://img.shields.io/badge/version-4.11.3-blue)](https://github.com/fedec65/bettercallclaude/releases)
+[![Version](https://img.shields.io/badge/version-4.11.4-blue)](https://github.com/fedec65/bettercallclaude/releases)
 [![License: AGPL-3.0](https://img.shields.io/badge/license-AGPL--3.0-green)](LICENSE)
 [![Platform](https://img.shields.io/badge/platform-Cowork%20Desktop-orange)](https://claude.ai)
 [![Website](https://img.shields.io/badge/web-bettercallclaude.ch-brightgreen)](https://bettercallclaude.ch)
@@ -25,7 +25,9 @@ BetterCallClaude provides a structured methodology for handling legal work with 
 
 ---
 
-## What's New in v4.11.3
+## What's New in v4.11.4
+
+**v4.11.4 — Ollama connector fixed on Cowork Desktop.** Since v4.3.0 the bundled ollama server received an empty `ollama_host` setting on Cowork (the app exposes no userConfig settings UI), which broke every local translation/summarisation call with `Failed to parse URL from /api/version`. The server now falls back to the default `http://localhost:11434` automatically — reinstall or update the plugin and no action is needed.
 
 **v4.11.3 — Workflow IDs that survive Cowork restarts.** Cowork Desktop wipes its sandbox filesystem on restart, which used to reset your generated workflow ID. The workflow commands now also read your ID from a `BetterCallClaude workflow user ID: …` line in Settings → General → Instructions for Claude — one line to paste once, stored by the app, permanent. The generation message tells new users how.
 

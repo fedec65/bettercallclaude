@@ -283,6 +283,11 @@ t('strict: Ollama tool → null (exempt, local processing)', () => {
   assert.strictEqual(r, null);
 });
 
+t('strict: Cowork-prefixed Ollama tool → null (exempt, local processing)', () => {
+  const r = classifyWithMode('Anwaltsgeheimnis.', '', 'strict', 'mcp__plugin_bettercallclaude_ollama__ollama_generate');
+  assert.strictEqual(r, null);
+});
+
 t('strict: non-Ollama MCP tool, no pattern → null (allow)', () => {
   const r = classifyWithMode('Neutral text.', '', 'strict', 'mcp__entscheidsuche__search');
   assert.strictEqual(r, null);
@@ -335,6 +340,10 @@ t('identifies mcp__ollama__translate as Ollama', () => {
 
 t('identifies mcp__ollama__summarize as Ollama', () => {
   assert.strictEqual(isOllamaTool('mcp__ollama__summarize'), true);
+});
+
+t('identifies Cowork-prefixed mcp__plugin_bettercallclaude_ollama__ as Ollama', () => {
+  assert.strictEqual(isOllamaTool('mcp__plugin_bettercallclaude_ollama__ollama_check_status'), true);
 });
 
 t('rejects mcp__entscheidsuche__search', () => {

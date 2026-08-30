@@ -4,6 +4,14 @@ All notable changes to BetterCallClaude will be documented in this file.
 
 ---
 
+## [4.11.4] - 2026-08-30
+
+### Fixed
+- **Ollama connector broken on Cowork Desktop since v4.3.0** — `.mcp.json` passes `${user_config.ollama_host}` to the bundled ollama server, but Cowork Desktop exposes no userConfig settings UI, so the value arrived empty and every ollama tool failed with `Failed to parse URL from /api/version`. The bundled server now treats an empty or unresolved `${…}` template value as "use the default" (`http://localhost:11434`), trims whitespace, and strips trailing slashes from a configured host. No plugin setting change is needed.
+- **Privacy hook recognises Cowork's ollama tool names** — the local-processing exemption now also covers `mcp__plugin_bettercallclaude_ollama__*` (Cowork Desktop prefix), not just `mcp__ollama__*` (Claude Code CLI prefix).
+
+---
+
 ## [4.11.3] - 2026-08-26
 
 ### Fixed

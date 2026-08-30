@@ -26,7 +26,14 @@ export class OllamaClient {
   private readonly timeoutMs: number;
 
   constructor(host?: string, timeoutMs?: number) {
-    this.host = (host ?? process.env.OLLAMA_HOST ?? DEFAULT_HOST).replace(/\/+$/, '');
+    // Cowork Desktop does not surface a userConfig settings UI, so the
+    // OLLAMA_HOST env from .mcp.json arrives empty or as an unresolved
+    // `${user_config.ollama_host}` template. Fall back to the local default
+    // instead of trying to fetch against a blank host. An explicit host
+    // (e.g. CLI users with a custom ollama_host) is still honoured.
+    const configured = (host ?? process.env.OLLAMA_HOST ?? '').trim();
+    const effective = configured && !configured.startsWith('${') ? configured : DEFAULT_HOST;
+    this.host = effective.replace(/\/+$/, '');
     this.timeoutMs = timeoutMs ?? DEFAULT_TIMEOUT_MS;
   }
 
