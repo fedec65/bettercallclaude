@@ -9,8 +9,6 @@ tools:
   - Bash
   - WebSearch
   - WebFetch
-  - mcp__plugin_bettercallclaude_legal-persona__present_intake_form
-  - mcp__legal-persona__present_intake_form
 ---
 
 # Swiss Legal Briefing Coordinator Agent
@@ -42,7 +40,12 @@ You do not spawn subagents and you do not interact with the user directly. The p
 
 ## Workflow
 
-You have two entry points, both invoked by the `/bettercallclaude:briefing` command. Detect which mode the command is asking for from the system prompt context (it tells you explicitly whether you're in Phase A or Phase D).
+You have two entry points, both invoked by the `/bettercallclaude:briefing` command. The command passes an explicit marker as the first line of its prompt — match exactly:
+
+- `Mode: A` → plan the panel (classify + roster).
+- `Mode: D` → build the execution plan from the Q&A history provided.
+
+Any other input (including no marker, or `Mode:` with no value) is an error — refuse with a one-line message and let the command surface it. Do not guess.
 
 ### Mode A — Plan the panel
 
