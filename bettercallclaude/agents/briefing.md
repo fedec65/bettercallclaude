@@ -9,6 +9,7 @@ tools:
   - Bash
   - WebSearch
   - WebFetch
+  - Task
   - mcp__plugin_bettercallclaude_legal-persona__present_intake_form
   - mcp__legal-persona__present_intake_form
 ---

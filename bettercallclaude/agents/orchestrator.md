@@ -9,6 +9,7 @@ tools:
   - Bash
   - WebSearch
   - WebFetch
+  - Task
   - mcp__plugin_bettercallclaude_bge-search__search_bge
   - mcp__bge-search__search_bge
   - mcp__plugin_bettercallclaude_bge-search__get_bge_decision
