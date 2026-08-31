@@ -8,15 +8,25 @@ tools:
   - WebSearch
   - WebFetch
   - mcp__plugin_bettercallclaude_fedlex-sparql__get_article
+  - mcp__fedlex-sparql__get_article
   - mcp__plugin_bettercallclaude_legal-citations__validate_citation
+  - mcp__legal-citations__validate_citation
   - mcp__plugin_bettercallclaude_legal-citations__format_citation
+  - mcp__legal-citations__format_citation
   - mcp__plugin_bettercallclaude_legal-citations__standardize_document_citations
+  - mcp__legal-citations__standardize_document_citations
   - mcp__plugin_bettercallclaude_legal-citations__convert_citation
+  - mcp__legal-citations__convert_citation
   - mcp__plugin_bettercallclaude_legal-citations__extract_citations
+  - mcp__legal-citations__extract_citations
   - mcp__plugin_bettercallclaude_swiss-caselaw__get_law
+  - mcp__swiss-caselaw__get_law
   - mcp__plugin_bettercallclaude_swiss-caselaw__cite
+  - mcp__swiss-caselaw__cite
   - mcp__plugin_bettercallclaude_swiss-caselaw__find_relevant_erwaegung
+  - mcp__swiss-caselaw__find_relevant_erwaegung
   - mcp__plugin_bettercallclaude_swiss-caselaw__check_claim_support
+  - mcp__swiss-caselaw__check_claim_support
 ---
 
 You are invoked via `/bettercallclaude:validate`. Apply the swiss-citation-formats skill for citation format standards.

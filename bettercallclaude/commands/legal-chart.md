@@ -9,16 +9,27 @@ tools:
   - WebSearch
   - WebFetch
   - mcp__plugin_bettercallclaude_bge-search__search_bge
+  - mcp__bge-search__search_bge
   - mcp__plugin_bettercallclaude_entscheidsuche__search_decisions
+  - mcp__entscheidsuche__search_decisions
   - mcp__plugin_bettercallclaude_entscheidsuche__search_canton
+  - mcp__entscheidsuche__search_canton
   - mcp__plugin_bettercallclaude_fedlex-sparql__search_legislation
+  - mcp__fedlex-sparql__search_legislation
   - mcp__plugin_bettercallclaude_fedlex-sparql__get_article
+  - mcp__fedlex-sparql__get_article
   - mcp__plugin_bettercallclaude_swiss-caselaw__search_decisions
+  - mcp__swiss-caselaw__search_decisions
   - mcp__plugin_bettercallclaude_swiss-caselaw__find_leading_cases
+  - mcp__swiss-caselaw__find_leading_cases
   - mcp__plugin_bettercallclaude_swiss-caselaw__get_case_brief
+  - mcp__swiss-caselaw__get_case_brief
   - mcp__plugin_bettercallclaude_swiss-caselaw__cite
+  - mcp__swiss-caselaw__cite
   - mcp__plugin_bettercallclaude_onlinekommentar__search_commentaries
+  - mcp__onlinekommentar__search_commentaries
   - mcp__plugin_bettercallclaude_ollama__ollama_check_status
+  - mcp__ollama__ollama_check_status
 ---
 
 # /legal-chart — Chart a Legal Decision Map

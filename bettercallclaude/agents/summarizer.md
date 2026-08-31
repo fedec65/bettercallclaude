@@ -10,6 +10,7 @@ tools:
   - WebSearch
   - WebFetch
   - mcp__plugin_bettercallclaude_swiss-caselaw__cite
+  - mcp__swiss-caselaw__cite
 ---
 
 # Swiss Legal Summarizer Agent

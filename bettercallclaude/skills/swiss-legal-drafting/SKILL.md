@@ -9,10 +9,15 @@ tools:
   - WebSearch
   - WebFetch
   - mcp__plugin_bettercallclaude_legal-citations__validate_citation
+  - mcp__legal-citations__validate_citation
   - mcp__plugin_bettercallclaude_legal-citations__format_citation
+  - mcp__legal-citations__format_citation
   - mcp__plugin_bettercallclaude_legal-citations__standardize_document_citations
+  - mcp__legal-citations__standardize_document_citations
   - mcp__plugin_bettercallclaude_legal-citations__convert_citation
+  - mcp__legal-citations__convert_citation
   - mcp__plugin_bettercallclaude_swiss-caselaw__cite
+  - mcp__swiss-caselaw__cite
 ---
 
 # Swiss Legal Drafting

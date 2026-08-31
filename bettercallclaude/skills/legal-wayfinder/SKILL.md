@@ -9,15 +9,25 @@ tools:
   - WebSearch
   - WebFetch
   - mcp__plugin_bettercallclaude_bge-search__search_bge
+  - mcp__bge-search__search_bge
   - mcp__plugin_bettercallclaude_entscheidsuche__search_decisions
+  - mcp__entscheidsuche__search_decisions
   - mcp__plugin_bettercallclaude_fedlex-sparql__search_legislation
+  - mcp__fedlex-sparql__search_legislation
   - mcp__plugin_bettercallclaude_fedlex-sparql__get_article
+  - mcp__fedlex-sparql__get_article
   - mcp__plugin_bettercallclaude_swiss-caselaw__search_decisions
+  - mcp__swiss-caselaw__search_decisions
   - mcp__plugin_bettercallclaude_swiss-caselaw__find_leading_cases
+  - mcp__swiss-caselaw__find_leading_cases
   - mcp__plugin_bettercallclaude_swiss-caselaw__cite
+  - mcp__swiss-caselaw__cite
   - mcp__plugin_bettercallclaude_legal-citations__validate_citation
+  - mcp__legal-citations__validate_citation
   - mcp__plugin_bettercallclaude_ollama__ollama_check_status
+  - mcp__ollama__ollama_check_status
   - mcp__plugin_bettercallclaude_ollama__ollama_classify_privacy
+  - mcp__ollama__ollama_classify_privacy
 ---
 
 # Legal Wayfinder — Decision Maps for Big Legal Matters

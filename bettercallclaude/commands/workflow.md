@@ -8,8 +8,11 @@ tools:
   - WebSearch
   - WebFetch
   - mcp__plugin_bettercallclaude_workflows-ch__claim_user_id
+  - mcp__workflows-ch__claim_user_id
   - mcp__plugin_bettercallclaude_workflows-ch__list_workflows
+  - mcp__workflows-ch__list_workflows
   - mcp__plugin_bettercallclaude_workflows-ch__get_workflow
+  - mcp__workflows-ch__get_workflow
 ---
 
 # Multi-Agent Legal Workflows

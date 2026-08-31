@@ -1,4 +1,4 @@
-[![Version](https://img.shields.io/badge/version-4.11.5-blue)](https://github.com/fedec65/bettercallclaude/releases)
+[![Version](https://img.shields.io/badge/version-4.11.6-blue)](https://github.com/fedec65/bettercallclaude/releases)
 [![License: AGPL-3.0](https://img.shields.io/badge/license-AGPL--3.0-green)](LICENSE)
 [![Platform](https://img.shields.io/badge/platform-Cowork%20Desktop-orange)](https://claude.ai)
 [![Website](https://img.shields.io/badge/web-bettercallclaude.ch-brightgreen)](https://bettercallclaude.ch)
@@ -24,6 +24,10 @@ BetterCallClaude provides a structured methodology for handling legal work with 
 ![BetterCallClaude Framework](docs/images/bettercallclaude_framework.png)
 
 ---
+
+## What's New in v4.11.6
+
+**v4.11.6 — Agents reach the legal databases on every install.** On some Cowork Desktop installs the connectors register under plain names (`mcp__fedlex-sparql__…`) instead of the plugin-scoped ones (`mcp__plugin_bettercallclaude_fedlex-sparql__…`), so every agent's tool whitelist matched nothing: plugin agents failed each database call with `Error: No such tool available`, while direct questions, generic agents, and inline commands worked. Every agent, skill, and command now whitelists each MCP tool under **both** names — update the plugin and re-run your agent task; no other action needed.
 
 ## What's New in v4.11.5
 

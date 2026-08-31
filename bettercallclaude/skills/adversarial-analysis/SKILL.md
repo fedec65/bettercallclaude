@@ -9,11 +9,17 @@ tools:
   - WebSearch
   - WebFetch
   - mcp__plugin_bettercallclaude_bge-search__search_bge
+  - mcp__bge-search__search_bge
   - mcp__plugin_bettercallclaude_entscheidsuche__find_similar_cases
+  - mcp__entscheidsuche__find_similar_cases
   - mcp__plugin_bettercallclaude_entscheidsuche__analyze_precedent_success_rate
+  - mcp__entscheidsuche__analyze_precedent_success_rate
   - mcp__plugin_bettercallclaude_swiss-caselaw__find_leading_cases
+  - mcp__swiss-caselaw__find_leading_cases
   - mcp__plugin_bettercallclaude_swiss-caselaw__cite
+  - mcp__swiss-caselaw__cite
   - mcp__plugin_bettercallclaude_legal-persona__present_adversarial_analysis
+  - mcp__legal-persona__present_adversarial_analysis
 ---
 
 # Adversarial Legal Analysis

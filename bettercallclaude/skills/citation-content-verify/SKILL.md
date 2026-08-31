@@ -9,24 +9,43 @@ tools:
   - WebSearch
   - WebFetch
   - mcp__plugin_bettercallclaude_legal-citations__extract_citations
+  - mcp__legal-citations__extract_citations
   - mcp__plugin_bettercallclaude_legal-citations__parse_citation
+  - mcp__legal-citations__parse_citation
   - mcp__plugin_bettercallclaude_legal-citations__validate_citation
+  - mcp__legal-citations__validate_citation
   - mcp__plugin_bettercallclaude_legal-citations__review_citations
+  - mcp__legal-citations__review_citations
   - mcp__plugin_bettercallclaude_fedlex-sparql__lookup_statute
+  - mcp__fedlex-sparql__lookup_statute
   - mcp__plugin_bettercallclaude_fedlex-sparql__get_article
+  - mcp__fedlex-sparql__get_article
   - mcp__plugin_bettercallclaude_entscheidsuche__search_decisions
+  - mcp__entscheidsuche__search_decisions
   - mcp__plugin_bettercallclaude_entscheidsuche__get_decision_details
+  - mcp__entscheidsuche__get_decision_details
   - mcp__plugin_bettercallclaude_onlinekommentar__search_commentaries
+  - mcp__onlinekommentar__search_commentaries
   - mcp__plugin_bettercallclaude_onlinekommentar__get_commentary_for_article
+  - mcp__onlinekommentar__get_commentary_for_article
   - mcp__plugin_bettercallclaude_swiss-caselaw__cite
+  - mcp__swiss-caselaw__cite
   - mcp__plugin_bettercallclaude_swiss-caselaw__get_decision
+  - mcp__swiss-caselaw__get_decision
   - mcp__plugin_bettercallclaude_swiss-caselaw__get_erwaegung
+  - mcp__swiss-caselaw__get_erwaegung
   - mcp__plugin_bettercallclaude_swiss-caselaw__get_regeste
+  - mcp__swiss-caselaw__get_regeste
   - mcp__plugin_bettercallclaude_swiss-caselaw__find_relevant_erwaegung
+  - mcp__swiss-caselaw__find_relevant_erwaegung
   - mcp__plugin_bettercallclaude_swiss-caselaw__check_claim_support
+  - mcp__swiss-caselaw__check_claim_support
   - mcp__plugin_bettercallclaude_swiss-caselaw__attest_response
+  - mcp__swiss-caselaw__attest_response
   - mcp__plugin_bettercallclaude_swiss-caselaw__get_doctrine
+  - mcp__swiss-caselaw__get_doctrine
   - mcp__plugin_bettercallclaude_ollama__ollama_check_status
+  - mcp__ollama__ollama_check_status
 ---
 
 # Citation Content Verify

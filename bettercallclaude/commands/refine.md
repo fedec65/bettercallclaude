@@ -8,6 +8,7 @@ tools:
   - WebSearch
   - WebFetch
   - mcp__plugin_bettercallclaude_legal-persona__present_intake_form
+  - mcp__legal-persona__present_intake_form
 ---
 
 You are invoked via `/bettercallclaude:refine`. Apply the legal-intake skill's Refine mode to the user's query.

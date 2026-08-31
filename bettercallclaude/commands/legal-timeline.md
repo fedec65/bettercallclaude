@@ -8,6 +8,7 @@ tools:
   - WebSearch
   - WebFetch
   - mcp__plugin_bettercallclaude_legal-persona__compute_deadlines
+  - mcp__legal-persona__compute_deadlines
 ---
 
 # /legal-timeline — Sourced Legal Chronology

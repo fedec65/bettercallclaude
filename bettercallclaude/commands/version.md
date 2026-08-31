@@ -8,6 +8,7 @@ tools:
   - WebSearch
   - WebFetch
   - mcp__plugin_bettercallclaude_swiss-caselaw__cite
+  - mcp__swiss-caselaw__cite
 ---
 
 # BetterCallClaude Version and Status
@@ -22,7 +23,7 @@ Output the following formatted block:
 ======================================================
   BetterCallClaude - Swiss Legal Intelligence Plugin
 ======================================================
-  Version:      4.11.5
+  Version:      4.11.6
   Format:       Claude Code Plugin (Cowork Desktop)
   Author:       Federico Cesconi
   License:      AGPL-3.0
