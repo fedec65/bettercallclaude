@@ -10,11 +10,17 @@ tools:
   - WebSearch
   - WebFetch
   - mcp__plugin_bettercallclaude_entscheidsuche__search_decisions
+  - mcp__entscheidsuche__search_decisions
   - mcp__plugin_bettercallclaude_fedlex-sparql__get_article
+  - mcp__fedlex-sparql__get_article
   - mcp__plugin_bettercallclaude_onlinekommentar__search_commentaries
+  - mcp__onlinekommentar__search_commentaries
   - mcp__plugin_bettercallclaude_onlinekommentar__get_commentary_for_article
+  - mcp__onlinekommentar__get_commentary_for_article
   - mcp__plugin_bettercallclaude_swiss-caselaw__find_leading_cases
+  - mcp__swiss-caselaw__find_leading_cases
   - mcp__plugin_bettercallclaude_swiss-caselaw__cite
+  - mcp__swiss-caselaw__cite
 ---
 
 # Swiss Real Estate Law Expert Agent

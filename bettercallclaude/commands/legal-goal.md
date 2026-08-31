@@ -8,8 +8,11 @@ tools:
   - WebSearch
   - WebFetch
   - mcp__plugin_bettercallclaude_swiss-caselaw__search_decisions
+  - mcp__swiss-caselaw__search_decisions
   - mcp__plugin_bettercallclaude_fedlex-sparql__search_legislation
+  - mcp__fedlex-sparql__search_legislation
   - mcp__plugin_bettercallclaude_legal-citations__validate_citation
+  - mcp__legal-citations__validate_citation
 ---
 
 # /legal-goal — Define a Legal Success Condition

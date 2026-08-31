@@ -8,14 +8,23 @@ tools:
   - WebSearch
   - WebFetch
   - mcp__plugin_bettercallclaude_bge-search__search_bge
+  - mcp__bge-search__search_bge
   - mcp__plugin_bettercallclaude_entscheidsuche__search_decisions
+  - mcp__entscheidsuche__search_decisions
   - mcp__plugin_bettercallclaude_fedlex-sparql__search_legislation
+  - mcp__fedlex-sparql__search_legislation
   - mcp__plugin_bettercallclaude_legal-citations__validate_citation
+  - mcp__legal-citations__validate_citation
   - mcp__plugin_bettercallclaude_onlinekommentar__search_commentaries
+  - mcp__onlinekommentar__search_commentaries
   - mcp__plugin_bettercallclaude_legal-persona__legal_analyze
+  - mcp__legal-persona__legal_analyze
   - mcp__plugin_bettercallclaude_tas-jurisprudence__cas_search
+  - mcp__tas-jurisprudence__cas_search
   - mcp__plugin_bettercallclaude_workflows-ch__list_workflows
+  - mcp__workflows-ch__list_workflows
   - mcp__plugin_bettercallclaude_ollama__ollama_check_status
+  - mcp__ollama__ollama_check_status
 ---
 
 # BetterCallClaude — Diagnostics

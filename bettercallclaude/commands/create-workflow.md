@@ -4,9 +4,13 @@ tools:
   - Read
   - Bash
   - mcp__plugin_bettercallclaude_workflows-ch__claim_user_id
+  - mcp__workflows-ch__claim_user_id
   - mcp__plugin_bettercallclaude_workflows-ch__list_agents
+  - mcp__workflows-ch__list_agents
   - mcp__plugin_bettercallclaude_workflows-ch__validate_pipeline
+  - mcp__workflows-ch__validate_pipeline
   - mcp__plugin_bettercallclaude_workflows-ch__save_workflow
+  - mcp__workflows-ch__save_workflow
 ---
 
 # Create Custom Workflow

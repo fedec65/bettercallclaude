@@ -1,16 +1,31 @@
 #!/usr/bin/env node
 /**
- * Generate and apply `tools:` YAML frontmatter for skills and commands.
+ * Generate and apply `tools:` YAML frontmatter for agents, skills, and commands.
+ *
+ * Every MCP tool is emitted under BOTH naming conventions, because hosts
+ * disagree on how plugin MCP servers are registered:
+ *   - mcp__plugin_bettercallclaude_<server>__<tool>  (Cowork Desktop, most installs)
+ *   - mcp__<server>__<tool>                          (some Cowork installs, Claude Code CLI)
+ * A whitelist entry that matches no registered tool is inert, so listing both
+ * forms is safe on every host (verified: agents with fully mismatched tool
+ * lists still ran, just without MCP access).
  *
  * Usage:
  *   node scripts/generate-tool-frontmatter.js          # dry-run (print only)
  *   node scripts/generate-tool-frontmatter.js --apply  # modify files in place
+ *
+ * Files that already have a `tools:` block keep their curated list verbatim;
+ * each prefixed MCP entry gets its unprefixed twin inserted right after it
+ * (idempotent, order-preserving). Files without a `tools:` block get one
+ * computed from their body text (agents are never recomputed — their lists
+ * are hand-curated).
  */
 
 const fs = require('fs');
 const path = require('path');
 
 const root = path.resolve(__dirname, '..');
+const agentsDir = path.join(root, 'bettercallclaude', 'agents');
 const skillsDir = path.join(root, 'bettercallclaude', 'skills');
 const commandsDir = path.join(root, 'bettercallclaude', 'commands');
 const apply = process.argv.includes('--apply');
@@ -59,8 +74,34 @@ const COMMAND_SKILL_MAP = {
 
 const GENERIC_TOOLS = ['Read', 'Grep', 'Glob', 'Bash', 'WebSearch', 'WebFetch'];
 
+const PREFIXED_TOOL_RE = /^mcp__plugin_bettercallclaude_(.+?)__(.+)$/;
+
 function readFile(p) {
   return fs.readFileSync(p, 'utf8');
+}
+
+// Given a fully-qualified tool name, return it plus its twin under the other
+// naming convention (empty extra entry when the name is not prefixed).
+function dualNames(fq) {
+  const m = fq.match(PREFIXED_TOOL_RE);
+  if (!m) return [fq];
+  return [fq, `mcp__${m[1]}__${m[2]}`];
+}
+
+// Insert the unprefixed twin after each prefixed MCP entry, deduplicating.
+function dualizeTools(tools) {
+  const seen = new Set();
+  const out = [];
+  const push = (t) => {
+    if (!seen.has(t)) {
+      seen.add(t);
+      out.push(t);
+    }
+  };
+  for (const t of tools) {
+    for (const n of dualNames(t)) push(n);
+  }
+  return out;
 }
 
 function extractBareToolNames(text) {
@@ -113,32 +154,71 @@ function fullyQualified(tool, server) {
   return `mcp__plugin_bettercallclaude_${server}__${tool}`;
 }
 
-function analyzeFile(filePath) {
-  const text = readFile(filePath);
-  const bare = extractBareToolNames(text);
-  const resolved = {};
-  for (const tool of bare) {
-    const server = resolveServer(tool, text);
-    resolved[tool] = { server, fq: fullyQualified(tool, server) };
+// Locate an existing `tools:` block inside frontmatter lines.
+function findToolsBlock(lines) {
+  const start = lines.indexOf('tools:');
+  if (start === -1) return null;
+  let end = start + 1;
+  while (end < lines.length && lines[end].startsWith('  - ')) end++;
+  return { start, end };
+}
+
+function parseTools(fm) {
+  const lines = fm.split('\n');
+  const block = findToolsBlock(lines);
+  if (!block) return null;
+  return lines.slice(block.start + 1, block.end).map((l) => l.replace(/^  - /, ''));
+}
+
+// Replace the existing `tools:` block in place, or insert one after the
+// description line when absent. Idempotent.
+function applyToolsBlock(content, tools) {
+  const fmMatch = content.match(/^---\n([\s\S]*?)\n---\n/);
+  if (!fmMatch) return null;
+
+  const fm = fmMatch[1];
+  const rest = content.slice(fmMatch[0].length);
+  const lines = fm.split('\n');
+  const toolsYaml = ['tools:', ...tools.map((t) => `  - ${t}`)];
+
+  const block = findToolsBlock(lines);
+  if (block) {
+    lines.splice(block.start, block.end - block.start, ...toolsYaml);
+  } else {
+    let insertAt = -1;
+    for (let i = 0; i < lines.length; i++) {
+      if (lines[i].startsWith('description:')) {
+        insertAt = i + 1;
+        // Skip multi-line description continuation
+        while (insertAt < lines.length && lines[insertAt].match(/^\s+/) && !lines[insertAt].includes(':')) {
+          insertAt++;
+        }
+        break;
+      }
+    }
+    if (insertAt === -1) insertAt = lines.length;
+    lines.splice(insertAt, 0, ...toolsYaml);
   }
-  return { bare, resolved, text };
+  return `---\n${lines.join('\n')}\n---\n${rest}`;
 }
 
 function skillTools(skillName) {
   const skillPath = path.join(skillsDir, skillName, 'SKILL.md');
   if (!fs.existsSync(skillPath)) return [];
-  const { resolved } = analyzeFile(skillPath);
-  return Object.values(resolved).map(r => r.fq);
+  const text = readFile(skillPath);
+  const tools = [];
+  for (const tool of extractBareToolNames(text)) {
+    tools.push(fullyQualified(tool, resolveServer(tool, text)));
+  }
+  return tools;
 }
 
 function commandTools(cmdFile) {
   const text = readFile(cmdFile);
-  const bare = extractBareToolNames(text);
   const tools = new Set(GENERIC_TOOLS);
 
-  for (const tool of bare) {
-    const server = resolveServer(tool, text);
-    tools.add(fullyQualified(tool, server));
+  for (const tool of extractBareToolNames(text)) {
+    tools.add(fullyQualified(tool, resolveServer(tool, text)));
   }
 
   const base = path.basename(cmdFile);
@@ -150,48 +230,44 @@ function commandTools(cmdFile) {
   return [...tools];
 }
 
-function insertToolsIntoFrontmatter(content, tools) {
+// Agents: transform the curated list only (add twins), never recompute.
+function agentTools(agentFile) {
+  const content = readFile(agentFile);
   const fmMatch = content.match(/^---\n([\s\S]*?)\n---\n/);
-  if (!fmMatch) return null;
+  if (!fmMatch) return { error: 'no frontmatter' };
+  const existing = parseTools(fmMatch[1]);
+  if (!existing) return { error: 'no tools block' };
+  return { tools: dualizeTools(existing) };
+}
 
-  const fm = fmMatch[1];
-  const rest = content.slice(fmMatch[0].length);
-
-  const toolsYaml = 'tools:\n' + tools.map(t => `  - ${t}`).join('\n');
-
-  // Insert after description line, or append at end of frontmatter
-  const lines = fm.split('\n');
-  let insertAt = -1;
-  for (let i = 0; i < lines.length; i++) {
-    if (lines[i].startsWith('description:')) {
-      insertAt = i + 1;
-      // Skip multi-line description continuation
-      while (insertAt < lines.length && lines[insertAt].match(/^\s+/) && !lines[insertAt].includes(':')) {
-        insertAt++;
-      }
-      break;
-    }
-  }
-  if (insertAt === -1) insertAt = lines.length;
-
-  lines.splice(insertAt, 0, toolsYaml);
-  return `---\n${lines.join('\n')}\n---\n${rest}`;
+// Skills/commands: keep an existing curated list (dualize it); compute one
+// from body text only when absent.
+function fileTools(filePath, compute) {
+  const content = readFile(filePath);
+  const fmMatch = content.match(/^---\n([\s\S]*?)\n---\n/);
+  if (!fmMatch) return { error: 'no frontmatter' };
+  const existing = parseTools(fmMatch[1]);
+  const tools = existing ? dualizeTools(existing) : dualizeTools(compute());
+  return { tools, hadTools: !!existing };
 }
 
 function processFile(filePath, tools) {
   const content = readFile(filePath);
-  const updated = insertToolsIntoFrontmatter(content, tools);
+  const updated = applyToolsBlock(content, tools);
   if (!updated) {
     console.error(`Could not parse frontmatter: ${filePath}`);
     return false;
   }
+  const rel = path.relative(root, filePath);
   if (apply) {
-    fs.writeFileSync(filePath, updated);
-    console.log(`Updated: ${path.relative(root, filePath)}`);
+    if (updated !== content) {
+      fs.writeFileSync(filePath, updated);
+      console.log(`Updated: ${rel} (${tools.length} tools)`);
+    } else {
+      console.log(`Unchanged: ${rel}`);
+    }
   } else {
-    console.log(`--- ${path.relative(root, filePath)}`);
-    console.log(updated.split('\n').slice(0, 20).join('\n'));
-    console.log('...');
+    console.log(`${rel}: ${tools.length} tools (dual-convention)`);
   }
   return true;
 }
@@ -201,19 +277,43 @@ console.log(`Mode: ${apply ? 'APPLY' : 'DRY RUN'}\n`);
 let ok = 0;
 let fail = 0;
 
-for (const skillDir of fs.readdirSync(skillsDir)) {
-  const skillPath = path.join(skillsDir, skillDir, 'SKILL.md');
-  if (!fs.existsSync(skillPath)) continue;
-  const { resolved } = analyzeFile(skillPath);
-  const tools = new Set(GENERIC_TOOLS);
-  for (const r of Object.values(resolved)) tools.add(r.fq);
-  if (processFile(skillPath, [...tools])) ok++;
+for (const agentFile of fs.readdirSync(agentsDir).filter((f) => f.endsWith('.md'))) {
+  const agentPath = path.join(agentsDir, agentFile);
+  const r = agentTools(agentPath);
+  if (r.error) {
+    console.error(`Skipping ${agentFile}: ${r.error}`);
+    fail++;
+    continue;
+  }
+  if (processFile(agentPath, r.tools)) ok++;
   else fail++;
 }
 
-for (const cmdFile of fs.readdirSync(commandsDir).filter(f => f.endsWith('.md'))) {
+for (const skillDir of fs.readdirSync(skillsDir)) {
+  const skillPath = path.join(skillsDir, skillDir, 'SKILL.md');
+  if (!fs.existsSync(skillPath)) continue;
+  const r = fileTools(skillPath, () => {
+    const text = readFile(skillPath);
+    return [...GENERIC_TOOLS, ...extractBareToolNames(text).map((t) => fullyQualified(t, resolveServer(t, text)))];
+  });
+  if (r.error) {
+    console.error(`Skipping ${skillDir}: ${r.error}`);
+    fail++;
+    continue;
+  }
+  if (processFile(skillPath, r.tools)) ok++;
+  else fail++;
+}
+
+for (const cmdFile of fs.readdirSync(commandsDir).filter((f) => f.endsWith('.md'))) {
   const cmdPath = path.join(commandsDir, cmdFile);
-  if (processFile(cmdPath, commandTools(cmdPath))) ok++;
+  const r = fileTools(cmdPath, () => commandTools(cmdPath));
+  if (r.error) {
+    console.error(`Skipping ${cmdFile}: ${r.error}`);
+    fail++;
+    continue;
+  }
+  if (processFile(cmdPath, r.tools)) ok++;
   else fail++;
 }
 

@@ -1,6 +1,6 @@
 {
   "name": "bettercallclaude",
-  "version": "4.11.5",
+  "version": "4.11.6",
   "private": true,
   "description": "Swiss Legal Intelligence Plugin for Claude",
   "scripts": {

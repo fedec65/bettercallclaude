@@ -123,6 +123,7 @@ of these places, or they drift (4.11.1–4.11.3 forgot the plugin README and
 - [ ] `README.md` — version badge line 1 (and refresh "What's New" on
       minor releases)
 - [ ] `CHANGELOG.md` — new entry at the top
+- [ ] `AGENTS.md` (local-only, git-ignored) — `> **Version**: X.Y.Z` header
 
 Verify with:
 
