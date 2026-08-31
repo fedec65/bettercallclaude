@@ -1,4 +1,4 @@
-[![Version](https://img.shields.io/badge/version-4.11.6-blue)](https://github.com/fedec65/bettercallclaude/releases)
+[![Version](https://img.shields.io/badge/version-4.11.7-blue)](https://github.com/fedec65/bettercallclaude/releases)
 [![License: AGPL-3.0](https://img.shields.io/badge/license-AGPL--3.0-green)](LICENSE)
 [![Platform](https://img.shields.io/badge/platform-Cowork%20Desktop-orange)](https://claude.ai)
 [![Website](https://img.shields.io/badge/web-bettercallclaude.ch-brightgreen)](https://bettercallclaude.ch)
@@ -25,9 +25,9 @@ BetterCallClaude provides a structured methodology for handling legal work with 
 
 ---
 
-## What's New in v4.11.6
+## What's New in v4.11.7
 
-**v4.11.6 — Agents reach the legal databases on every install.** On some Cowork Desktop installs the connectors register under plain names (`mcp__fedlex-sparql__…`) instead of the plugin-scoped ones (`mcp__plugin_bettercallclaude_fedlex-sparql__…`), so every agent's tool whitelist matched nothing: plugin agents failed each database call with `Error: No such tool available`, while direct questions, generic agents, and inline commands worked. Every agent, skill, and command now whitelists each MCP tool under **both** names — update the plugin and re-run your agent task; no other action needed.
+**v4.11.7 — Briefing panels actually run on Cowork Desktop.** `/bettercallclaude:briefing` used to spawn the specialist panel from inside the briefing coordinator (a nested subagent); Cowork's host does not grant the `Task` tool to nested subagents, so the panel dispatch silently fell back to a "single-agent mode" synthesised by the coordinator — no real specialist input, and the brief looked plausible enough that nothing surfaced. The command now owns panel dispatch via `Task` at the top-level session (where it works on every host), and the coordinator becomes a pure planner: it classifies the query, selects the panel (Mode A), then takes the Q&A history and builds the execution plan (Mode D). If you used `/briefing` and felt the output was a generic synthesis rather than a real panel consult, reinstall and try the same query — the panel questions will now come from the named specialists.
 
 ## What's New in v4.11.5
 
