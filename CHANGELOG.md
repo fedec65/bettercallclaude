@@ -4,6 +4,11 @@ All notable changes to BetterCallClaude will be documented in this file.
 
 ---
 
+## [4.11.7] - 2026-09-01
+
+### Fixed
+- **Briefing coordinator's panel dispatch never ran on Cowork Desktop** — `/bettercallclaude:briefing` invoked the `swiss-legal-briefing-coordinator` agent, which then spawned the specialist panel via `Task` *inside its own subagent context*. Cowork's host grants `Task` only to the top-level session, not to nested subagents, so every panel dispatch was a no-op: the coordinator fell back to synthesising the panel's questions itself and printed *"Running in single-agent mode — questions synthesized from panel perspectives."* in the plan — a flag that was easy to miss because the brief still looked complete. User reporter saw the symptom directly: the panel questions came from the coordinator's voice rather than from the named specialists, and the resulting execution plan was a single-agent synthesis. v4.11.6 added `Task` to the briefing agent's whitelist (commit `9c26273`), but that fix only works if Task dispatch is reachable from where the spawn happens — it is not, inside nested subagents on Cowork. The plugin now **flattens the briefing flow**: `/bettercallclaude:briefing` (the top-level command) owns panel dispatch via `Task` at the session level (where it works on every host), and the coordinator becomes a pure planner with two explicit modes — Mode A classifies the query and returns the panel roster, Mode D takes the Q&A history and returns the structured execution plan (or signals "too foggy for a static plan"). The coordinator's `Task` frontmatter entry is removed: it was misleading (worked on hosts where it's not actually used) and would have invited future regressions. Files: `bettercallclaude/commands/briefing.md` (added `Task` to frontmatter, rewrote "New Briefing" into Phases A–F), `bettercallclaude/agents/briefing.md` (removed `Task`, restructured into two modes, moved memory schema to the command).
+
 ## [4.11.6] - 2026-08-31
 
 ### Fixed
