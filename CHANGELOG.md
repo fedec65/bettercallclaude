@@ -4,6 +4,12 @@ All notable changes to BetterCallClaude will be documented in this file.
 
 ---
 
+## [4.11.8] - 2026-09-01
+
+### Added
+- **`/bettercallclaude:doctor` agent-route probe** — doctor previously verified only the main-session route, so it reported all-green during the v4.11.5 outage while plugin agents could not reach any connector ("No such tool available: mcp__fedlex-sparql__…"). New Step 3 dispatches the plugin's `citation-specialist` agent via `Task` with a one-shot `validate_citation` call and interprets the outcome: healthy / agent-route-broken (with update instructions) / not verifiable from a nested session. `Task` added to the doctor command's tools whitelist (same convention as `briefing.md` in 4.11.7).
+- **`scripts/check-tool-names.js` + CI step "Check MCP tool-name parity"** — every `mcp__…` entry in the `tools:` frontmatter of agents, commands, and skills must be whitelisted under both naming conventions (`mcp__plugin_bettercallclaude_<server>__<tool>` and `mcp__<server>__<tool>`), since hosts differ (scoped names on Claude Code CLI and current Cowork builds, bare server names on older Cowork builds). A missing twin silently strips the tool on the other host — the exact v4.11.5 regression. Audit of the shipped 4.11.6/4.11.7 tree: 68 files, 1658 MCP entries, all paired.
+
 ## [4.11.7] - 2026-09-01
 
 ### Fixed

@@ -112,5 +112,8 @@ jobs:
             echo "OK: $skill_file"
           done
 
+      - name: Check MCP tool-name parity
+        run: node scripts/check-tool-names.js
+
       - name: Package plugin (dry check)
         run: bash scripts/package-plugin.sh
