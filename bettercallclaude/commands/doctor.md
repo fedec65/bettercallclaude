@@ -7,6 +7,7 @@ tools:
   - Bash
   - WebSearch
   - WebFetch
+  - Task
   - mcp__plugin_bettercallclaude_bge-search__search_bge
   - mcp__bge-search__search_bge
   - mcp__plugin_bettercallclaude_entscheidsuche__search_decisions
@@ -60,7 +61,21 @@ For each of the 10 MCP servers, use a **two-stage approach**:
 | swiss-caselaw | Giurisprudenza, catene citazioni, dottrina | `search_decisions` (minimal) |
 | ollama | Classificatore privacy locale | `ollama_check_status` |
 
-## Step 3: Display Results
+## Step 3: Agent Route Probe
+
+Steps 1–2 verify the connectors from the **main session**. This step verifies the **agent route** — the path that broke in v4.11.5, when plugin agents could not see any MCP tool ("No such tool available: mcp__fedlex-sparql__…") while the main session worked fine.
+
+Dispatch the plugin's citation specialist agent via the Task tool (use its scoped name, e.g. `bettercallclaude:citation-specialist`) with exactly this prompt:
+
+> Call the legal-citations MCP tool whose name ends in `validate_citation` with the citation "BGE 145 III 229". Do not use any other tool. Report back ONLY: (1) the exact tool name you called, (2) "OK" plus the returned citation, or the verbatim error message.
+
+Interpret the result:
+
+- Agent reports a tool name + "OK" → agent route healthy; note "Route agent: OK".
+- Agent reports "No such tool available" (or cannot find any MCP tool ending in `validate_citation`) → **agent route broken**: plugin agents cannot reach the connectors even though the main session can. Tell the user to update BetterCallClaude to the latest version and re-run `/bettercallclaude:doctor`; if the problem persists, report it at https://github.com/fedec65/bettercallclaude/issues including this output.
+- The Task tool is not available in the current context (e.g. inside a nested session) → mark the route as "non verificabile" and hint to re-run `/bettercallclaude:doctor` in a fresh top-level session.
+
+## Step 4: Display Results
 
 Present results in the user's language, without technical jargon. Example (IT):
 
@@ -84,13 +99,14 @@ Present results in the user's language, without technical jargon. Example (IT):
 
   Gateway: https://mcp.bettercallclaude.ch — online
   Servizi attivi: 9/10
+  Route agent (MCP via subagent): ✓ operativa
 
 ╚══════════════════════════════════════════════════════════╝
 ```
 
 Adapt labels to DE/FR/EN based on user language.
 
-## Step 4: Guidance
+## Step 5: Guidance
 
 ### All servers active:
 > Tutti i servizi sono operativi. BetterCallClaude funziona a piena capacità.
