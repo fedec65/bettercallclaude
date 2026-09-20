@@ -139,9 +139,10 @@ Expected: no output. Historical mentions in CHANGELOG, marketing, docs, and
 
 ## Style notes specific to this repo
 
-- **Agents must declare `model:`.** Inheriting the caller's model gives
-  non-deterministic cost and latency. Use `opus` for coordination,
-  `haiku` for mechanical formatting, `sonnet` for everything else.
+- **Agents use `model: inherit`.** Every agent runs on the model the user
+  selected for the main conversation; no per-agent tier pinning. Declaring
+  the field explicitly keeps the intent visible — omitting it is not
+  equivalent on every host, so don't leave it out.
 - **Agents that spawn subagents must list `Task` as a tool.** The prompt
   alone is not enough; the subagent-runtime checks the tool list.
 - **Do not use `${user_config.*}` anywhere in `.mcp.json`.** Cowork Desktop's
