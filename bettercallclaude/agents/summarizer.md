@@ -1,7 +1,7 @@
 ---
 name: swiss-legal-summarizer
 description: "Consolidates multi-agent pipeline outputs by deduplicating disclaimers, terminology tables, and citations, then calibrates output length to --short, --medium, or --long"
-model: haiku
+model: inherit
 tools:
   - Read
   - Grep
