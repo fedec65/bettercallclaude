@@ -1,4 +1,4 @@
-[![Version](https://img.shields.io/badge/version-4.11.8-blue)](https://github.com/fedec65/bettercallclaude/releases)
+[![Version](https://img.shields.io/badge/version-4.11.9-blue)](https://github.com/fedec65/bettercallclaude/releases)
 [![License: AGPL-3.0](https://img.shields.io/badge/license-AGPL--3.0-green)](LICENSE)
 [![Platform](https://img.shields.io/badge/platform-Cowork%20Desktop-orange)](https://claude.ai)
 [![Website](https://img.shields.io/badge/web-bettercallclaude.ch-brightgreen)](https://bettercallclaude.ch)
@@ -25,6 +25,8 @@ BetterCallClaude provides a structured methodology for handling legal work with 
 
 ---
 
+## What's New in v4.11.9
+**v4.11.9 — Every agent runs on the model you chose.** All 21 agents previously pinned to fixed tiers (`opus` for the orchestrator and judicial analyst, `haiku` for the citation specialist and summarizer, `sonnet` for the rest) now declare `model: inherit` and follow the model selected in your main conversation — cost, quality, and latency track your explicit choice end-to-end.
 ## What's New in v4.11.8
 
 **v4.11.8 — `/doctor` now catches a broken agent route.** In v4.11.5 an outage left plugin agents unable to reach any connector ("No such tool available") while `/doctor` reported everything green, because doctor only tested the main-session route. `/doctor` now also dispatches the plugin's citation-specialist agent for a one-shot `validate_citation` call and reports "Route agent: OK" — or, if the agent route is broken, says so plainly with update instructions. A new CI check additionally enforces that every MCP tool in agent/command/skill whitelists is registered under both naming conventions hosts use, so this regression class cannot silently return.

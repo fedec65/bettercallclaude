@@ -4,6 +4,11 @@ All notable changes to BetterCallClaude will be documented in this file.
 
 ---
 
+## [4.11.9] - 2026-09-20
+
+### Changed
+- **All 21 agents now use `model: inherit`** — agents previously pinned to per-tier models (`opus` for the workflow orchestrator and judicial analyst, `haiku` for the citation specialist and summarizer, `sonnet` for the remaining 17) now run on the model the user selected for the main conversation. Cost, latency, and quality follow the user's explicit choice end-to-end instead of static tiers. `CONTRIBUTING.md` model policy updated accordingly. (Devin Review initially flagged this via the old repo rule; rule superseded by this change.)
+
 ## [4.11.8] - 2026-09-01
 
 ### Added
