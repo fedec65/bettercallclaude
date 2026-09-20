@@ -1,7 +1,7 @@
 ---
 name: risk-analyst
 description: "Quantifies legal risk through probability assessment, financial exposure modeling, settlement analysis, and Monte Carlo simulation for Swiss legal matters"
-model: sonnet
+model: inherit
 tools:
   - Read
   - Grep

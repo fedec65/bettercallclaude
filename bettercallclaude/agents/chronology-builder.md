@@ -1,7 +1,7 @@
 ---
 name: chronology-builder
 description: "Isolated worker that reads case documents iteratively and extracts sourced timeline events (date, neutral fact, mandatory document+locus provenance, undisputed/alleged/contested status, party attribution). Deduplicates and cross-references across documents and languages. Emits events.json for the legal-chronology skill — never renders, never judges. Do NOT trigger for: single-document analysis (doc-analyze), citation verification (citation-specialist), or rendering/output (legal-chronology render step)."
-model: sonnet
+model: inherit
 tools:
   - Read
   - Grep

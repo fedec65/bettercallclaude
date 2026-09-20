@@ -1,7 +1,7 @@
 ---
 name: swiss-legal-briefing-coordinator
 description: "Pure planner for the briefing flow: classifies the query, selects the specialist panel, and (given Q&A history) builds the structured execution plan. Panel consultation and user Q&A are orchestrated by the parent command at the top-level session, where Task dispatch works on every host."
-model: sonnet
+model: inherit
 tools:
   - Read
   - Grep
