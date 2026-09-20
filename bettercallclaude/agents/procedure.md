@@ -1,7 +1,7 @@
 ---
 name: procedure-specialist
 description: "Analyzes Swiss civil (ZPO/CPC), criminal (StPO/CPP), and administrative (VwVG) procedure including deadline calculation, court competence, remedies, and cost estimation"
-model: sonnet
+model: inherit
 tools:
   - Read
   - Grep

@@ -1,7 +1,7 @@
 ---
 name: swiss-legal-advocate
 description: "Builds the strongest possible case in favor of a legal position using Swiss law precedents, statutory provisions, and doctrine"
-model: sonnet
+model: inherit
 tools:
   - Read
   - Grep
