@@ -139,6 +139,26 @@ MCP servers connect automatically via HTTP. No Node.js, no local setup, no API k
 /bettercallclaude:doc-analyze @contract.pdf Review this commercial lease agreement
 ```
 
+### Smoke Test: Browser Login and Delegated Synthesis
+
+You do not need a legal subscription to test the browser workflow. Use the public demo page at [the-internet.herokuapp.com/login](https://the-internet.herokuapp.com/login); its demo credentials are shown on the page. The demo account is shared: never enter personal, client, or confidential information.
+
+**Direct browser test** — run:
+
+```text
+/bettercallclaude:web-research https://the-internet.herokuapp.com/login "Describe the area accessible after login without changing anything"
+```
+
+Approving the unlisted domain is expected. When the login form appears, enter the demo credentials yourself in the browser, then tell Claude that login is complete. The main session should resume reading in the same browser session and produce `02-research-memo.md` and `sources.md`.
+
+**Delegated synthesis test** — run:
+
+```text
+/bettercallclaude:web-research https://the-internet.herokuapp.com/login "Describe the area accessible after login without changing anything" with synthesis delegated to web-research-specialist
+```
+
+After your manual login, the main session should dispatch `bettercallclaude:web-research-specialist` via `Task`. The specialist alone writes the final files. From the main session, open both returned paths and verify that the memo answers the question and the source list contains URL, title, and consultation date/time.
+
 ---
 
 ## Agents
