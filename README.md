@@ -25,6 +25,10 @@ BetterCallClaude provides a structured methodology for handling legal work with 
 
 ---
 
+## What's New in v4.12.0
+
+**v4.12.0 — Web research on login-protected legal sources.** New `legal-web-research` skill, `web-research-specialist` agent, and `/bettercallclaude:web-research <site> <question>` command let you research doctrine databases and paid legal services through the Claude Desktop browser. The lawyer always performs the login manually; the session stays read-only, sources are dated and recorded, and results land in `bcc-output/`.
+
 ## What's New in v4.11.9
 **v4.11.9 — Every agent runs on the model you chose.** All 21 agents previously pinned to fixed tiers (`opus` for the orchestrator and judicial analyst, `haiku` for the citation specialist and summarizer, `sonnet` for the rest) now declare `model: inherit` and follow the model selected in your main conversation — cost, quality, and latency track your explicit choice end-to-end.
 ## What's New in v4.11.8
@@ -51,7 +55,7 @@ BetterCallClaude provides a structured methodology for handling legal work with 
 
 **Also in recent releases — v4.9.5 `/legal-timeline`**: build a sourced case chronology from your case documents: every event carries its document and locus, contested facts and date conflicts are made visible (never silently resolved), evidentiary gaps of 30+ days are flagged, and procedural deadlines are computed via MCP with cantonal holiday calendars. Three outputs (Markdown table, interactive HTML, Word export) under `bcc-output/timeline/`.
 
-**Content counts**: 21 agents, 30 commands, 17 skills, 10 MCP servers in `.mcp.json` (8 remote HTTP on `mcp.bettercallclaude.ch` + `swiss-caselaw` SSE on `mcp.opencaselaw.ch` + `ollama` local STDIO).
+**Content counts**: 22 agents, 31 commands, 18 skills, 10 MCP servers in `.mcp.json` (8 remote HTTP on `mcp.bettercallclaude.ch` + `swiss-caselaw` SSE on `mcp.opencaselaw.ch` + `ollama` local STDIO).
 
 [Full changelog →](CHANGELOG.md)
 
@@ -82,6 +86,7 @@ MCP servers connect automatically via HTTP. No Node.js, no local setup, no API k
 | `/bettercallclaude:legal` | Intelligent gateway -- analyzes intent, routes to the appropriate specialist agent, and manages multi-step legal workflows. Use `--refine` to transform vague queries first. |
 | `/bettercallclaude:refine` | Transform vague legal queries into structured prompts through Socratic dialogue. Recommends optimal workflows and introduces Swiss legal terminology. |
 | `/bettercallclaude:research` | Search Swiss legal precedents and compile research memoranda. Supports BGE/ATF/DTF databases, doctrine references, and cross-jurisdictional analysis. |
+| `/bettercallclaude:web-research` | Research login-protected legal websites (doctrine, paid services) through the Claude Desktop browser with manual login hand-off. |
 | `/bettercallclaude:strategy` | Develop litigation strategy with risk assessment, cost-benefit analysis, and procedural pathway evaluation. |
 | `/bettercallclaude:draft` | Draft Swiss legal documents including contracts, court briefs, legal opinions, and memoranda with proper citation formatting. |
 | `/bettercallclaude:cite` | Verify and format Swiss legal citations across all four national languages (BGE/ATF/DTF formats). |

@@ -144,6 +144,10 @@ for doc in README.md CONNECTORS.md LICENSE; do
   fi
 done
 
+# Copy playbook language templates used by /start to generate the local playbook.
+mkdir -p "$STAGING_DIR/templates"
+cp "$REPO_ROOT/templates/"bettercallclaude.local.md.example.* "$STAGING_DIR/templates/"
+
 # Create zip
 mkdir -p "$OUTPUT_DIR"
 (cd "$STAGING_DIR" && zip -r -q "$OUTPUT_DIR/$ZIP_NAME" .)

@@ -20,6 +20,10 @@ You receive:
 - `site`: the target website or domain.
 - `question`: the research question or the specific information to find.
 
+## Browser Availability
+
+Browser tool names vary between hosts and are therefore not listed in this agent's frontmatter. If the host grants browser tools to subagents, use them. If the host does not expose browser tools to this agent, stop and tell the caller to run `/bettercallclaude:web-research` in the main session instead. Do not invent tool names and do not fall back to direct HTTP requests.
+
 ## Execution
 
 Apply the `legal-web-research` skill in full. In particular:
