@@ -27,7 +27,7 @@ Resolve the privacy mode with the same rules as the privacy-routing hook:
 
 Then apply the gate:
 
-- **strict**: Do not start. Explain that browser page content is sent to the cloud model and strict mode forbids it. Suggest switching to balanced or cloud if the lawyer accepts that processing mode.
+- **strict**: Do not start. Explain that browser page content is sent to the cloud model and strict mode forbids it. Offer working BetterCallClaude MCP sources as an alternative. A local `cloud` setting is not a valid workaround because the privacy resolver ignores that downgrade.
 - **balanced**: Ask for explicit confirmation before opening the browser: "La ricerca web invierà il contenuto delle pagine al modello cloud. Procedere?"
 - **cloud**: Proceed without an additional prompt.
 
