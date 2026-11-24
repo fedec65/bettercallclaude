@@ -86,7 +86,7 @@ If the user agrees, ask these questions one by one (adapt to their language):
 6. **NDA thresholds**: "Qual è la durata massima accettabile per un NDA? (es. 3 anni, 5 anni)"
 7. **Frequently used websites** (optional): "Ci sono siti web che usa abitualmente per la ricerca giuridica, soprattutto se richiedono un login? (es. legalis.ch, italgiure.it)"
 
-After collecting answers, generate a `bettercallclaude.local.md` file in the shared folder (Cowork) or `.claude/` (Claude Code) based on the appropriate language template.
+After collecting answers, generate a `bettercallclaude.local.md` file in the shared folder (Cowork) or `.claude/` (Claude Code) based on the appropriate language template shipped in the plugin's `templates/` directory (`templates/bettercallclaude.local.md.example.<lang>`). Write any user-supplied research sites under the template's web-research allow-list heading for the chosen language.
 
 ## Step 5: Usage Examples
 

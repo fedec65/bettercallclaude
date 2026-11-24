@@ -95,7 +95,7 @@ For every information item collected, record:
 
 ## Blocking Conditions
 
-On CAPTCHA, anti-bot block, or expired session:
+On CAPTCHA or an anti-bot block:
 
 - Stop and explain.
 - Do not attempt to bypass.
