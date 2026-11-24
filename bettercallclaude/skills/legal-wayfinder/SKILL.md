@@ -1,6 +1,6 @@
 ---
 name: legal-wayfinder
-description: "Decision-map decomposition for legal matters too big or too foggy for one session. Charts a map (destination, decisions so far, fog, out-of-scope) plus decision tickets under bcc-output/YYYY-MM-DD-<slug>/wayfinder/, then works tickets one at a time until the route to the deliverable is clear, then hands off to execution. Trigger when: charting a big legal matter (/legal-chart), working the next decision ticket (/legal-way), or a briefing is too foggy for a static execution plan. Do NOT trigger for: normal matters that fit /briefing or /legal-5step, quality-gate loops (legal-goal / legal-loop), or single-question research."
+description: "Decision-map decomposition for legal matters too big or too foggy for one session. Charts a map (destination, decisions so far, fog, out-of-scope) plus decision tickets under bcc-output/YYYY-MM-DD-slug/wayfinder/, then works tickets one at a time until the route to the deliverable is clear, then hands off to execution. Trigger when: charting a big legal matter (/legal-chart), working the next decision ticket (/legal-way), or a briefing is too foggy for a static execution plan. Do NOT trigger for: normal matters that fit /briefing or /legal-5step, quality-gate loops (legal-goal / legal-loop), or single-question research."
 tools:
   - Read
   - Grep
