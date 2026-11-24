@@ -4,6 +4,12 @@ All notable changes to BetterCallClaude will be documented in this file.
 
 ---
 
+## [4.12.0] - 2026-11-24
+
+### Added
+- **Web research on login-protected legal sources** — new `legal-web-research` skill, `web-research-specialist` agent, and `/bettercallclaude:web-research <site> <question>` command. Uses the Claude Desktop browser with manual login hand-off, read-only research, source recording, and bcc-output delivery. Targets doctrine databases and paid legal services (e.g. legalis.ch, italgiure.it).
+- **Playbook allow-list for web research** — new "Siti consentiti per la ricerca web" section in all four language templates and an optional `/start` question.
+
 ## [4.11.9] - 2026-09-20
 
 ### Changed

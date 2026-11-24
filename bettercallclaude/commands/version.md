@@ -23,13 +23,13 @@ Output the following formatted block:
 ======================================================
   BetterCallClaude - Swiss Legal Intelligence Plugin
 ======================================================
-  Version:      4.11.9
+  Version:      4.12.0
   Format:       Claude Code Plugin (Cowork Desktop)
   Author:       Federico Cesconi
   License:      AGPL-3.0
 ======================================================
 
-  COMMANDS (30)
+  COMMANDS (31)
   -------------
   [x] legal           - Intelligent gateway and router
   [x] start           - Welcome and first-use onboarding
@@ -61,8 +61,9 @@ Output the following formatted block:
   [x] legal-loop      - Worker-evaluator iteration toward a Goal Record
   [x] legal-timeline  - Build a sourced legal chronology
   [x] legal-way       - Work one ticket from a decision map
+  [x] web-research    - Browser research on login-protected legal sites
 
-  AGENTS (21)
+  AGENTS (22)
   -----------
   [x] researcher      [x] strategist     [x] drafter
   [x] citation        [x] compliance     [x] data-protection
@@ -71,8 +72,9 @@ Output the following formatted block:
   [x] realestate      [x] advocate       [x] adversary
   [x] judicial        [x] briefing       [x] orchestrator
   [x] summarizer      [x] prompt-engineer [x] chronology-builder
+  [x] web-research-specialist
 
-  SKILLS (17)
+  SKILLS (18)
   ----------
   [x] swiss-legal-research     [x] swiss-legal-drafting
   [x] swiss-legal-strategy     [x] swiss-citation-formats
@@ -82,7 +84,7 @@ Output the following formatted block:
   [x] legal-5step-framework    [x] legal-chronology
   [x] legal-evaluator          [x] legal-intake
   [x] legal-wayfinder          [x] citation-content-verify
-  [x] shared
+  [x] legal-web-research       [x] shared
 
   MCP SERVERS (10)
   ----------------
