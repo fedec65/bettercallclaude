@@ -27,7 +27,7 @@ BetterCallClaude provides a structured methodology for handling legal work with 
 
 ## What's New in v4.12.0
 
-**v4.12.0 — Web research on login-protected legal sources.** New `legal-web-research` skill, `web-research-specialist` agent, and `/bettercallclaude:web-research <site> <question>` command let you research doctrine databases and paid legal services through the Claude Desktop browser. The lawyer always performs the login manually; the session stays read-only, sources are dated and recorded, and results land in `bcc-output/`.
+**v4.12.0 — Web research on login-protected legal sources.** New `legal-web-research` skill, `web-research-specialist` agent, and `/bettercallclaude:web-research <site> <question>` command let you research doctrine databases and paid legal services through the Claude Desktop browser. The lawyer always performs the login manually; afterwards, the main session autonomously continues the approved read-only research on instructions from the user or another agent. The specialist is used only for optional delegated synthesis, not browser navigation. Form submissions, downloads, account changes, and confidential search terms require confirmation; expired logins return to the lawyer and CAPTCHA or anti-bot blocks stop the research. Sources are dated and recorded, and results land in `bcc-output/`.
 
 ## What's New in v4.11.9
 **v4.11.9 — Every agent runs on the model you chose.** All 21 agents previously pinned to fixed tiers (`opus` for the orchestrator and judicial analyst, `haiku` for the citation specialist and summarizer, `sonnet` for the rest) now declare `model: inherit` and follow the model selected in your main conversation — cost, quality, and latency track your explicit choice end-to-end.
