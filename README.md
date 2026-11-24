@@ -139,6 +139,26 @@ MCP servers connect automatically via HTTP. No Node.js, no local setup, no API k
 /bettercallclaude:doc-analyze @contract.pdf Review this commercial lease agreement
 ```
 
+### Approved Research Sites
+
+You can add a site to the web-research allow-list in three ways:
+
+1. **During setup**: run `/bettercallclaude:start` and answer the optional question about frequently used legal research websites. The command writes the supplied domains to your local playbook.
+2. **During research**: Claude asks before opening an unlisted domain. After you approve it, Claude offers to add it to the playbook and writes only after your explicit yes.
+3. **Manually**: edit `bettercallclaude.local.md` in the Cowork shared folder (or `.claude/bettercallclaude.local.md` in Claude Code):
+
+```markdown
+## Allowed Sites for Web Research
+
+- **List**:
+  - www.bger.ch
+  - entscheidsuche.ch
+  - legalis.ch
+- **Domains not listed**: ask for confirmation
+```
+
+Use the heading supplied by your playbook's language template. Enter domains only, never usernames, passwords, or tokens. A destination domain reached through a redirect must also be listed or approved.
+
 ### Smoke Test: Browser Login and Delegated Synthesis
 
 You do not need a legal subscription to test the browser workflow. Use the public demo page at [the-internet.herokuapp.com/login](https://the-internet.herokuapp.com/login); its demo credentials are shown on the page. The demo account is shared: never enter personal, client, or confidential information.
