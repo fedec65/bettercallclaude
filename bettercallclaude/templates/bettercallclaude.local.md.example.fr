@@ -41,6 +41,14 @@
 - **Transferts a l'etranger recurrents**: [p. ex. UE, USA — decision d'adequation / CSC]
 - **DPA standard**: [p. ex. modele nLPD / modele interne]
 
+## Sites autorisés pour la recherche web
+
+- **Liste** :
+  - www.bger.ch
+  - entscheidsuche.ch
+  - [domaine du service payant du cabinet]
+- **Domaines non listés** : demander confirmation
+
 ## Style et format
 
 - **Format de citation**: [p. ex. ATF 144 III 462 consid. 3.2 ; art. 97 al. 1 CO]

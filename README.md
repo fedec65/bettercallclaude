@@ -1,4 +1,4 @@
-[![Version](https://img.shields.io/badge/version-4.11.9-blue)](https://github.com/fedec65/bettercallclaude/releases)
+[![Version](https://img.shields.io/badge/version-4.12.0-blue)](https://github.com/fedec65/bettercallclaude/releases)
 [![License: AGPL-3.0](https://img.shields.io/badge/license-AGPL--3.0-green)](LICENSE)
 [![Platform](https://img.shields.io/badge/platform-Cowork%20Desktop-orange)](https://claude.ai)
 [![Website](https://img.shields.io/badge/web-bettercallclaude.ch-brightgreen)](https://bettercallclaude.ch)
@@ -11,7 +11,7 @@
 
 <p align="center"><strong>Swiss Legal Intelligence Plugin for Cowork Desktop</strong></p>
 
-BetterCallClaude transforms legal research, case strategy, and document drafting for Swiss lawyers. It provides deep integration with Swiss legal databases, multi-lingual analysis (DE/FR/IT/EN), and built-in Anwaltsgeheimnis (attorney-client privilege) protection -- 21 agents, 30 commands, 17 skills, and 10 MCP servers covering BGE/ATF/DTF precedent research, litigation strategy, adversarial analysis, legal drafting, citation verification, document intelligence, and CAS/TAS sports arbitration across all 26 Swiss cantons.
+BetterCallClaude transforms legal research, case strategy, and document drafting for Swiss lawyers. It provides deep integration with Swiss legal databases, multi-lingual analysis (DE/FR/IT/EN), and built-in Anwaltsgeheimnis (attorney-client privilege) protection -- 22 agents, 31 commands, 18 skills, and 10 MCP servers covering BGE/ATF/DTF precedent research, litigation strategy, adversarial analysis, legal drafting, citation verification, document intelligence, CAS/TAS sports arbitration, and browser-based research on login-protected legal sources across all 26 Swiss cantons.
 
 > **Claude Code CLI users**: this repository is Cowork Desktop only. The CLI version is at [fedec65/bettercallclaude-cli](https://github.com/fedec65/bettercallclaude-cli).
 
@@ -24,6 +24,10 @@ BetterCallClaude provides a structured methodology for handling legal work with 
 ![BetterCallClaude Framework](docs/images/bettercallclaude_framework.png)
 
 ---
+
+## What's New in v4.12.0
+
+**v4.12.0 — Web research on login-protected legal sources.** New `legal-web-research` skill, `web-research-specialist` agent, and `/bettercallclaude:web-research <site> <question>` command let you research doctrine databases and paid legal services through the Claude Desktop browser. The lawyer always performs the login manually; afterwards, the main session autonomously continues the approved read-only research on instructions from the user or another agent. The specialist is used only for optional delegated synthesis, not browser navigation. Form submissions, downloads, account changes, and confidential search terms require confirmation; expired logins return to the lawyer and CAPTCHA or anti-bot blocks stop the research. Sources are dated and recorded, and results land in `bcc-output/`.
 
 ## What's New in v4.11.9
 **v4.11.9 — Every agent runs on the model you chose.** All 21 agents previously pinned to fixed tiers (`opus` for the orchestrator and judicial analyst, `haiku` for the citation specialist and summarizer, `sonnet` for the rest) now declare `model: inherit` and follow the model selected in your main conversation — cost, quality, and latency track your explicit choice end-to-end.
@@ -51,7 +55,7 @@ BetterCallClaude provides a structured methodology for handling legal work with 
 
 **Also in recent releases — v4.9.5 `/legal-timeline`**: build a sourced case chronology from your case documents: every event carries its document and locus, contested facts and date conflicts are made visible (never silently resolved), evidentiary gaps of 30+ days are flagged, and procedural deadlines are computed via MCP with cantonal holiday calendars. Three outputs (Markdown table, interactive HTML, Word export) under `bcc-output/timeline/`.
 
-**Content counts**: 21 agents, 30 commands, 17 skills, 10 MCP servers in `.mcp.json` (8 remote HTTP on `mcp.bettercallclaude.ch` + `swiss-caselaw` SSE on `mcp.opencaselaw.ch` + `ollama` local STDIO).
+**Content counts**: 22 agents, 31 commands, 18 skills, 10 MCP servers in `.mcp.json` (8 remote HTTP on `mcp.bettercallclaude.ch` + `swiss-caselaw` SSE on `mcp.opencaselaw.ch` + `ollama` local STDIO).
 
 [Full changelog →](CHANGELOG.md)
 
@@ -82,6 +86,7 @@ MCP servers connect automatically via HTTP. No Node.js, no local setup, no API k
 | `/bettercallclaude:legal` | Intelligent gateway -- analyzes intent, routes to the appropriate specialist agent, and manages multi-step legal workflows. Use `--refine` to transform vague queries first. |
 | `/bettercallclaude:refine` | Transform vague legal queries into structured prompts through Socratic dialogue. Recommends optimal workflows and introduces Swiss legal terminology. |
 | `/bettercallclaude:research` | Search Swiss legal precedents and compile research memoranda. Supports BGE/ATF/DTF databases, doctrine references, and cross-jurisdictional analysis. |
+| `/bettercallclaude:web-research` | Research login-protected legal websites (doctrine, paid services) through the Claude Desktop browser with manual login hand-off. |
 | `/bettercallclaude:strategy` | Develop litigation strategy with risk assessment, cost-benefit analysis, and procedural pathway evaluation. |
 | `/bettercallclaude:draft` | Draft Swiss legal documents including contracts, court briefs, legal opinions, and memoranda with proper citation formatting. |
 | `/bettercallclaude:cite` | Verify and format Swiss legal citations across all four national languages (BGE/ATF/DTF formats). |
@@ -133,6 +138,46 @@ MCP servers connect automatically via HTTP. No Node.js, no local setup, no API k
 
 /bettercallclaude:doc-analyze @contract.pdf Review this commercial lease agreement
 ```
+
+### Approved Research Sites
+
+You can add a site to the web-research allow-list in three ways:
+
+1. **During setup**: run `/bettercallclaude:start` and answer the optional question about frequently used legal research websites. The command writes the supplied domains to your local playbook.
+2. **During research**: Claude asks before opening an unlisted domain. After you approve it, Claude offers to add it to the playbook and writes only after your explicit yes.
+3. **Manually**: edit `bettercallclaude.local.md` in the Cowork shared folder (or `.claude/bettercallclaude.local.md` in Claude Code):
+
+```markdown
+## Allowed Sites for Web Research
+
+- **List**:
+  - www.bger.ch
+  - entscheidsuche.ch
+  - legalis.ch
+- **Domains not listed**: ask for confirmation
+```
+
+Use the heading supplied by your playbook's language template. Enter domains only, never usernames, passwords, or tokens. A destination domain reached through a redirect must also be listed or approved.
+
+### Smoke Test: Browser Login and Delegated Synthesis
+
+You do not need a legal subscription to test the browser workflow. Use the public demo page at [the-internet.herokuapp.com/login](https://the-internet.herokuapp.com/login); its demo credentials are shown on the page. The demo account is shared: never enter personal, client, or confidential information.
+
+**Direct browser test** — run:
+
+```text
+/bettercallclaude:web-research https://the-internet.herokuapp.com/login "Describe the area accessible after login without changing anything"
+```
+
+Approving the unlisted domain is expected. When the login form appears, enter the demo credentials yourself in the browser, then tell Claude that login is complete. The main session should resume reading in the same browser session and produce `02-research-memo.md` and `sources.md`.
+
+**Delegated synthesis test** — run:
+
+```text
+/bettercallclaude:web-research https://the-internet.herokuapp.com/login "Describe the area accessible after login without changing anything" with synthesis delegated to web-research-specialist
+```
+
+After your manual login, the main session should dispatch `bettercallclaude:web-research-specialist` via `Task`. The specialist alone writes the final files. From the main session, open both returned paths and verify that the memo answers the question and the source list contains URL, title, and consultation date/time.
 
 ---
 
