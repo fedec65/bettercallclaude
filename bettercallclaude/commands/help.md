@@ -100,7 +100,7 @@ BetterCallClaude provides Swiss legal intelligence through three interfaces:
 | citation | BGE citation verification and multi-lingual formatting |
 | compliance | FINMA, AML/KYC, regulatory compliance checks |
 | chronology-builder | Sourced timeline event extraction from case documents |
-| web-research-specialist | Read-only research on login-protected legal websites via the Claude Desktop browser |
+| web-research-specialist | Synthesis of sourced material collected in the main session from login-protected legal websites |
 
 ### Specialized Domain Agents
 
