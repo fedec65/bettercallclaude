@@ -5,13 +5,14 @@ tools:
   - Grep
   - Glob
   - Bash
+  - Task
 ---
 
 You are invoked via `/bettercallclaude:web-research <site> <question>`. Browser navigation, manual login hand-off, and read-only collection always run in this main session. Apply the `legal-web-research` skill methodology to the user's request.
 
 **Execution modes**:
 - **Direct delivery (default)**: apply the skill in full, including final delivery by this main session. Do not hand off the same research for synthesis afterwards.
-- **Collection for delegated synthesis**: use this only when the caller explicitly requests synthesis by `web-research-specialist`. Apply the skill through source collection, but skip its Delivery section. Pass the collected material and its provenance to the specialist; the specialist alone writes the final memo and source list.
+- **Collection for delegated synthesis**: use this only when the caller explicitly requests synthesis by `web-research-specialist`. Apply the skill through source collection, but skip its Delivery section. From this main session, dispatch `bettercallclaude:web-research-specialist` via `Task`, passing the collected material and its provenance. The specialist alone writes the final memo and source list; return both paths supplied by the specialist.
 
 **Arguments**:
 - `<site>`: target website or domain (e.g. `legalis.ch`, `italgiure.it`).
