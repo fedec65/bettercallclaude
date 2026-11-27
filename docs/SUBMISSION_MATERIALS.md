@@ -138,3 +138,44 @@ When filling out the submission form, use these prepared answers:
 - **The shipped plugin does not contain a local Ollama server directory.** The `.mcp.json` contains only remote URLs.
 - **Marketplace synchronization caveat:** manual MCP configurations kept inside the marketplace-managed plugin directory can be overwritten on sync; the documentation tells users to keep manual Ollama configuration outside that directory and back it up before upgrading.
 - **Component counts verified:** 22 agents, 31 commands, 18 skills, 9 remote MCP servers.
+
+---
+
+## Automated Verification — 2026-11-27
+
+Source baseline: `6b571cc99856b35c34976c212213a94b2849b8a8`
+Automated acceptance run from `/Users/federicocesconi/Dev/BetterCallClaude/.worktrees/feat-anthropic-directory-readiness-v5`.
+
+### Commands and Results
+
+| Step | Command | Result |
+|------|---------|--------|
+| 1 | `node scripts/check-directory-readiness.test.js` | 5/5 directory-readiness tests passed |
+| 1 | `node bettercallclaude/scripts/privacy-check.test.js` | 82/82 privacy tests passed |
+| 1 | `node scripts/check-tool-names.js` | 71 files, 1658 MCP entries, all paired under both naming conventions |
+| 1 | `node scripts/check-directory-readiness.js source` | Directory readiness OK: source v5.0.0, nine remote MCP servers |
+| 1 | `bash scripts/package-plugin.sh` | Package created successfully |
+| 1 | `node scripts/check-directory-readiness.js zip dist/bettercallclaude-5.0.0.zip` | Directory readiness OK: dist/bettercallclaude-5.0.0.zip, nine remote MCP servers |
+| 2 | `node -e "version check"` | plugin.json: 5.0.0, marketplace.json: 5.0.0, package.json: 5.0.0 |
+| 2 | `unzip -Z1 dist/bettercallclaude-5.0.0.zip \| rg forbidden paths` | No forbidden paths found |
+| 2 | `cmp /Users/federicocesconi/Downloads/bcc-icon.png /tmp/bcc-packaged-icon.png` | Packaged icon byte-identical to supplied asset |
+| 3 | `npm run build:ollama` | Optional Ollama bundle built at `mcp-servers-src/ollama/dist/index.js` |
+| 3 | `git check-ignore mcp-servers-src/ollama/dist/index.js` | Build output is gitignored |
+| 3 | `node scripts/check-directory-readiness.js source` | Source remains compliant after optional build |
+| 4 | `curl -sS -o /dev/null -w '%{http_code}' https://bettercallclaude.ch/privacy` | 200 |
+| 4 | `git status --short` | Only `?? docs/superpowers/` (pre-existing untracked user content) |
+
+### Artifact Evidence
+
+- **ZIP filename:** `dist/bettercallclaude-5.0.0.zip`
+- **ZIP size:** 508K
+- **ZIP file count:** 122 files
+- **ZIP contents:** 976534 bytes uncompressed
+
+### Public URL Status
+
+- https://bettercallclaude.ch/privacy — HTTP 200
+
+### Manual Acceptance Status
+
+**Manual Cowork testing has not yet been performed.** This record covers automated acceptance only and does not constitute release or directory-submission approval.
