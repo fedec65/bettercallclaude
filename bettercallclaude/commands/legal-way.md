@@ -76,7 +76,7 @@ in chat the resolution summary and the updated frontier. See `skills/shared/SKIL
    never pick or claim a ticket.
 1. **Map exists.** If none found: `ERROR: No wayfinder map found. Run /bettercallclaude:legal-chart first.`
 2. **Map not handed off.** If `status: handed-off`, show the map summary and stop — the matter is in execution.
-3. **Privacy mode loaded** from map frontmatter; `classifier` respected without re-probing.
+3. **Privacy mode loaded** from map frontmatter; `classifier` respected without re-probing. `classifier: none` selects the existing no-classifier row; privileged or indeterminate strict content stays local or is reformulated with the attorney before cloud use.
 
 ## Working Flow
 

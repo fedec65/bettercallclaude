@@ -40,9 +40,9 @@ Check the HTTP MCP gateway:
 - If the health check succeeds, note "Gateway online".
 - If it fails, note "Gateway non raggiungibile" and the likely impact.
 
-## Step 2: Probe Each Server
+## Step 2: Probe Remote Servers
 
-For each of the 10 MCP servers, use a **two-stage approach**:
+For each of the **9 required remote MCP servers**, use a **two-stage approach**:
 
 **Stage A — Tool availability**: Check whether the server's tools appear in your available tool list. If they do not appear, mark the server as "non connesso" immediately.
 
@@ -59,7 +59,8 @@ For each of the 10 MCP servers, use a **two-stage approach**:
 | tas-jurisprudence | Lodi arbitrali CAS/TAS | `cas_search` (minimal) |
 | workflows-ch | Flussi di lavoro personalizzati | `list_workflows` with `{"user_id": "default"}` |
 | swiss-caselaw | Giurisprudenza, catene citazioni, dottrina | `search_decisions` (minimal) |
-| ollama | Classificatore privacy locale | `ollama_check_status` |
+
+Then check the **optional local classifier** separately: if `ollama_check_status` is available, call it once. Record the result as `configured`, `not responding`, or `not configured`. Do not count this in the remote health score.
 
 ## Step 3: Agent Route Probe
 
@@ -95,10 +96,11 @@ Present results in the user's language, without technical jargon. Example (IT):
   Arbitrato sportivo (TAS)       ✓ attivo     —
   Flussi personalizzati          ✓ attivo     —
   Giurisprudenza svizzera        ✓ attivo     —
-  Classificatore privacy         ✗ assente    Traduzioni/riassunti non filtrati localmente
+
+  Classificatore privacy locale  ✗ non configurato   (opzionale)
 
   Gateway: https://mcp.bettercallclaude.ch — online
-  Servizi attivi: 9/10
+  Servizi remoti attivi: 9/9
   Route agent (MCP via subagent): ✓ operativa
 
 ╚══════════════════════════════════════════════════════════╝
@@ -125,7 +127,13 @@ For each unavailable server, explain in plain language:
 | tas-jurisprudence | La ricerca di lodi CAS/TAS non è disponibile. |
 | workflows-ch | I flussi di lavoro personalizzati non possono essere salvati o eseguiti. |
 | swiss-caselaw | Ricerca giurisprudenziale, catene di citazioni e analisi dottrinale non disponibili. |
-| ollama | La classificazione di privacy locale non è attiva. Traduzioni e riassunti non vengono filtrati localmente. |
+### Optional local classifier
+
+| Stato | Meaning | Impact |
+|-------|---------|--------|
+| configured | `ollama_check_status` responded | Local privacy classification is available; privileged content can stay on-machine. |
+| not responding | Tools appear but the local service does not answer | Optional classification is temporarily unavailable; cloud-backed workflows continue in `balanced`/`cloud` mode, and `strict` mode halts privileged or indeterminate cloud work as usual. |
+| not configured | `ollama_check_status` is not in the tool list | No local classifier is installed. This is normal for standard operation; see `README.md#optional-local-classification` if you want to set it up manually. |
 
 ### Suggested fixes:
 > Se un servizio risulta non disponibile:

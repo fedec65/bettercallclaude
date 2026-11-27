@@ -151,7 +151,7 @@ Skills activate automatically when Claude detects relevant context.
 
 ---
 
-## MCP Servers (10)
+## MCP Servers (9 remote)
 
 | Server | Purpose | Transport |
 |--------|---------|-----------|
@@ -164,7 +164,8 @@ Skills activate automatically when Claude detects relevant context.
 | tas-jurisprudence | CAS/TAS sports arbitration awards and jurisprudence | HTTP |
 | workflows-ch | Custom workflow definitions: validation, persistence, run logging | HTTP |
 | swiss-caselaw | Case law search, citation graphs, appeal chains, doctrine (opencaselaw.ch) | SSE |
-| ollama | Local privacy classification for privileged content | Local |
+
+> Optional manual local classification is available from `mcp-servers-src/ollama`; it is not installed by the plugin.
 
 ---
 
@@ -228,7 +229,7 @@ Skills activate automatically when Claude detects relevant context.
 
 ---
 
-**BetterCallClaude v4.12.0 -- Swiss Legal Intelligence for Cowork Desktop**
+**BetterCallClaude v5.0.0 -- Swiss Legal Intelligence for Cowork Desktop**
 
 If the user provided additional input, respond to it in the context of this help reference.
 

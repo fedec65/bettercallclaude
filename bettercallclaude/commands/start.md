@@ -46,10 +46,12 @@ Stato dei servizi:
   Commentari online                         ✓ attivo
   Profili giudiziari                        ✓ attivo
   Arbitrato sportivo (TAS/CAS)             ✓ attivo
+  Flussi personalizzati                     ✓ attivo
   Giurisprudenza svizzera                   ✓ attivo
-  Classificatore privacy (locale)           ✗ non disponibile
 
-  8/9 servizi attivi. BetterCallClaude è operativo.
+  Classificatore privacy (locale, opzionale)  ✗ non configurato
+
+  9/9 servizi remoti attivi. BetterCallClaude è operativo.
 ```
 
 If any server is down, explain in plain language what the user will miss (e.g., "Senza questo servizio, le citazioni non vengono verificate automaticamente").
