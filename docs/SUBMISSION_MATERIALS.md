@@ -159,11 +159,18 @@ Automated acceptance run from `/Users/federicocesconi/Dev/BetterCallClaude/.work
 | 2 | `node -e "version check"` | plugin.json: 5.0.0, marketplace.json: 5.0.0, package.json: 5.0.0 |
 | 2 | `unzip -Z1 dist/bettercallclaude-5.0.0.zip \| rg forbidden paths` | No forbidden paths found |
 | 2 | `cmp /Users/federicocesconi/Downloads/bcc-icon.png /tmp/bcc-packaged-icon.png` | Packaged icon byte-identical to supplied asset |
+| 3 | `npm audit fix` in `mcp-servers-src/ollama` | 0 vulnerabilities after non-forced fix |
+| 3 | `npm audit --omit=dev` in `mcp-servers-src/ollama` | found 0 vulnerabilities |
+| 3 | `npm audit` in `mcp-servers-src/ollama` | found 0 vulnerabilities |
 | 3 | `npm run build:ollama` | Optional Ollama bundle built at `mcp-servers-src/ollama/dist/index.js` |
 | 3 | `git check-ignore mcp-servers-src/ollama/dist/index.js` | Build output is gitignored |
 | 3 | `node scripts/check-directory-readiness.js source` | Source remains compliant after optional build |
 | 4 | `curl -sS -o /dev/null -w '%{http_code}' https://bettercallclaude.ch/privacy` | 200 |
 | 4 | `git status --short` | Only `?? docs/superpowers/` (pre-existing untracked user content) |
+
+### Optional Ollama Dependency Audit
+
+The optional `mcp-servers-src/ollama` dependency tree was audited and fixed on 2026-11-27. `npm audit fix` (without `--force`) resolved 10 vulnerabilities (3 moderate, 6 high, 1 critical), including the direct `@modelcontextprotocol/sdk` dependency. Both `npm audit --omit=dev` and full `npm audit` now report zero vulnerabilities. `@modelcontextprotocol/sdk` resolved from 1.29.0 to 1.32.2, remaining within the declared `^1.26.0` range. The canonical plugin ZIP is unaffected because the Ollama bundle remains gitignored and is not packaged. The dependency-fix commit is recorded in the repository history.
 
 ### Artifact Evidence
 
