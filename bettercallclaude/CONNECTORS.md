@@ -1,6 +1,6 @@
 # MCP Server Integration -- CONNECTORS
 
-This document describes the nine MCP (Model Context Protocol) servers included with the BetterCallClaude plugin. These servers provide direct integration with Swiss legal databases for precedent search, court decision retrieval, citation verification, federal legislation lookup, legal commentary access, document intelligence (strategy/drafting/analysis), CAS/TAS sports arbitration, case law graphs, and local privacy classification.
+This document describes the nine MCP (Model Context Protocol) servers included with the BetterCallClaude plugin. These servers provide direct integration with Swiss legal databases for precedent search, court decision retrieval, citation verification, federal legislation lookup, legal commentary access, document intelligence (strategy/drafting/analysis), CAS/TAS sports arbitration, custom workflows, and case law graphs. No local server is shipped.
 
 ---
 
@@ -15,20 +15,22 @@ This document describes the nine MCP (Model Context Protocol) servers included w
 | `onlinekommentar` | Search and retrieve Swiss legal commentaries (Kommentare) | HTTP |
 | `legal-persona` | Swiss-law document intelligence — strategy, drafting, analysis | HTTP |
 | `tas-jurisprudence` | CAS/TAS sports arbitration awards and jurisprudence | HTTP |
+| `workflows-ch` | Custom workflow validation, persistence, and run logging | HTTP |
 | `swiss-caselaw` | Case law search, citation graphs, appeal chains, doctrine (opencaselaw.ch) | SSE |
-| `ollama` | Privacy classification for privileged content (offline regex) | Local (stdio) |
 
 ### Configuration
 
 #### All platforms (default -- HTTP transport)
 
-Seven servers connect to the hosted HTTP MCP service at `https://mcp.bettercallclaude.ch`. One server (`swiss-caselaw`) connects via SSE to `https://mcp.opencaselaw.ch`. The plugin's `.mcp.json` configures these automatically — no local setup, Node.js, or API keys are required.
+Eight servers connect to the hosted HTTP MCP service at `https://mcp.bettercallclaude.ch`. One server (`swiss-caselaw`) connects via SSE to `https://mcp.opencaselaw.ch`. The plugin's `.mcp.json` configures these automatically — no local setup, Node.js, or API keys are required.
 
-The ollama privacy classifier runs locally via stdio to ensure sensitive content never leaves your machine.
+After plugin installation, verify with `/mcp` that all 9 remote servers appear. Restart Claude Code or Cowork if needed.
 
-After plugin installation, verify with `/mcp` that all 9 servers appear. Restart Claude Code or Cowork if needed.
+#### Optional manual server (not shipped)
 
-#### Local mode (optional -- stdio transport, Claude Code only)
+The `ollama` privacy classifier is not included in the standard plugin. Advanced users can build it from `mcp-servers-src/ollama` and register it in a separate manual MCP configuration. See `README.md` for build instructions and the marketplace-overwrite warning.
+
+#### Local mode (Claude Code CLI only)
 
 For lower latency or offline capability in Claude Code, you can switch the HTTP servers to local stdio transport. This feature is not available in Cowork Desktop (which uses HTTP-only transport).
 
@@ -875,7 +877,7 @@ Refer to the opencaselaw.ch MCP documentation for the full parameter specificati
 
 ## Error Handling
 
-All nine servers return errors in a consistent format:
+All remote servers return errors in a consistent format:
 
 ```json
 {

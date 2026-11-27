@@ -30,22 +30,22 @@ https://bettercallclaude.ch
 
 BetterCallClaude transforms Claude into a Swiss legal research and analysis assistant. It covers the full spectrum of Swiss legal work:
 
-- **Precedent research** — Search BGE/ATF/DTF databases, cantonal court decisions, and federal legislation via 5 custom MCP servers connected to live Swiss legal databases (entscheidsuche.ch, Fedlex SPARQL, OnlineKommentar).
+- **Precedent research** — Search BGE/ATF/DTF databases, cantonal court decisions, and federal legislation via 9 remote MCP servers connected to live Swiss legal databases (entscheidsuche.ch, Fedlex SPARQL, OnlineKommentar, opencaselaw.ch).
 - **Case strategy** — Risk assessment, cost-benefit analysis, procedural pathway evaluation, and settlement modeling.
 - **Adversarial analysis** — Three-agent workflow (advocate builds the case, adversary challenges it, judicial analyst synthesizes with Erwagung methodology and probability scores).
 - **Legal drafting** — Contracts, court submissions, legal opinions with jurisdiction-aware terminology and citation formatting.
 - **Citation verification** — Validate and convert citations between DE/FR/IT/EN formats across BGE/ATF/DTF reference systems.
-- **Multi-agent workflows** — Pre-built pipelines for due diligence, litigation preparation, contract lifecycle, and real estate closings.
-- **Privacy protection** — Built-in Anwaltsgeheimnis (attorney-client privilege, Art. 321 StGB) detection hook that intercepts privileged content before it leaves the local environment.
+- **Multi-agent workflows** — Pre-built pipelines for due diligence, litigation preparation, contract lifecycle, and real estate closings; custom workflows are saved remotely under a personal user ID.
+- **Privacy protection** — Built-in Anwaltsgeheimnis (attorney-client privilege, Art. 321 StGB) detection hook that intercepts privileged content before it leaves the local environment; optional local Ollama classifier can be built from source.
 
 ## Components
 
 | Type | Count | Examples |
 |------|-------|---------|
-| Agents | 18 | Researcher, Strategist, Drafter, Advocate, Adversary, Judicial Analyst, Citation Specialist, Compliance Officer, Risk Analyst, etc. |
-| Commands | 17 | `/legal`, `/research`, `/strategy`, `/draft`, `/cite`, `/adversarial`, `/briefing`, `/workflow`, `/translate`, etc. |
-| Skills | 10 | Swiss legal research, strategy, drafting, citation formats, jurisdictions, privacy routing, adversarial analysis, etc. |
-| MCP Servers | 5 | bge-search, entscheidsuche, fedlex-sparql, legal-citations, onlinekommentar |
+| Agents | 22 | Researcher, Strategist, Drafter, Advocate, Adversary, Judicial Analyst, Citation Specialist, Compliance Officer, Risk Analyst, Data Protection Specialist, etc. |
+| Commands | 31 | `/legal`, `/research`, `/strategy`, `/draft`, `/cite`, `/adversarial`, `/briefing`, `/workflow`, `/translate`, `/web-research`, `/legal-timeline`, `/nda-triage`, etc. |
+| Skills | 18 | Swiss legal research, strategy, drafting, citation formats, jurisdictions, privacy routing, adversarial analysis, legal wayfinder, legal chronology, etc. |
+| MCP Servers | 9 | bge-search, entscheidsuche, fedlex-sparql, legal-citations, onlinekommentar, legal-persona, tas-jurisprudence, workflows-ch, swiss-caselaw |
 
 ## Key Differentiators
 
@@ -57,9 +57,9 @@ No other Claude plugin covers Swiss law. BetterCallClaude provides deep coverage
 
 Matches Switzerland's official languages. Automatic language detection switches between BGE (German), ATF (French), and DTF (Italian) citation formats and legal terminology. English is supported as a working language with Swiss legal term mapping.
 
-### 3. 5 Custom MCP Servers with Live Data
+### 3. 9 Remote MCP Servers with Live Data
 
-Connected to real Swiss legal databases — not static datasets. Servers query entscheidsuche.ch (cantonal and federal court decisions), the Federal Supreme Court BGE database, Fedlex SPARQL (federal legislation), legal citation databases, and OnlineKommentar (legal commentaries).
+Connected to real Swiss legal databases — not static datasets. Servers query entscheidsuche.ch (cantonal and federal court decisions), the Federal Supreme Court BGE database, Fedlex SPARQL (federal legislation), legal citation databases, OnlineKommentar (legal commentaries), judicial persona analysis, CAS/TAS sports arbitration, custom workflows, and opencaselaw.ch. No local build or Ollama is required for the standard plugin.
 
 ### 4. Professional Ethics Built-In
 
@@ -85,7 +85,7 @@ Fully transparent codebase. Community-driven development. No vendor lock-in.
 |--------|-------------------|------------------|
 | Scope | Generic (contracts, NDAs, compliance for in-house teams) | Swiss-specific (all 26 cantons, federal and cantonal law) |
 | Languages | English | DE, FR, IT, EN |
-| Data Sources | None (relies on Claude's training data) | 5 live MCP servers connected to Swiss legal databases |
+| Data Sources | None (relies on Claude's training data) | 9 remote MCP servers connected to Swiss legal databases |
 | Precedent Research | No | BGE/ATF/DTF search with citation chain tracking |
 | Privacy | No | Anwaltsgeheimnis (Art. 321 StGB) enforcement hook |
 | Adversarial Analysis | No | Three-agent Erwagung methodology |
@@ -98,11 +98,14 @@ The two plugins are complementary, not competing. BetterCallClaude targets a spe
 ## Technical Details
 
 - **License**: AGPL-3.0
-- **Runtime**: Node.js >= 18 (for MCP servers)
-- **MCP servers**: Pre-compiled, included in plugin (no build step for users)
+- **Runtime**: No local runtime required for the standard plugin (readable Markdown/JavaScript)
+- **MCP servers**: 9 remote HTTPS/SSE servers; optional local Ollama classifier built manually from `mcp-servers-src/ollama`
 - **Plugin manifest**: `.claude-plugin/plugin.json` with full metadata
 - **Hooks**: PreToolUse privacy detection via `hooks/hooks.json`
 - **No hardcoded secrets**: All API keys via environment variables
+- **Icon**: `docs/images/bettercallclaude_logo.png`
+- **Privacy URL**: `docs/PRIVACY.md`
+- **Source commit**: v5.0.0 (`d15d1a1` baseline)
 
 ---
 
@@ -114,7 +117,7 @@ When filling out the submission form, use these prepared answers:
 
 **Description (short)**: Swiss Legal Intelligence — BGE/ATF/DTF precedent research, case strategy, legal drafting, and citation verification across all 26 Swiss cantons.
 
-**Description (long)**: BetterCallClaude transforms Claude into a Swiss legal research and analysis assistant. It includes 18 specialized agents, 17 commands, 10 skills, and 5 MCP servers connected to live Swiss legal databases. Coverage spans federal and cantonal law across all 26 Swiss cantons with multi-lingual support (DE/FR/IT/EN), adversarial analysis using Swiss Erwagung methodology, and built-in Anwaltsgeheimnis (attorney-client privilege) protection.
+**Description (long)**: BetterCallClaude transforms Claude into a Swiss legal research and analysis assistant. It includes 22 specialized agents, 31 commands, 18 skills, and 9 remote MCP servers connected to live Swiss legal databases. Coverage spans federal and cantonal law across all 26 Swiss cantons with multi-lingual support (DE/FR/IT/EN), adversarial analysis using Swiss Erwagung methodology, and built-in Anwaltsgeheimnis (attorney-client privilege) protection. Optional local Ollama classification can be built from source.
 
 **Repository URL**: https://github.com/fedec65/BetterCallClaude
 
@@ -125,3 +128,13 @@ When filling out the submission form, use these prepared answers:
 **Category**: Legal / Domain-Specific
 
 **Keywords**: swiss-law, legal-research, bge-atf-dtf, litigation, legal-drafting, citation-verification, multilingual, compliance, data-protection, mcp-servers
+
+---
+
+## Reviewer Notes
+
+- **v5.0.0 is remote-only by default.** The canonical plugin ships nine remote MCP servers (eight HTTP on `mcp.bettercallclaude.ch`, one SSE on `mcp.opencaselaw.ch`). No local Node.js runtime, no compiled-in MCP server, and no Ollama daemon are required for installation or normal use.
+- **Optional local Ollama is built from source.** Users who want local privacy classification can run `npm run build:ollama` from `mcp-servers-src/ollama` and register the resulting `dist/index.js` in a separate manual MCP configuration.
+- **The shipped plugin does not contain a local Ollama server directory.** The `.mcp.json` contains only remote URLs.
+- **Marketplace synchronization caveat:** manual MCP configurations kept inside the marketplace-managed plugin directory can be overwritten on sync; the documentation tells users to keep manual Ollama configuration outside that directory and back it up before upgrading.
+- **Component counts verified:** 22 agents, 31 commands, 18 skills, 9 remote MCP servers.

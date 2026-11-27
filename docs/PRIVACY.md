@@ -25,11 +25,9 @@ conversation content ever reaches the plugin author.
 
 ### 1.2 MCP servers
 
-Seven MCP servers are declared in
-[`bettercallclaude/.mcp.json`](../bettercallclaude/.mcp.json).
-
-Six run **remotely** at `mcp.bettercallclaude.ch` (HTTP) or
-`mcp.opencaselaw.ch` (SSE). Exact list:
+Nine MCP servers are declared in
+[`bettercallclaude/.mcp.json`](../bettercallclaude/.mcp.json). All nine are
+remote and reached over HTTPS/SSE:
 
 | Server            | Transport | Default endpoint                                   |
 | ----------------- | --------- | -------------------------------------------------- |
@@ -38,12 +36,18 @@ Six run **remotely** at `mcp.bettercallclaude.ch` (HTTP) or
 | `legal-citations` | HTTP      | `https://mcp.bettercallclaude.ch/legal-citations/mcp` |
 | `fedlex-sparql`   | HTTP      | `https://mcp.bettercallclaude.ch/fedlex-sparql/mcp` |
 | `onlinekommentar` | HTTP      | `https://mcp.bettercallclaude.ch/onlinekommentar/mcp` |
+| `legal-persona`   | HTTP      | `https://mcp.bettercallclaude.ch/legal-persona/mcp` |
+| `tas-jurisprudence` | HTTP    | `https://mcp.bettercallclaude.ch/tas-jurisprudence/mcp` |
+| `workflows-ch`    | HTTP      | `https://mcp.bettercallclaude.ch/workflows-ch/mcp` |
 | `swiss-caselaw`   | SSE       | `https://mcp.opencaselaw.ch`                       |
 
 When one of these is invoked, the **arguments** passed to the tool (usually a
-search query, a BGE reference, or a citation string) are sent to the endpoint
-over HTTPS. The endpoint queries public Swiss legal sources
-(entscheidsuche.ch, fedlex.admin.ch, BGer, etc.) and returns results.
+search query, a BGE reference, or a citation string) are transmitted to the
+endpoint over HTTPS. The endpoint queries public Swiss legal sources
+(entscheidsuche.ch, fedlex.admin.ch, BGer, etc.) and returns results. The
+call also passes through Anthropic: Cowork Desktop sends the tool call
+(including arguments) to the Anthropic API, and the model response is routed
+back.
 
 What this means for privilege:
 
@@ -54,17 +58,24 @@ What this means for privilege:
   motion")`, that string *does* leave your machine. The `pre-tool-use` hook
   (see §2) is intended to stop this.
 
-One server runs **locally**:
+The `workflows-ch` server persists your saved custom workflows under the
+personal user ID shown when you first use a workflow feature. Only workflow
+definitions, validation results, and run logs are stored; prompts and
+conversation content are not.
 
-| Server   | Transport | Command                                          |
-| -------- | --------- | ------------------------------------------------ |
-| `ollama` | STDIO     | `node ${CLAUDE_PLUGIN_ROOT}/mcp-servers/ollama/dist/index.js` |
+#### Optional local Ollama (not shipped)
 
-The Ollama subserver talks to a local Ollama daemon you operate (default
-`http://localhost:11434`, configurable in
-[`.mcp.json`](../bettercallclaude/.mcp.json)). It does not send data to the
-plugin author or to `bettercallclaude.ch`. If you point it at a remote host,
-the privacy properties of that host are your responsibility.
+The standard plugin does not include a local server. Advanced users can build
+the optional `ollama` classifier from `mcp-servers-src/ollama` and register it
+in a **separate manual MCP configuration**. When running, it talks only to a
+local Ollama daemon you operate (default `http://localhost:11434`). It does
+not send data to the plugin author or to `bettercallclaude.ch`. If you point
+it at a remote host, the privacy properties of that host are your
+responsibility.
+
+Optional local classification does **not** make Anthropic processing local:
+your prompts, tool arguments/results, and model responses still pass through
+the Anthropic API.
 
 ### 1.3 Anthropic
 
@@ -90,8 +101,8 @@ that is unacceptable for a given matter:
 
 The gateway source lives in the separate
 [`fedec65/BetterCallClaudeMCP`](https://github.com/fedec65/BetterCallClaudeMCP)
-repo (directory `mcp-servers-http/` plus the individual MCP packages under
-`mcp-servers/`) — you can audit it.
+repo (directory `mcp-servers-http/` plus the individual MCP packages) — you
+can audit it.
 
 ---
 
@@ -128,8 +139,10 @@ Limits of the hook:
 
 For critical matters, disable the hosted MCP servers in your
 [`.mcp.json`](../bettercallclaude/.mcp.json) (or fork and point the URLs at a
-self-hosted instance) and rely on the local `ollama` subserver plus your own
-research.
+self-hosted instance) and rely on your own offline research. The optional
+`ollama` subserver, if built and registered manually, can classify content
+locally, but it does not change that prompts and model responses still pass
+through Anthropic.
 
 ---
 
