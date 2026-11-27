@@ -64,6 +64,7 @@ coverage/
 # Development artifacts
 claudedocs/
 .serena/
+.worktrees/
 
 # Python linter cache
 .ruff_cache/
