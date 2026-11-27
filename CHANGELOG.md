@@ -4,6 +4,16 @@ All notable changes to BetterCallClaude will be documented in this file.
 
 ---
 
+## [5.0.0] - 2026-11-26
+
+### Changed
+- The canonical marketplace plugin and release ZIP now contain nine remote MCP connectors and no bundled local MCP server. Standard `balanced` and `cloud` workflows no longer require Ollama; strict mode continues to fail closed for privileged or indeterminate content.
+- Diagnostics, wayfinder maps, and worker-evaluator loops treat local classification as optional and report `classifier: none` when unavailable.
+- Added the directory icon and `https://bettercallclaude.ch/privacy` metadata; updated the public privacy documentation and submission materials.
+
+### Removed
+- The automatically configured Ollama STDIO server and its compiled bundle. Readable TypeScript source remains available under `mcp-servers-src/ollama/` for optional manual installation. Marketplace synchronization may overwrite manual MCP configuration; back up any custom setup before upgrading.
+
 ## [4.12.0] - 2026-11-24
 
 ### Added
