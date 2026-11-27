@@ -32,7 +32,7 @@ bettercallclaude/           The Cowork Desktop / Claude Code plugin itself.
 ├── commands/               31 slash commands.
 ├── skills/                 18 skills (SKILL.md per directory).
 ├── hooks/                  Cowork Desktop hooks. Entrypoint for privacy protection.
-└── scripts/                privacy-check.js and its test file.
+└── scripts/                privacy-check.js + test file; timeline-render.mjs (legal-timeline output).
 
 mcp-servers-src/            Optional source code for local-only servers.
 └── ollama/                 Optional local STDIO MCP server (not shipped).
@@ -70,10 +70,11 @@ npm run package
 npm run build:ollama
 ```
 
-There is no TypeScript to compile for the standard plugin — the only runtime
-code is `bettercallclaude/scripts/privacy-check.js` (vanilla Node). The
-optional Ollama classifier is built from `mcp-servers-src/ollama` only when
-needed.
+There is no TypeScript to compile for the standard plugin — runtime code is
+`bettercallclaude/scripts/privacy-check.js` (vanilla Node) and
+`bettercallclaude/scripts/timeline-render.mjs` (ES module used by
+`/legal-timeline`). The optional Ollama classifier is built from
+`mcp-servers-src/ollama` only when needed.
 
 ## Branching
 

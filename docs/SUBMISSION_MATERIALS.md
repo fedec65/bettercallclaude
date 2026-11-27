@@ -105,7 +105,7 @@ The two plugins are complementary, not competing. BetterCallClaude targets a spe
 - **No hardcoded secrets**: All API keys via environment variables
 - **Icon**: `docs/images/bettercallclaude_logo.png`
 - **Privacy URL**: `docs/PRIVACY.md`
-- **Source commit**: v5.0.0 (`d15d1a1` baseline)
+- **Implementation baseline**: `d15d1a1` (v5.0.0 remote-only refactor); the release task will record the final submission commit
 
 ---
 

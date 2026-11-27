@@ -102,7 +102,7 @@ BetterCallClaude/
 │   │   └── ... (11 more skills)
 │   ├── hooks/
 │   │   └── hooks.json             # PreToolUse hook for privacy detection
-│   └── scripts/                   # Runtime scripts (privacy-check.js)
+│   └── scripts/                   # Runtime scripts (privacy-check.js, timeline-render.mjs)
 │
 ├── mcp-servers-src/               # Optional Ollama classifier source
 │   └── ollama/                    # Local privacy classification server source
@@ -121,7 +121,9 @@ BetterCallClaude/
 │
 ├── tests/                         # Python test structure (legacy/development)
 ├── .github/workflows/             # CI/CD
-│   ├── ci.yml                     # Validate plugin structure, check tool-name parity
+│   ├── ci.yml                     # Source audit, marketplace/plugin.json validation,
+│   │                              # directory readiness, skill frontmatter, hook quoting,
+│   │                              # MCP tool-name parity, privacy tests, packaging/ZIP audit
 │   └── release.yml                # Release automation
 ├── package.json                   # Root package (build orchestration)
 ├── README.md                      # User-facing documentation
@@ -136,7 +138,7 @@ BetterCallClaude/
 
 ### Prerequisites
 
-- Node.js >= 18 (only for building the optional Ollama classifier from source)
+- Node.js >= 20 (only for building the optional Ollama classifier from source; matches the esbuild `node20` target)
 - npm >= 9
 
 ### Development Commands
@@ -162,7 +164,7 @@ bash scripts/package-plugin.sh
 
 ### TypeScript (optional Ollama classifier source)
 
-- **Target**: ES2022, CommonJS modules
+- **Target**: ES2022, **module: Node16 / ESM** (`"type": "module"` in `package.json`)
 - **Strict mode**: Enabled (`strict: true`)
 - **Unused checks**: `noUnusedLocals`, `noUnusedParameters`, `noImplicitReturns`
 - **Naming**: PascalCase for classes/interfaces, camelCase for functions/variables
@@ -199,21 +201,27 @@ tools:
 node bettercallclaude/scripts/privacy-check.test.js
 ```
 
-### Optional Ollama Classifier Tests
+### Optional Ollama Classifier Build Verification
 
 ```bash
 cd mcp-servers-src/ollama
-npm test
+npm run build:bundle
 ```
 
 ### CI Validation
 
 The CI pipeline (`/.github/workflows/ci.yml`) validates:
 
-1. **Plugin Structure** - Checks required files and directories
-2. **Configuration Files** - Validates `.mcp.json` and `plugin.json`
-3. **Frontmatter** - Ensures all agents/commands/skills have YAML frontmatter
-4. **Tool-name parity** - Every MCP tool in frontmatter has both scoped and bare naming conventions
+1. **Marketplace manifest** — `.claude-plugin/marketplace.json` schema
+2. **Plugin manifest** — `bettercallclaude/.claude-plugin/plugin.json` required fields
+3. **Plugin subdirectory contents** — `agents/`, `commands/`, `skills/`, `hooks/`, `scripts/`, `.mcp.json` exist
+4. **Directory readiness** — `scripts/check-directory-readiness.js source`
+5. **`.mcp.json` configuration** — servers are declared
+6. **Hook command quoting** — `${CLAUDE_PLUGIN_ROOT}` is properly quoted in hooks, timeline command, and chronology skill
+7. **Skill frontmatter** — every `bettercallclaude/skills/*/SKILL.md` has YAML frontmatter
+8. **MCP tool-name parity** — `scripts/check-tool-names.js`
+9. **Privacy tests** — `bettercallclaude/scripts/privacy-check.test.js`
+10. **Packaging / ZIP audit** — `bash scripts/package-plugin.sh`
 
 ---
 
