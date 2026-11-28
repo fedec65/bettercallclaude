@@ -221,7 +221,9 @@ With `CLAUDE_PLUGIN_USER_CONFIG privacy_mode=strict`:
 
 `legal-persona` returned a non-empty coherent analysis for `.smoke/contract.md`; the short-input `{}` case was not an outage.
 
-### Scenario 6 — CLI marketplace upgrade from v4.12.0 to v5.0.0
+### Scenario 6 — CLI marketplace upgrade from v4.12.0 to v5.0.0 (agent-run CLI test)
+
+> This scenario was executed by the agent via Claude Code CLI commands in an isolated config, distinct from Scenarios 1–5 which were user-observed host checks.
 
 Run in a fresh isolated config (`.smoke/upgrade-config`) with a temporary local git clone (`.smoke/upgrade-marketplace/v4.12.0`). Global `~/.claude.json`, default Claude config, and existing user plugins were not touched (verified after the test).
 
@@ -247,8 +249,8 @@ Run in a fresh isolated config (`.smoke/upgrade-config`) with a temporary local 
 | Verify privacy URL | `cat .smoke/upgrade-config/plugins/cache/bettercallclaude-marketplace/bettercallclaude/5.0.0/.claude-plugin/plugin.json` | `privacyPolicyUrl`: `https://bettercallclaude.ch/privacy` |
 
 Upgrade findings:
-- Active 5.0.0 installation is clean: 9 remote MCP servers, no Ollama key, no `mcp-servers/ollama` bundle, icon and privacy URL present.
-- The CLI keeps the previous 4.12.0 version in its plugin cache (`.smoke/upgrade-config/plugins/cache/bettercallclaude-marketplace/bettercallclaude/4.12.0`). That cached copy still contains the old `mcp-servers/ollama/dist/index.js` bundle, but it is **not part of the active installation** and is not referenced by the enabled v5.0.0 plugin. `claude plugin prune --dry-run` reported nothing to prune.
+- **Active v5.0.0 installation is clean**: 9 remote MCP servers, no Ollama key, no `mcp-servers/ollama` bundle, icon and privacy URL present. This is what the enabled plugin loads at runtime.
+- **Inactive CLI-managed cache**: The CLI also retained the previous 4.12.0 version in its plugin cache (`.smoke/upgrade-config/plugins/cache/bettercallclaude-marketplace/bettercallclaude/4.12.0`). That cached copy still contains the old `mcp-servers/ollama/dist/index.js` bundle, but it is **inactive CLI-managed retention**, not part of the active installation, and is not referenced by the enabled v5.0.0 plugin. `claude plugin prune --dry-run` reported nothing to prune.
 - Global user plugins were not modified: the pre-existing `bettercallclaude@bettercallclaude-marketplace` installation outside the isolated config remained at 4.1.4 disabled.
 
 ### Submission Gate Status
