@@ -100,7 +100,7 @@ Present results in the user's language, without technical jargon. Example (IT):
   Giurisprudenza svizzera        ✓ attivo     —
 
   Classificatore privacy locale  ✓ disponibile       (opzionale)
-  Daemon Ollama                  ✗ non in esecuzione (solo per generazione locale)
+  Daemon Ollama                  ✗ non raggiungibile (solo per generazione locale)
 
   Gateway: https://mcp.bettercallclaude.ch — online
   Servizi remoti attivi: 9/9
@@ -136,7 +136,7 @@ For each unavailable server, explain in plain language:
 | Stato | Meaning | Impact |
 |-------|---------|--------|
 | configured | `ollama_classify_privacy` answered the fixed public probe | Local privacy classification is available, independently of daemon health. |
-| daemon stopped | Classification succeeded but `ollama_check_status` reports the daemon offline | Classification remains available; daemon-dependent generation is unavailable. Cloud-backed workflows continue normally. |
+| daemon unreachable | Classification succeeded but `ollama_check_status` cannot reach the daemon | Classification remains available; daemon-dependent generation is unavailable until connectivity is restored. Cloud-backed workflows continue normally. |
 | not responding | `ollama_classify_privacy` is present but the probe fails | Optional classification is unavailable; cloud-backed workflows continue in `balanced`/`cloud` mode, and `strict` mode halts privileged or indeterminate cloud work as usual. |
 | not configured | `ollama_classify_privacy` is not in the tool list | No local classifier is installed. This is normal for standard operation; see `README.md#optional-local-classification` if you want to set it up manually. |
 
