@@ -115,6 +115,7 @@ find "$STAGING_DIR" -type f \( -name '.DS_Store' -o -name 'Thumbs.db' \) -delete
 
 # Create zip
 mkdir -p "$OUTPUT_DIR"
+rm -f "$OUTPUT_DIR/$ZIP_NAME"
 (cd "$STAGING_DIR" && zip -r -q "$OUTPUT_DIR/$ZIP_NAME" .)
 
 node "$REPO_ROOT/scripts/check-directory-readiness.js" zip "$OUTPUT_DIR/$ZIP_NAME" "$REPO_ROOT"

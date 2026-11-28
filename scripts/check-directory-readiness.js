@@ -10,6 +10,7 @@ const PLUGIN_DIR = 'bettercallclaude';
 const MANIFEST = '.claude-plugin/plugin.json';
 const ICON = '.claude-plugin/icon.png';
 const PRIVACY_URL = 'https://bettercallclaude.ch/privacy';
+const OS_METADATA = new Set(['.DS_Store', 'Thumbs.db']);
 const EXPECTED_SERVERS = [
   'entscheidsuche', 'bge-search', 'legal-citations', 'fedlex-sparql',
   'onlinekommentar', 'legal-persona', 'tas-jurisprudence', 'workflows-ch',
@@ -19,16 +20,67 @@ const FORBIDDEN_EXTENSIONS = [
   '.wasm', '.node', '.dll', '.dylib', '.so', '.exe', '.pyc', '.pyo',
   '.class', '.jar',
 ];
+const PNG_SIGNATURE = Buffer.from([0x89, 0x50, 0x4e, 0x47, 0x0d, 0x0a, 0x1a, 0x0a]);
+const CRC_TABLE = Array.from({ length: 256 }, (_, n) => {
+  let c = n;
+  for (let k = 0; k < 8; k++) c = (c & 1) ? 0xedb88320 ^ (c >>> 1) : c >>> 1;
+  return c >>> 0;
+});
+
+function crc32(buffer) {
+  let crc = 0xffffffff;
+  for (const byte of buffer) crc = CRC_TABLE[(crc ^ byte) & 0xff] ^ (crc >>> 8);
+  return (crc ^ 0xffffffff) >>> 0;
+}
 
 function readJson(readFile, name) {
   return JSON.parse(readFile(name).toString('utf8'));
 }
 
 function pngDimensions(file) {
-  const signature = Buffer.from([0x89, 0x50, 0x4e, 0x47, 0x0d, 0x0a, 0x1a, 0x0a]);
-  assert(file.length >= 24 && file.subarray(0, 8).equals(signature), 'icon must be a real PNG');
-  assert.equal(file.toString('ascii', 12, 16), 'IHDR', 'icon PNG must contain an IHDR header');
-  return { width: file.readUInt32BE(16), height: file.readUInt32BE(20) };
+  assert(file.length >= 33 && file.subarray(0, 8).equals(PNG_SIGNATURE), 'truncated PNG icon');
+  let offset = 8;
+  let width = 0;
+  let height = 0;
+  let sawHeader = false;
+  let sawImageData = false;
+
+  while (offset + 12 <= file.length) {
+    const length = file.readUInt32BE(offset);
+    const type = file.toString('ascii', offset + 4, offset + 8);
+    const dataStart = offset + 8;
+    const dataEnd = dataStart + length;
+    const chunkEnd = dataEnd + 4;
+    assert(chunkEnd <= file.length, `truncated PNG chunk: ${type}`);
+    const expectedCrc = file.readUInt32BE(dataEnd);
+    const actualCrc = crc32(file.subarray(offset + 4, dataEnd));
+    assert.equal(actualCrc, expectedCrc, `invalid PNG CRC: ${type}`);
+
+    if (!sawHeader) {
+      assert.equal(type, 'IHDR', 'first PNG chunk must be IHDR');
+      assert.equal(length, 13, 'PNG IHDR must be 13 bytes');
+      width = file.readUInt32BE(dataStart);
+      height = file.readUInt32BE(dataStart + 4);
+      assert(width > 0 && height > 0, 'PNG dimensions must be positive');
+      sawHeader = true;
+    } else {
+      assert.notEqual(type, 'IHDR', 'PNG must contain exactly one IHDR');
+    }
+
+    if (type === 'IDAT') {
+      assert(length > 0, 'PNG IDAT must not be empty');
+      sawImageData = true;
+    }
+    if (type === 'IEND') {
+      assert.equal(length, 0, 'PNG IEND must be empty');
+      assert.equal(chunkEnd, file.length, 'PNG must end at IEND');
+      assert(sawImageData, 'PNG must contain image data');
+      return { width, height };
+    }
+    offset = chunkEnd;
+  }
+
+  throw new Error('PNG is missing IEND');
 }
 
 function auditPayload(paths, readFile) {
@@ -68,6 +120,7 @@ function auditPayload(paths, readFile) {
 function walk(root, relative = '') {
   const absolute = path.join(root, relative);
   return fs.readdirSync(absolute, { withFileTypes: true }).flatMap((entry) => {
+    if (OS_METADATA.has(entry.name)) return [];
     const name = relative ? `${relative}/${entry.name}` : entry.name;
     return entry.isDirectory() ? walk(root, name) : [name];
   });

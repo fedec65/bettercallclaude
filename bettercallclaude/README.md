@@ -434,7 +434,7 @@ The plugin ships nine pre-configured remote MCP servers that provide direct inte
 
 ### Requirements
 
-No local Node.js or Ollama is required for the standard plugin. All nine MCP servers are reached over HTTPS / SSE and run no code on your machine.
+No local Node.js or Ollama is required to use the nine remote MCP servers, which are reached over HTTPS / SSE and run no code on your machine. `/legal-timeline` uses the bundled Node.js renderer and therefore requires Node.js >= 20 locally.
 
 The nine remote servers are hosted (eight HTTP servers at `mcp.bettercallclaude.ch`, one SSE server at `mcp.opencaselaw.ch`) and are reached by Cowork Desktop without any local build step. No API keys are required.
 
@@ -468,7 +468,7 @@ The privacy system supports three modes:
 
 ## Optional local classification
 
-The standard plugin does not install Ollama and does not require Node.js. The PreToolUse hook remains active. Prompts, tool arguments/results, and model responses still pass through Anthropic.
+The standard plugin does not install Ollama. The PreToolUse hook remains active. Prompts, tool arguments/results, and model responses still pass through Anthropic.
 
 Advanced users can build the readable source manually:
 
@@ -502,7 +502,8 @@ Marketplace synchronization can overwrite plugin files or manual changes made in
 ## Requirements
 
 - Cowork or Claude Code (latest version)
-- No local Node.js or Ollama required for the standard plugin
+- No local Node.js or Ollama required for the nine remote MCP servers
+- Node.js >= 20 for `/legal-timeline` or for building the optional Ollama classifier
 
 ---
 

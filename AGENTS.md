@@ -42,7 +42,7 @@ The project implements a dual-interface architecture combining granular commands
 
 | Component | Technology | Purpose |
 |-----------|------------|---------|
-| Runtime | none required for standard plugin | Remote MCP servers run on hosted infrastructure |
+| Runtime | none for remote MCP connectors; Node.js >= 20 for timeline rendering and optional Ollama build | Remote MCP servers run on hosted infrastructure |
 | Language | TypeScript 5.7 | Optional Ollama classifier source (`mcp-servers-src/ollama`) |
 | Bundler | esbuild | Optional Ollama classifier bundle |
 | Testing | vitest, jest | Optional Ollama classifier and hook tests |
@@ -138,7 +138,7 @@ BetterCallClaude/
 
 ### Prerequisites
 
-- Node.js >= 20 (only for building the optional Ollama classifier from source; matches the esbuild `node20` target)
+- Node.js >= 20 for `/legal-timeline` and for building the optional Ollama classifier from source; the optional build matches the esbuild `node20` target
 - npm >= 9
 
 ### Development Commands

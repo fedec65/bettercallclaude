@@ -2,7 +2,11 @@
 'use strict';
 
 const assert = require('node:assert/strict');
-const { auditPayload, pngDimensions } = require('./check-directory-readiness.js');
+const fs = require('node:fs');
+const os = require('node:os');
+const path = require('node:path');
+const zlib = require('node:zlib');
+const { auditPayload, auditSource, pngDimensions } = require('./check-directory-readiness.js');
 
 let passed = 0;
 let failed = 0;
@@ -11,6 +15,44 @@ const servers = [
   'onlinekommentar', 'legal-persona', 'tas-jurisprudence', 'workflows-ch',
   'swiss-caselaw',
 ];
+const PNG_SIGNATURE = Buffer.from([0x89, 0x50, 0x4e, 0x47, 0x0d, 0x0a, 0x1a, 0x0a]);
+const CRC_TABLE = Array.from({ length: 256 }, (_, n) => {
+  let c = n;
+  for (let k = 0; k < 8; k++) c = (c & 1) ? 0xedb88320 ^ (c >>> 1) : c >>> 1;
+  return c >>> 0;
+});
+
+function crc32(buffer) {
+  let crc = 0xffffffff;
+  for (const byte of buffer) crc = CRC_TABLE[(crc ^ byte) & 0xff] ^ (crc >>> 8);
+  return (crc ^ 0xffffffff) >>> 0;
+}
+
+function pngChunk(type, data) {
+  const header = Buffer.alloc(8);
+  header.writeUInt32BE(data.length, 0);
+  header.write(type, 4, 'ascii');
+  const crc = Buffer.alloc(4);
+  crc.writeUInt32BE(crc32(Buffer.concat([Buffer.from(type, 'ascii'), data])), 0);
+  return Buffer.concat([header, data, crc]);
+}
+
+function icon(width = 512, height = 512) {
+  const ihdr = Buffer.alloc(13);
+  ihdr.writeUInt32BE(width, 0);
+  ihdr.writeUInt32BE(height, 4);
+  ihdr[8] = 8; // bit depth
+  ihdr[9] = 2; // truecolor RGB
+  const rowLength = 1 + width * 3;
+  const raw = Buffer.alloc(rowLength * height);
+  const idat = zlib.deflateSync(raw);
+  return Buffer.concat([
+    PNG_SIGNATURE,
+    pngChunk('IHDR', ihdr),
+    pngChunk('IDAT', idat),
+    pngChunk('IEND', Buffer.alloc(0)),
+  ]);
+}
 
 function t(name, fn) {
   try {
@@ -21,15 +63,6 @@ function t(name, fn) {
     console.error(`  FAIL ${name}: ${error.message}`);
     failed++;
   }
-}
-
-function icon(width = 512, height = 512) {
-  const file = Buffer.alloc(24);
-  Buffer.from([0x89, 0x50, 0x4e, 0x47, 0x0d, 0x0a, 0x1a, 0x0a]).copy(file);
-  file.write('IHDR', 12, 'ascii');
-  file.writeUInt32BE(width, 16);
-  file.writeUInt32BE(height, 20);
-  return file;
 }
 
 function validFiles() {
@@ -51,10 +84,33 @@ function validFiles() {
 }
 
 function readFrom(files) {
-  return (path) => {
-    if (!files[path]) throw new Error(`missing fixture ${path}`);
-    return files[path];
+  return (name) => {
+    if (!files[name]) throw new Error(`missing fixture ${name}`);
+    return files[name];
   };
+}
+
+function writeFixture(root, files) {
+  for (const [name, contents] of Object.entries(files)) {
+    const target = path.join(root, 'bettercallclaude', name);
+    fs.mkdirSync(path.dirname(target), { recursive: true });
+    fs.writeFileSync(target, contents);
+  }
+  fs.writeFileSync(path.join(root, 'package.json'), JSON.stringify({ version: '5.0.0' }));
+  fs.mkdirSync(path.join(root, '.claude-plugin'), { recursive: true });
+  fs.writeFileSync(path.join(root, '.claude-plugin/marketplace.json'), JSON.stringify({
+    plugins: [{ name: 'bettercallclaude', version: '5.0.0' }],
+  }));
+}
+
+function withoutLogs(fn) {
+  const original = console.log;
+  console.log = () => {};
+  try {
+    return fn();
+  } finally {
+    console.log = original;
+  }
 }
 
 t('accepts nine remote connectors, metadata, icon, and readable JavaScript', () => {
@@ -88,6 +144,10 @@ t('rejects unreadable or oversized JavaScript', () => {
   assert.throws(() => auditPayload(Object.keys(files), readFrom(files)), /bundled JavaScript/);
 });
 
+t('rejects truncated PNG icons', () => {
+  assert.throws(() => pngDimensions(icon().subarray(0, 24)), /truncated PNG|missing IEND/);
+});
+
 t('validates PNG dimensions and the privacy URL', () => {
   assert.deepEqual(pngDimensions(icon()), { width: 512, height: 512 });
   const files = validFiles();
@@ -98,6 +158,22 @@ t('validates PNG dimensions and the privacy URL', () => {
     version: '5.0.0', privacyPolicyUrl: 'https://example.test/privacy',
   }));
   assert.throws(() => auditPayload(Object.keys(files), readFrom(files)), /privacyPolicyUrl/);
+});
+
+t('source audit ignores OS metadata while artifact audit rejects it', () => {
+  const root = fs.mkdtempSync(path.join(os.tmpdir(), 'bcc-readiness-'));
+  try {
+    writeFixture(root, validFiles());
+    fs.writeFileSync(path.join(root, 'bettercallclaude/.DS_Store'), Buffer.from([0, 1, 2]));
+    withoutLogs(() => auditSource(root));
+    const artifactFiles = { ...validFiles(), '.DS_Store': Buffer.from([0, 1, 2]) };
+    assert.throws(
+      () => auditPayload(Object.keys(artifactFiles), readFrom(artifactFiles)),
+      /readable source text/,
+    );
+  } finally {
+    fs.rmSync(root, { recursive: true, force: true });
+  }
 });
 
 if (failed) process.exitCode = 1;

@@ -97,7 +97,7 @@ Determine the active `privacy_mode` and whether `ollama_check_status` / `ollama_
 
 - If local classification is available, run it on content that would be sent to cloud MCP tools in this iteration.
 - If it is unavailable, set `classifier: none` for the iteration and apply the existing pattern-based PreToolUse hook plus this mode matrix.
-- `strict`: public operations may continue. Privileged or indeterminate content MUST NOT be sent to cloud tools. If the requested operation requires local classification or cloud transmission, stop with `HALTED (privacy)` and explain that the user may configure optional Ollama, provide an anonymized input, or explicitly choose another privacy mode. Never change the mode automatically.
+- `strict`: public operations may continue, including remote calls that carry only public content. Privileged or indeterminate content MUST NOT be sent to cloud tools. If a required call cannot proceed without sending that content or without unavailable local classification, stop with `HALTED (privacy)` and explain that the user may configure optional Ollama, provide an anonymized input, or explicitly choose another privacy mode. Never change the mode automatically.
 - `balanced`: non-privileged content may use cloud tools. Withhold privileged passages; without a local classifier, ask for or use a user-approved anonymized formulation before any cloud call.
 - `cloud`: proceed under the existing PreToolUse ask/allow behavior.
 
