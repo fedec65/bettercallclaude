@@ -138,7 +138,7 @@ BetterCallClaude/
 
 ### Prerequisites
 
-- Node.js >= 20 for `/legal-timeline` and for building the optional Ollama classifier from source; the optional build matches the esbuild `node20` target
+- Node.js >= 20 for packaging, `/legal-timeline`, and building the optional Ollama classifier from source; the optional build matches the esbuild `node20` target
 - npm >= 9
 
 ### Development Commands
