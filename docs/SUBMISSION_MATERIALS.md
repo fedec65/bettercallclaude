@@ -106,7 +106,7 @@ The two plugins are complementary, not competing. BetterCallClaude targets a spe
 - **Icon**: `bettercallclaude/.claude-plugin/icon.png`
 - **Privacy URL**: `https://bettercallclaude.ch/privacy`
 - **Implementation baseline**: `1e30ec0` (v5.0.0 remote-only refactor + optional Ollama dependency refresh used for acceptance)
-- **Final implementation commit**: `e322bf7` (final release-review fixes); subsequent acceptance-evidence edits are documentation-only. The merged submission SHA is recorded in the release/PR evidence after merge.
+- **Final implementation commit**: `d78e416` (Devin release findings fixed; final implementation reference before merge). The merged submission SHA is recorded in the release/PR evidence after merge.
 
 ---
 
