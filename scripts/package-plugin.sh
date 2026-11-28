@@ -38,7 +38,6 @@ REQUIRED_DIRS=(
   "agents"
   "commands"
   "skills"
-  "mcp-servers"
 )
 
 for file in "${REQUIRED_FILES[@]}"; do
@@ -55,30 +54,7 @@ for dir in "${REQUIRED_DIRS[@]}"; do
   fi
 done
 
-# Verify compiled MCP servers.
-#
-# Since v4.2.1 five of the six Swiss-law servers (entscheidsuche, bge-search,
-# legal-citations, fedlex-sparql, onlinekommentar) are HTTP/SSE-only and are
-# reached via URLs declared in .mcp.json — they ship no local JS. Only ollama
-# is bundled as a STDIO server, so only its compiled output is required here.
-BUNDLED_SERVERS=("ollama")
-for server in "${BUNDLED_SERVERS[@]}"; do
-  if [ ! -f "$PLUGIN_ROOT/mcp-servers/$server/dist/index.js" ]; then
-    echo "ERROR: Missing compiled server: mcp-servers/$server/dist/index.js"
-    echo ""
-    echo "The ollama bundle is normally checked into git under"
-    echo "bettercallclaude/mcp-servers/ollama/dist/. If you've deleted it or"
-    echo "changed the source, rebuild it by running:"
-    echo ""
-    echo "    npm run build:ollama"
-    echo ""
-    echo "from the repo root, which runs esbuild against"
-    echo "bettercallclaude/mcp-servers/ollama/src/. Other MCP servers are now"
-    echo "hosted remotely — their source lives in"
-    echo "https://github.com/fedec65/BetterCallClaudeMCP."
-    exit 1
-  fi
-done
+node "$REPO_ROOT/scripts/check-directory-readiness.js" source "$REPO_ROOT"
 
 echo "All required files present."
 echo ""
@@ -95,21 +71,6 @@ cp -r "$PLUGIN_ROOT/agents" "$STAGING_DIR/"
 cp -r "$PLUGIN_ROOT/commands" "$STAGING_DIR/"
 cp -r "$PLUGIN_ROOT/skills" "$STAGING_DIR/"
 cp -r "$PLUGIN_ROOT/hooks" "$STAGING_DIR/"
-
-# Copy MCP servers (only dist/ contents, not source)
-mkdir -p "$STAGING_DIR/mcp-servers"
-for server in "${BUNDLED_SERVERS[@]}"; do
-  mkdir -p "$STAGING_DIR/mcp-servers/$server/dist"
-  cp "$PLUGIN_ROOT/mcp-servers/$server/dist/"*.js "$STAGING_DIR/mcp-servers/$server/dist/"
-  # Copy WASM files if present
-  if [ -f "$PLUGIN_ROOT/mcp-servers/$server/dist/sql-wasm.wasm" ]; then
-    cp "$PLUGIN_ROOT/mcp-servers/$server/dist/sql-wasm.wasm" "$STAGING_DIR/mcp-servers/$server/dist/"
-  fi
-  # Copy package.json so the STDIO subprocess has its declared deps if any
-  if [ -f "$PLUGIN_ROOT/mcp-servers/$server/package.json" ]; then
-    cp "$PLUGIN_ROOT/mcp-servers/$server/package.json" "$STAGING_DIR/mcp-servers/$server/"
-  fi
-done
 
 # Copy scripts needed at runtime.
 # The canonical PreToolUse hook is bettercallclaude/scripts/privacy-check.js
@@ -149,9 +110,20 @@ done
 mkdir -p "$STAGING_DIR/templates"
 cp "$PLUGIN_ROOT/templates/"bettercallclaude.local.md.example.* "$STAGING_DIR/templates/"
 
-# Create zip
+# Remove macOS/Windows metadata that may have been copied into staging
+find "$STAGING_DIR" -type f \( -name '.DS_Store' -o -name 'Thumbs.db' \) -delete
+
+# Create zip in a temporary path, audit it, then publish it to the release path.
 mkdir -p "$OUTPUT_DIR"
-(cd "$STAGING_DIR" && zip -r -q "$OUTPUT_DIR/$ZIP_NAME" .)
+TMP_ZIP="$OUTPUT_DIR/$ZIP_NAME.tmp.$$"
+rm -f "$OUTPUT_DIR/$ZIP_NAME" "$TMP_ZIP"
+(cd "$STAGING_DIR" && zip -r -q "$TMP_ZIP" .)
+
+if ! node "$REPO_ROOT/scripts/check-directory-readiness.js" zip "$TMP_ZIP" "$REPO_ROOT"; then
+  rm -f "$TMP_ZIP"
+  exit 1
+fi
+mv "$TMP_ZIP" "$OUTPUT_DIR/$ZIP_NAME"
 
 # Clean up staging
 rm -rf "$STAGING_DIR"

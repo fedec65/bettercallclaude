@@ -1,8 +1,8 @@
 # MCP Server Integration -- CONNECTORS
 
-This document describes the MCP (Model Context Protocol) servers included with the BetterCallClaude plugin. These servers provide direct integration with Swiss legal databases for precedent search, court decision retrieval, citation verification, federal legislation lookup, legal commentary access, judicial persona analysis, sports arbitration research, and local privacy classification.
+This document describes the MCP (Model Context Protocol) servers included with the BetterCallClaude plugin. These servers provide direct integration with Swiss legal databases for precedent search, court decision retrieval, citation verification, federal legislation lookup, legal commentary access, judicial persona analysis, sports arbitration research, custom workflows, and case-law graphs.
 
-The plugin ships with nine MCP servers: seven HTTP servers hosted at `https://mcp.bettercallclaude.ch`, one SSE server hosted at `https://mcp.opencaselaw.ch`, and one local STDIO server (`ollama`) that runs on the user's machine for attorney-client privilege protection.
+The plugin ships with nine remote MCP servers: seven HTTP servers hosted at `https://mcp.bettercallclaude.ch`, one SSE server hosted at `https://mcp.opencaselaw.ch`, and one HTTP workflow server hosted at `https://mcp.bettercallclaude.ch`. No local server is shipped.
 
 ---
 
@@ -17,18 +17,18 @@ The plugin ships with nine MCP servers: seven HTTP servers hosted at `https://mc
 | `onlinekommentar` | Search and retrieve Swiss legal commentaries (Kommentare) | HTTP |
 | `legal-persona` | Judicial persona analysis, deadline computation, intake forms | HTTP |
 | `tas-jurisprudence` | CAS/TAS sports arbitration awards and jurisprudence | HTTP |
+| `workflows-ch` | Custom workflow validation, persistence, and run logging | HTTP |
 | `swiss-caselaw` | Case-law search, citation graphs, doctrine (opencaselaw.ch) | SSE |
-| `ollama` | Local privacy classification for privileged content | STDIO (local) |
 
 ### Requirements
 
-- Node.js >= 18 (required only for the local `ollama` STDIO server)
+No local MCP server or Ollama is required. The nine remote connectors need no local Node.js; the included privacy hook, `/legal-timeline`, packaging, and optional Ollama builds require Node.js >= 20.
 
 ### Configuration
 
 #### Claude Code CLI (Automatic)
 
-All nine servers auto-register via the `.mcp.json` file at the plugin root:
+All nine remote servers auto-register via the `.mcp.json` file at the plugin root:
 
 ```json
 {
@@ -61,27 +61,30 @@ All nine servers auto-register via the `.mcp.json` file at the plugin root:
       "type": "http",
       "url": "https://mcp.bettercallclaude.ch/tas-jurisprudence/mcp"
     },
+    "workflows-ch": {
+      "type": "http",
+      "url": "https://mcp.bettercallclaude.ch/workflows-ch/mcp"
+    },
     "swiss-caselaw": {
       "type": "sse",
       "url": "https://mcp.opencaselaw.ch"
-    },
-    "ollama": {
-      "command": "node",
-      "args": ["${CLAUDE_PLUGIN_ROOT}/mcp-servers/ollama/dist/index.js"]
     }
   }
 }
 ```
 
-After plugin installation, verify with `/mcp` that all 9 servers appear. Restart Claude Code if needed.
+After plugin installation, verify with `/mcp` that all 9 remote servers appear. Restart Claude Code if needed.
 
 #### Cowork Desktop (Guided Setup)
 
 Cowork Desktop reads the plugin's `.mcp.json` automatically. Run `/bettercallclaude:setup` to:
 
-1. Check which servers are connected
-2. Verify the local `ollama` server can start
-3. Confirm HTTP/SSE connectivity
+1. Check which remote servers are connected
+2. Confirm HTTP/SSE connectivity
+
+#### Optional manual server (not shipped)
+
+Advanced users can build the local `ollama` classifier from `mcp-servers-src/ollama` and register it in a separate manual MCP configuration. See `README.md` for build instructions and the marketplace-overwrite warning.
 
 #### Without MCP Servers
 
@@ -771,9 +774,9 @@ For the complete tool list, query the server's `tools/list` endpoint or see the 
 
 ---
 
-## ollama
+## Optional manual server: ollama (not shipped)
 
-Local STDIO server for privacy classification and offline generation of privileged content. This server never sends data to cloud APIs, ensuring compliance with Art. 321 StGB (attorney-client privilege).
+Local STDIO server for privacy classification and offline generation of privileged content. This server is **not included** in the standard plugin distribution. Build it manually from `mcp-servers-src/ollama` and register it in a separate MCP configuration. When running, it only talks to your local Ollama daemon and does not send data to the plugin author or to `bettercallclaude.ch`.
 
 ### Tools
 
@@ -787,7 +790,7 @@ Local STDIO server for privacy classification and offline generation of privileg
 
 ## Error Handling
 
-All servers return errors in a consistent format:
+All remote servers return errors in a consistent format:
 
 ```json
 {

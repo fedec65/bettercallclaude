@@ -30,6 +30,8 @@ tools:
   - mcp__onlinekommentar__search_commentaries
   - mcp__plugin_bettercallclaude_ollama__ollama_check_status
   - mcp__ollama__ollama_check_status
+  - mcp__plugin_bettercallclaude_ollama__ollama_classify_privacy
+  - mcp__ollama__ollama_classify_privacy
 ---
 
 # /legal-chart — Chart a Legal Decision Map
@@ -74,7 +76,7 @@ ticket list by name with types, fog count). See `skills/shared/SKILL.md`.
    /bettercallclaude:legal-5step (end-to-end pipeline).
    ```
 
-3. **Probe the classifier** with `ollama_check_status` and record the result.
+3. **Record classifier availability.** If `ollama_classify_privacy` is available, probe it with a fixed public sample such as `BGE 145 III 229` and record `classifier: ollama` only when classification succeeds. Use `ollama_check_status` only to report daemon health; a stopped daemon does not make offline classification unavailable. Otherwise record `classifier: none` without treating it as an error. Apply the map's privacy mode and the legal-wayfinder degradation matrix to every research ticket.
 4. **Create the map** (`status: charting`) with the fog sketched into *Not yet
    specified*.
 5. **Create the tickets that are sharp now** as ticket files — then wire `blocked-by`

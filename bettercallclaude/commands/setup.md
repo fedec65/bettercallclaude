@@ -85,7 +85,7 @@ If the health check succeeds, the HTTP service is online. If it fails, note the 
 
 ## Step 2: Probe MCP Servers
 
-Check connectivity for each of the 10 MCP servers using a **two-stage non-blocking approach**:
+Check connectivity for each of the **9 required remote MCP servers** using a **two-stage non-blocking approach**. The optional local Ollama classifier is checked separately and does not affect the required-server count.
 
 **Stage A — Check tool availability (non-blocking)**
 
@@ -102,7 +102,6 @@ Look at your currently available tools. For each server, check whether its tools
 | tas-jurisprudence | `cas_search`, `cas_get_award`, `cas_recent`, `cas_by_sport` |
 | workflows-ch | `list_agents`, `validate_pipeline`, `save_workflow`, `list_workflows`, `get_workflow`, `delete_workflow`, `log_run` |
 | swiss-caselaw | `search_decisions`, `find_citations`, `find_appeal_chain`, `cite`, `get_decision`, etc. |
-| ollama | `ollama_check_status`, `ollama_list_models`, `ollama_generate`, `ollama_classify_privacy`, `ollama_chat` |
 
 **If a server's tools do not appear in your available tool list, mark it as `[ ] Not connected` immediately and move on — do not attempt to call any of its tools.**
 
@@ -121,9 +120,18 @@ For each server whose tools ARE available, make one lightweight call to confirm 
 | tas-jurisprudence | `cas_search` with a minimal query |
 | workflows-ch | `list_workflows` with `{"user_id": "default"}` |
 | swiss-caselaw | `search_decisions` with a minimal query |
-| ollama | `ollama_check_status` (or `ollama_list_models`) |
 
 If a tool call does not respond promptly, mark that server as `[ ] Timeout` and continue — do not wait or retry.
+
+**Optional local classifier check**
+
+After the nine remote servers, check the optional Ollama classifier separately. If `ollama_check_status` is in your tool list, call it once. Record the result as one of:
+
+- `[x] configured` — responded
+- `[ ] not responding` — tools appear but the service does not answer
+- `[ ] not configured` — not in the tool list
+
+Do not treat a missing Ollama classifier as an error; standard operation does not require it.
 
 ## Step 3: Display Status Table
 
@@ -147,11 +155,12 @@ Output the following formatted status report, replacing status indicators and tr
   tas-jurisprudence         [x] Connected       HTTP
   workflows-ch              [x] Connected       HTTP
   swiss-caselaw             [x] Connected       SSE
-  ollama                    [x] Connected       Local
+
+  Optional local classifier: [x] configured / [ ] not responding / [ ] not configured
 
   HTTP Service: https://mcp.bettercallclaude.ch
   Health: OK / Unreachable
-  Connected: X/10 servers
+  Connected: X/9 remote servers
 ==============================================
 ```
 
@@ -159,10 +168,10 @@ Mark each server as `[x] Connected`, `[ ] Not connected`, or `[ ] Timeout` based
 
 ## Step 4: Provide Guidance Based on Results
 
-### If all 10 servers are connected:
+### If all 9 remote servers are connected:
 
 ```
-All 10 MCP servers are operational. No action needed.
+All 9 remote MCP servers are operational. No action needed.
 BetterCallClaude is running at full capability.
 ```
 
@@ -203,16 +212,14 @@ Possible causes:
 
 ```
 
-### If ollama is not connected:
+### If the optional local classifier is not connected:
 
-The ollama server runs locally and does not depend on the HTTP service. Suggest:
+The Ollama privacy classifier is optional and runs locally; it does not depend on the HTTP service. Standard operation does not require it.
 
 ```
-The ollama privacy classifier is not connected.
-This server requires the plugin's bundled files. Try:
-1. Restart Claude Code or Cowork
-2. Verify the plugin is installed: claude plugin list
-3. Check that Node.js 18+ is available: node --version
+The optional local privacy classifier is not connected.
+No local MCP server or Ollama setup is required for standard operation; the included privacy hook still uses the host's Node.js runtime.
+To enable local classification manually, see README.md#optional-local-classification.
 ```
 
 ## Step 5: Backend Error Diagnostics
@@ -231,9 +238,9 @@ If a server connects but returns errors during use, consult this diagnostic guid
 - MCP servers are required for live database access (court decisions, legislation, citation verification)
 - Without MCP servers, BetterCallClaude operates in **reduced mode** using built-in Swiss law knowledge
 - Reduced mode cannot search live databases, verify citation existence, or access current legislation
-- All servers are self-contained and require no API keys or external accounts
+- All remote servers are self-contained and require no API keys or external accounts
 - The HTTP service is rate-limited to 60 requests per minute per IP address
-- The ollama privacy classifier always runs locally to keep sensitive data on your machine
+- The optional Ollama privacy classifier runs locally to keep sensitive data on your machine; it is not installed by the plugin and is not required for standard operation
 
 ## User Query
 

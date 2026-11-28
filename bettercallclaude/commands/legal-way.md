@@ -76,7 +76,7 @@ in chat the resolution summary and the updated frontier. See `skills/shared/SKIL
    never pick or claim a ticket.
 1. **Map exists.** If none found: `ERROR: No wayfinder map found. Run /bettercallclaude:legal-chart first.`
 2. **Map not handed off.** If `status: handed-off`, show the map summary and stop — the matter is in execution.
-3. **Privacy mode loaded** from map frontmatter; `classifier` respected without re-probing.
+3. **Privacy mode loaded** from map frontmatter; `classifier` respected without re-probing. If a persisted map says `classifier: ollama` but the classification tool is not available in this session, use effective `classifier: none` for this invocation and select the existing no-classifier row; never silently change the map's privacy mode or claim a local classifier is present. `classifier: none` keeps privileged or indeterminate strict content local or reformulated with the attorney before cloud use.
 
 ## Working Flow
 

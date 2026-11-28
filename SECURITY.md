@@ -7,7 +7,8 @@ minors are not maintained.
 
 | Version | Status      |
 | ------- | ----------- |
-| 4.4.x   | Supported   |
+| 5.0.x   | Supported   |
+| 4.4.x   | Unsupported |
 | < 4.4   | Unsupported |
 
 ## Reporting a vulnerability
@@ -23,9 +24,11 @@ Use one of:
 Please include, as available:
 
 - Which component (plugin manifest, privacy hook, an MCP server — which one,
-  HTTP vs STDIO). Note that MCP server source lives in the separate
+  HTTP vs SSE vs optional STDIO). Note that remote MCP server source lives in
+  the separate
   [`fedec65/BetterCallClaudeMCP`](https://github.com/fedec65/BetterCallClaudeMCP)
-  repo since v4.4.0; only the local `ollama` STDIO server is bundled here.
+  repo since v4.4.0; the optional local `ollama` STDIO server source is in
+  this repo under `mcp-servers-src/ollama` and is not shipped with the plugin.
 - The commit or release version you tested against.
 - Reproduction steps: prompt, tool call, inputs, network transcript.
 - Observed impact: data that left the machine, confirmation bypassed, agent
@@ -51,10 +54,10 @@ In scope:
 
 - The plugin manifest, hooks, agents, commands, skills in
   [`bettercallclaude/`](./bettercallclaude/).
-- The local `ollama` STDIO server bundled at
-  `bettercallclaude/mcp-servers/ollama/`.
-- The seven remote HTTP MCP servers and the HTTP ingress gateway that serves
-  `mcp.bettercallclaude.ch` — source in
+- The optional local `ollama` STDIO server source at
+  `mcp-servers-src/ollama/` (not shipped; users build it manually).
+- The nine remote HTTP/SSE MCP servers and the HTTP ingress gateway that
+  serves `mcp.bettercallclaude.ch` — source in
   [`fedec65/BetterCallClaudeMCP`](https://github.com/fedec65/BetterCallClaudeMCP).
 
 Out of scope:

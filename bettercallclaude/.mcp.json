@@ -35,10 +35,6 @@
     "swiss-caselaw": {
       "type": "sse",
       "url": "https://mcp.opencaselaw.ch"
-    },
-    "ollama": {
-      "command": "node",
-      "args": ["${CLAUDE_PLUGIN_ROOT}/mcp-servers/ollama/dist/index.js"]
     }
   }
 }

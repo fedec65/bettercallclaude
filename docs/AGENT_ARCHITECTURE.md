@@ -1,8 +1,8 @@
 # BetterCallClaude Agent Architecture
 
-> **Version**: v3.1.0
-> **Status**: Approved for Implementation
-> **Last Updated**: 2025-11-25
+> **Version**: v5.0.0
+> **Status**: Current architecture
+> **Last Updated**: 2026-11-26
 
 ## Executive Summary
 
@@ -49,8 +49,8 @@ BetterCallClaude implements a **dual-interface architecture** combining granular
 ├─────────────────────────────────────────────────────────────────┤
 │  MCP Servers: bge-search, entscheidsuche, fedlex-sparql,        │
 │               legal-citations, onlinekommentar,                 │
-│               legal-persona, tas-jurisprudence, swiss-caselaw,  │
-│               ollama                                            │
+│               legal-persona, tas-jurisprudence, workflows-ch,   │
+│               swiss-caselaw (optional ollama built from source) │
 │  Case Context: Serena memory persistence                        │
 │  Verification: Citation validation layer                        │
 │  Audit: Anwaltsgeheimnis-compliant logging                      │
@@ -556,15 +556,16 @@ See `src/agents/base.py` and `src/agents/base.ts` for implementation.
 
 | MCP Server | Purpose | Status |
 |------------|---------|--------|
-| bge-search | Federal Supreme Court search | Implemented |
-| entscheidsuche | Swiss court decision search (incl. cantonal) | Implemented |
-| fedlex-sparql | Federal law SPARQL queries | Implemented |
-| legal-citations | Citation extraction/verification | Implemented |
-| onlinekommentar | Legal commentary search | Implemented |
-| legal-persona | Judicial persona analysis, deadlines, intake forms | Implemented |
-| tas-jurisprudence | CAS/TAS sports arbitration awards | Implemented |
-| swiss-caselaw | Case-law search, citation graphs, doctrine | Implemented |
-| ollama | Local privacy classification | Implemented |
+| bge-search | Federal Supreme Court search | Implemented (remote) |
+| entscheidsuche | Swiss court decision search (incl. cantonal) | Implemented (remote) |
+| fedlex-sparql | Federal law SPARQL queries | Implemented (remote) |
+| legal-citations | Citation extraction/verification | Implemented (remote) |
+| onlinekommentar | Legal commentary search | Implemented (remote) |
+| legal-persona | Judicial persona analysis, deadlines, intake forms | Implemented (remote) |
+| tas-jurisprudence | CAS/TAS sports arbitration awards | Implemented (remote) |
+| workflows-ch | Custom workflow validation, persistence, run logging | Implemented (remote) |
+| swiss-caselaw | Case-law search, citation graphs, doctrine | Implemented (remote SSE) |
+| ollama | Local privacy classification | Optional; built manually from `mcp-servers-src/ollama` |
 
 ### Performance Requirements
 

@@ -26,6 +26,8 @@ tools:
   - mcp__workflows-ch__list_workflows
   - mcp__plugin_bettercallclaude_ollama__ollama_check_status
   - mcp__ollama__ollama_check_status
+  - mcp__plugin_bettercallclaude_ollama__ollama_classify_privacy
+  - mcp__ollama__ollama_classify_privacy
 ---
 
 # BetterCallClaude — Diagnostics
@@ -40,9 +42,9 @@ Check the HTTP MCP gateway:
 - If the health check succeeds, note "Gateway online".
 - If it fails, note "Gateway non raggiungibile" and the likely impact.
 
-## Step 2: Probe Each Server
+## Step 2: Probe Remote Servers
 
-For each of the 10 MCP servers, use a **two-stage approach**:
+For each of the **9 required remote MCP servers**, use a **two-stage approach**:
 
 **Stage A — Tool availability**: Check whether the server's tools appear in your available tool list. If they do not appear, mark the server as "non connesso" immediately.
 
@@ -59,7 +61,8 @@ For each of the 10 MCP servers, use a **two-stage approach**:
 | tas-jurisprudence | Lodi arbitrali CAS/TAS | `cas_search` (minimal) |
 | workflows-ch | Flussi di lavoro personalizzati | `list_workflows` with `{"user_id": "default"}` |
 | swiss-caselaw | Giurisprudenza, catene citazioni, dottrina | `search_decisions` (minimal) |
-| ollama | Classificatore privacy locale | `ollama_check_status` |
+
+Then check the **optional local classifier** separately: if `ollama_classify_privacy` is available, probe it with the fixed public sample `BGE 145 III 229`; a successful result means `classifier: ollama`. Use `ollama_check_status` only to report daemon health (`configured`, `not responding`, or `not configured`) — a stopped daemon does not make offline classification unavailable. Do not count this in the remote health score.
 
 ## Step 3: Agent Route Probe
 
@@ -95,10 +98,12 @@ Present results in the user's language, without technical jargon. Example (IT):
   Arbitrato sportivo (TAS)       ✓ attivo     —
   Flussi personalizzati          ✓ attivo     —
   Giurisprudenza svizzera        ✓ attivo     —
-  Classificatore privacy         ✗ assente    Traduzioni/riassunti non filtrati localmente
+
+  Classificatore privacy locale  ✓ disponibile       (opzionale)
+  Daemon Ollama                  ✗ non raggiungibile (solo per generazione locale)
 
   Gateway: https://mcp.bettercallclaude.ch — online
-  Servizi attivi: 9/10
+  Servizi remoti attivi: 9/9
   Route agent (MCP via subagent): ✓ operativa
 
 ╚══════════════════════════════════════════════════════════╝
@@ -125,7 +130,15 @@ For each unavailable server, explain in plain language:
 | tas-jurisprudence | La ricerca di lodi CAS/TAS non è disponibile. |
 | workflows-ch | I flussi di lavoro personalizzati non possono essere salvati o eseguiti. |
 | swiss-caselaw | Ricerca giurisprudenziale, catene di citazioni e analisi dottrinale non disponibili. |
-| ollama | La classificazione di privacy locale non è attiva. Traduzioni e riassunti non vengono filtrati localmente. |
+
+### Optional local classifier
+
+| Stato | Meaning | Impact |
+|-------|---------|--------|
+| configured | `ollama_classify_privacy` answered the fixed public probe | Local privacy classification is available, independently of daemon health. |
+| daemon unreachable | Classification succeeded but `ollama_check_status` cannot reach the daemon | Classification remains available; daemon-dependent generation is unavailable until connectivity is restored. Cloud-backed workflows continue normally. |
+| not responding | `ollama_classify_privacy` is present but the probe fails | Optional classification is unavailable; cloud-backed workflows continue in `balanced`/`cloud` mode, and `strict` mode halts privileged or indeterminate cloud work as usual. |
+| not configured | `ollama_classify_privacy` is not in the tool list | No local classifier is installed. This is normal for standard operation; see `README.md#optional-local-classification` if you want to set it up manually. |
 
 ### Suggested fixes:
 > Se un servizio risulta non disponibile:

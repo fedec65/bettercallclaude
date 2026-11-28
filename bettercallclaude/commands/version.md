@@ -23,7 +23,7 @@ Output the following formatted block:
 ======================================================
   BetterCallClaude - Swiss Legal Intelligence Plugin
 ======================================================
-  Version:      4.12.0
+  Version:      5.0.0
   Format:       Claude Code Plugin (Cowork Desktop)
   Author:       Federico Cesconi
   License:      AGPL-3.0
@@ -86,8 +86,8 @@ Output the following formatted block:
   [x] legal-wayfinder          [x] citation-content-verify
   [x] legal-web-research       [x] shared
 
-  MCP SERVERS (10)
-  ----------------
+  MCP SERVERS (9 REMOTE)
+  ----------------------
   [ ] entscheidsuche    - Swiss court decision search        (HTTP)
   [ ] bge-search        - Federal Supreme Court decisions    (HTTP)
   [ ] legal-citations   - Citation verification              (HTTP)
@@ -97,7 +97,8 @@ Output the following formatted block:
   [ ] tas-jurisprudence - CAS/TAS sports arbitration awards  (HTTP)
   [ ] workflows-ch      - Custom workflow definitions        (HTTP)
   [ ] swiss-caselaw     - Case law, citation graphs, doctrine (SSE)
-  [ ] ollama            - Privacy classification             (Local)
+
+  Optional local classifier: [ ] not configured / [ ] not responding / [x] configured
 
   HTTP Service: https://mcp.bettercallclaude.ch
   Run /bettercallclaude:setup to check connectivity
@@ -119,7 +120,7 @@ Output the following formatted block:
   - Claude Code or Cowork with plugin support
   - MCP servers connect via HTTP (no local setup needed)
   - No API keys required for any functionality
-  - Node.js 18+ required for ollama server
+  - Node.js 20+ only for an optional manual Ollama build
 
 ======================================================
   https://github.com/fedec65/BetterCallClaude

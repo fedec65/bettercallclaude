@@ -146,8 +146,9 @@ For each evaluation:
 - `search_commentaries` / `get_commentary` — onlinekommentar
 
 ### Privacy Gate
-- `ollama_check_status` — verify local classifier availability
-- The local Ollama classifier (`ollama_classify_privacy`) runs before any iteration that would send privileged content to a cloud tool
+- Treat `ollama_classify_privacy` as the classifier availability signal; `ollama_check_status` reports daemon health only and may be offline while offline classification still works. If classification is unavailable, use `classifier: none` and do not emit an unavailable-tool error.
+- Verify the active privacy mode before every authoritative MCP call. In `balanced`/`cloud`, use the existing mode rules. In `strict`, privileged or indeterminate content receives no cloud content-check: return a privacy violation finding and keep any permitted existence-only checks separate.
+- Do not silently downgrade privacy mode and do not fall back to cloud merely because Ollama is absent.
 
 ## Profile-Specific Evaluation Logic
 
