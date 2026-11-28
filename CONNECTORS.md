@@ -22,7 +22,7 @@ The plugin ships with nine remote MCP servers: seven HTTP servers hosted at `htt
 
 ### Requirements
 
-No local Node.js or Ollama is required. The standard plugin runs no code on your machine.
+No local MCP server or Ollama is required. The nine remote connectors need no local Node.js; the included privacy hook, `/legal-timeline`, packaging, and optional Ollama builds require Node.js >= 20.
 
 ### Configuration
 

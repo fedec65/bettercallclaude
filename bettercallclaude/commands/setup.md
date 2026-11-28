@@ -218,7 +218,7 @@ The Ollama privacy classifier is optional and runs locally; it does not depend o
 
 ```
 The optional local privacy classifier is not connected.
-No local Node.js or Ollama setup is required for standard operation.
+No local MCP server or Ollama setup is required for standard operation; the included privacy hook still uses the host's Node.js runtime.
 To enable local classification manually, see README.md#optional-local-classification.
 ```
 
