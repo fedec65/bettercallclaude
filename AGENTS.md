@@ -238,7 +238,7 @@ The project implements privacy protection per **Art. 321 StGB** (Swiss Criminal 
 2. **Privacy Modes**:
    | Mode | Behavior |
    |------|----------|
-   | `strict` | All external calls require confirmation |
+   | `strict` | Privileged or indeterminate content is denied before remote use; public operations may continue |
    | `balanced` | Privileged content triggers confirmation |
    | `cloud` | Standard processing with explicit markers only |
 

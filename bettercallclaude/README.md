@@ -460,7 +460,7 @@ The privacy system supports three modes:
 
 | Mode | Behavior |
 |------|----------|
-| `strict` | All external calls require confirmation. Optional local Ollama processing preferred if built and registered manually. |
+| `strict` | Privileged or indeterminate content is denied before remote use; public operations may continue. Optional local Ollama processing preferred if built and registered manually. |
 | `balanced` | Privileged content triggers confirmation. Non-privileged content processed normally. |
 | `cloud` | Standard cloud processing with privacy hook active for explicit privilege markers only. |
 

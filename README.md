@@ -276,7 +276,7 @@ BetterCallClaude includes built-in Anwaltsgeheimnis (attorney-client privilege, 
 
 | Mode | Behavior |
 |------|----------|
-| `strict` | All external calls require confirmation. Local processing preferred via Ollama. |
+| `strict` | Privileged or indeterminate content is denied before remote use; public operations may continue. Optional local Ollama processing preferred if built and registered manually. |
 | `balanced` | Privileged content triggers confirmation. Non-privileged content processed normally. |
 | `cloud` | Standard cloud processing with privacy hook active for explicit privilege markers only. |
 
