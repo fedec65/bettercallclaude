@@ -103,9 +103,9 @@ The two plugins are complementary, not competing. BetterCallClaude targets a spe
 - **Plugin manifest**: `.claude-plugin/plugin.json` with full metadata
 - **Hooks**: PreToolUse privacy detection via `hooks/hooks.json`
 - **No hardcoded secrets**: All API keys via environment variables
-- **Icon**: `docs/images/bettercallclaude_logo.png`
-- **Privacy URL**: `docs/PRIVACY.md`
-- **Implementation baseline**: `d15d1a1` (v5.0.0 remote-only refactor); the release task will record the final submission commit
+- **Icon**: `bettercallclaude/.claude-plugin/icon.png`
+- **Privacy URL**: `https://bettercallclaude.ch/privacy`
+- **Implementation baseline**: `1e30ec0` (v5.0.0 remote-only refactor + optional Ollama dependency refresh); the release task will record the final submission commit
 
 ---
 
@@ -183,6 +183,82 @@ The optional `mcp-servers-src/ollama` dependency tree was audited and fixed on 2
 
 - https://bettercallclaude.ch/privacy — HTTP 200
 
-### Manual Acceptance Status
+### Manual Acceptance — 2026-11-28
 
-**Manual Cowork testing has not yet been performed.** This record covers automated acceptance only and does not constitute release or directory-submission approval.
+Host/plugin versions and isolated profile:
+- **Claude Code 2.1.325** for user-observed scenarios; **Claude Code 2.1.332** for the CLI marketplace upgrade test.
+- **Plugin source**: `1e30ec0` (`fix: update optional Ollama dependencies`).
+- **Isolated profile**: `CLAUDE_CONFIG_DIR=.smoke/claude-config`, `env -u ANTHROPIC_API_KEY` for user-observed scenarios; `CLAUDE_CONFIG_DIR=.smoke/upgrade-config` for the upgrade test.
+
+### Scenario 1 — Clean installation without Ollama (user-observed)
+
+`/bettercallclaude:doctor` and `/bettercallclaude:setup` in the isolated profile:
+- 9/9 remote services reported healthy.
+- Agent route OK via `mcp__plugin_bettercallclaude_legal-citations__validate_citation`.
+- Ollama reported as **optional / not configured**; no error about a missing local bundle.
+- Note: a normal global config had five `bettercallclaude-http-*` duplicates that broke routing in that profile; the isolated profile plus unset `ANTHROPIC_API_KEY` resolved it. This was environment-specific, not a plugin regression.
+
+### Scenario 2 — Real cloud-backed work (user-observed)
+
+- `Art. 257 OR` research returned MCP sources; existence of **BGE 145 III 229** was confirmed.
+- `/legal-loop <confirmed-goal-id> --dry-run` on the non-privileged Goal Record at `.smoke/citations.md` in **balanced** mode completed the legal-loop dry-run work+verdict with `classifier: none`, real MCP results, and no unavailable-Ollama error.
+- The same permitted cloud path completed in **cloud** mode.
+
+### Scenario 3 — Strict fail-closed behavior (user-observed)
+
+With `CLAUDE_PLUGIN_USER_CONFIG privacy_mode=strict`:
+- A synthetic `Anwaltsgeheimnis` query was blocked before remote transmission.
+- The explanation offered optional Ollama / anonymization / user-selected mode change.
+- Mode remained `strict` (no downgrade).
+- A public citation-only lookup (`Art. 257 OR`) remained possible.
+
+### Scenario 4 — Charting and optional local classification (user-observed)
+
+- `/legal-chart` without Ollama produced `bcc-output/2026-11-28-locazione-commerciale-zh/wayfinder/map.md` with `classifier: none` and worked in **balanced** mode.
+- Manual optional Ollama setup (per README): local daemon running, `ollama_check_status` reported online (`0.40.18`), and `ollama_classify_privacy` returned **PRIVILEGED** for synthetic Anwaltsgeheimnis text. Optional model-size recommendation labels looked wrong but are out of scope.
+
+### Scenario 5 — Legal-persona analysis (user-observed)
+
+`legal-persona` returned a non-empty coherent analysis for `.smoke/contract.md`; the short-input `{}` case was not an outage.
+
+### Scenario 6 — CLI marketplace upgrade from v4.12.0 to v5.0.0
+
+Run in a fresh isolated config (`.smoke/upgrade-config`) with a temporary local git clone (`.smoke/upgrade-marketplace/v4.12.0`). Global `~/.claude.json`, default Claude config, and existing user plugins were not touched (verified after the test).
+
+| Step | Command | Result |
+|------|---------|--------|
+| Inspect help | `claude plugin --help` | Listed `marketplace`, `install`, `update`, etc. |
+| Inspect help | `claude plugin marketplace --help` | Listed `add`, `update`, etc. |
+| Inspect help | `claude plugin update --help` | Confirmed `-y`, `--json`, `--scope` options |
+| Prepare isolated testbed | `mkdir -p .smoke/upgrade-config .smoke/upgrade-marketplace` | Created fresh directories |
+| Clone v4.12.0 source | `git clone --branch v4.12.0 --single-branch https://github.com/fedec65/bettercallclaude.git .smoke/upgrade-marketplace/v4.12.0` | Checked out `d4b0461` |
+| Add local marketplace | `CLAUDE_CONFIG_DIR=.smoke/upgrade-config env -u ANTHROPIC_API_KEY claude plugin marketplace add ./.smoke/upgrade-marketplace/v4.12.0` | `bettercallclaude-marketplace` added from folder |
+| Install v4.12.0 | `CLAUDE_CONFIG_DIR=.smoke/upgrade-config env -u ANTHROPIC_API_KEY claude plugin install bettercallclaude@bettercallclaude-marketplace -y` | Installed `bettercallclaude` 4.12.0 |
+| Verify v4.12.0 bundle | `cat .smoke/upgrade-marketplace/v4.12.0/bettercallclaude/.mcp.json` | Contained `ollama` STDIO entry |
+| Verify v4.12.0 bundle | `ls .smoke/upgrade-marketplace/v4.12.0/bettercallclaude/mcp-servers/ollama/dist/` | `index.js` bundle present (2.26 MB) |
+| Move marketplace clone to v5 head | `git remote add mainrepo /Users/federicocesconi/Dev/BetterCallClaude/.git && git fetch mainrepo && git checkout mainrepo/feat/anthropic-directory-readiness-v5` | HEAD now `1e30ec0` |
+| Refresh marketplace catalog | `CLAUDE_CONFIG_DIR=.smoke/upgrade-config env -u ANTHROPIC_API_KEY claude plugin marketplace update bettercallclaude-marketplace` | Marketplace updated successfully |
+| Update plugin | `CLAUDE_CONFIG_DIR=.smoke/upgrade-config env -u ANTHROPIC_API_KEY claude plugin update bettercallclaude@bettercallclaude-marketplace -y --json` | `{"oldVersion":"4.12.0","newVersion":"5.0.0","updateOutcome":"updated"}` |
+| Verify installed version | `CLAUDE_CONFIG_DIR=.smoke/upgrade-config env -u ANTHROPIC_API_KEY claude plugin list` | `bettercallclaude@bettercallclaude-marketplace` version **5.0.0**, scope user, enabled |
+| Verify MCP servers | `claude plugin details bettercallclaude@bettercallclaude-marketplace` | **MCP servers (9)**: entscheidsuche, bge-search, legal-citations, fedlex-sparql, onlinekommentar, legal-persona, tas-jurisprudence, workflows-ch, swiss-caselaw |
+| Verify `.mcp.json` | `cat .smoke/upgrade-config/plugins/cache/bettercallclaude-marketplace/bettercallclaude/5.0.0/.mcp.json` | 9 remote HTTP/SSE entries, **no `ollama` key** |
+| Verify no local bundle | `find .smoke/upgrade-config/plugins/cache/bettercallclaude-marketplace/bettercallclaude/5.0.0 -type d -name mcp-servers` | No `mcp-servers` directory in active 5.0.0 installation |
+| Verify icon | `file .smoke/upgrade-config/plugins/cache/bettercallclaude-marketplace/bettercallclaude/5.0.0/.claude-plugin/icon.png` | `PNG image data, 512 x 512` present |
+| Verify privacy URL | `cat .smoke/upgrade-config/plugins/cache/bettercallclaude-marketplace/bettercallclaude/5.0.0/.claude-plugin/plugin.json` | `privacyPolicyUrl`: `https://bettercallclaude.ch/privacy` |
+
+Upgrade findings:
+- Active 5.0.0 installation is clean: 9 remote MCP servers, no Ollama key, no `mcp-servers/ollama` bundle, icon and privacy URL present.
+- The CLI keeps the previous 4.12.0 version in its plugin cache (`.smoke/upgrade-config/plugins/cache/bettercallclaude-marketplace/bettercallclaude/4.12.0`). That cached copy still contains the old `mcp-servers/ollama/dist/index.js` bundle, but it is **not part of the active installation** and is not referenced by the enabled v5.0.0 plugin. `claude plugin prune --dry-run` reported nothing to prune.
+- Global user plugins were not modified: the pre-existing `bettercallclaude@bettercallclaude-marketplace` installation outside the isolated config remained at 4.1.4 disabled.
+
+### Submission Gate Status
+
+All six spec manual checks passed:
+1. Clean installation without Ollama — pass
+2. Real cloud-backed work — pass
+3. Strict fail-closed behavior — pass
+4. Charting and optional local classification — pass
+5. v4.x marketplace upgrade cleanup — pass (active v5.0.0 clean; old cache noted)
+6. Evidence recorded — pass
+
+The plugin is ready for release and directory submission.
