@@ -46,8 +46,8 @@ docs/                       Design docs, reviews, specs.
 
 ## Prerequisites
 
-- Node.js 20 or 22 (only required to build the optional Ollama classifier
-  from source; the standard plugin needs no local Node.js).
+- Node.js 20 or 22 for packaging, hook tests, `/legal-timeline`, and building
+  the optional Ollama classifier from source.
 - For privacy-hook work: nothing extra — `privacy-check.js` uses only the
   Node standard library.
 - For Ollama classifier work: a local Ollama daemon if you want to run the

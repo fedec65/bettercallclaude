@@ -37,7 +37,7 @@ function pngChunk(type, data) {
   return Buffer.concat([header, data, crc]);
 }
 
-function icon(width = 512, height = 512) {
+function icon(width = 512, height = 512, idatData) {
   const ihdr = Buffer.alloc(13);
   ihdr.writeUInt32BE(width, 0);
   ihdr.writeUInt32BE(height, 4);
@@ -45,7 +45,7 @@ function icon(width = 512, height = 512) {
   ihdr[9] = 2; // truecolor RGB
   const rowLength = 1 + width * 3;
   const raw = Buffer.alloc(rowLength * height);
-  const idat = zlib.deflateSync(raw);
+  const idat = idatData || zlib.deflateSync(raw);
   return Buffer.concat([
     PNG_SIGNATURE,
     pngChunk('IHDR', ihdr),
@@ -146,6 +146,10 @@ t('rejects unreadable or oversized JavaScript', () => {
 
 t('rejects truncated PNG icons', () => {
   assert.throws(() => pngDimensions(icon().subarray(0, 24)), /truncated PNG|missing IEND/);
+});
+
+t('rejects PNG icons whose image data cannot be decoded', () => {
+  assert.throws(() => pngDimensions(icon(512, 512, Buffer.from('not deflate'))), /not decodable/);
 });
 
 t('validates PNG dimensions and the privacy URL', () => {

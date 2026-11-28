@@ -93,7 +93,7 @@ Before starting the loop, verify:
 
 ### Step 1: Privacy Pre-Check
 
-Determine the active `privacy_mode` and whether `ollama_check_status` / `ollama_classify_privacy` are available. Never call an unavailable optional tool and never fail with a generic “tool not found” error.
+Determine the active `privacy_mode` and whether `ollama_classify_privacy` is available. `ollama_check_status` reports daemon health only; a stopped daemon does not make offline classification unavailable. Never call an unavailable optional tool and never fail with a generic “tool not found” error.
 
 - If local classification is available, run it on content that would be sent to cloud MCP tools in this iteration.
 - If it is unavailable, set `classifier: none` for the iteration and apply the existing pattern-based PreToolUse hook plus this mode matrix.

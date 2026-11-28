@@ -5,6 +5,7 @@ const assert = require('node:assert/strict');
 const fs = require('node:fs');
 const path = require('node:path');
 const { execFileSync } = require('node:child_process');
+const zlib = require('node:zlib');
 
 const PLUGIN_DIR = 'bettercallclaude';
 const MANIFEST = '.claude-plugin/plugin.json';
@@ -42,8 +43,11 @@ function pngDimensions(file) {
   let offset = 8;
   let width = 0;
   let height = 0;
+  let bitDepth = 0;
+  let colorType = 0;
+  let interlace = 0;
   let sawHeader = false;
-  let sawImageData = false;
+  const idatParts = [];
 
   while (offset + 12 <= file.length) {
     const length = file.readUInt32BE(offset);
@@ -61,6 +65,9 @@ function pngDimensions(file) {
       assert.equal(length, 13, 'PNG IHDR must be 13 bytes');
       width = file.readUInt32BE(dataStart);
       height = file.readUInt32BE(dataStart + 4);
+      bitDepth = file[dataStart + 8];
+      colorType = file[dataStart + 9];
+      interlace = file[dataStart + 12];
       assert(width > 0 && height > 0, 'PNG dimensions must be positive');
       sawHeader = true;
     } else {
@@ -69,12 +76,26 @@ function pngDimensions(file) {
 
     if (type === 'IDAT') {
       assert(length > 0, 'PNG IDAT must not be empty');
-      sawImageData = true;
+      idatParts.push(file.subarray(dataStart, dataEnd));
     }
     if (type === 'IEND') {
       assert.equal(length, 0, 'PNG IEND must be empty');
       assert.equal(chunkEnd, file.length, 'PNG must end at IEND');
-      assert(sawImageData, 'PNG must contain image data');
+      assert(idatParts.length > 0, 'PNG must contain image data');
+      let decoded;
+      try {
+        decoded = zlib.inflateSync(Buffer.concat(idatParts));
+      } catch {
+        assert.fail('PNG image data is not decodable');
+      }
+      if (interlace === 0) {
+        const channels = { 0: 1, 2: 3, 3: 1, 4: 2, 6: 4 }[colorType];
+        assert(channels, `unsupported PNG color type: ${colorType}`);
+        const rowBytes = Math.ceil((width * channels * bitDepth) / 8);
+        assert.equal(decoded.length, (rowBytes + 1) * height, 'PNG decoded image size does not match IHDR');
+      } else {
+        assert(decoded.length > 0, 'PNG decoded image data is empty');
+      }
       return { width, height };
     }
     offset = chunkEnd;

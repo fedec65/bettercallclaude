@@ -26,6 +26,8 @@ tools:
   - mcp__workflows-ch__list_workflows
   - mcp__plugin_bettercallclaude_ollama__ollama_check_status
   - mcp__ollama__ollama_check_status
+  - mcp__plugin_bettercallclaude_ollama__ollama_classify_privacy
+  - mcp__ollama__ollama_classify_privacy
 ---
 
 # BetterCallClaude — Diagnostics
@@ -60,7 +62,7 @@ For each of the **9 required remote MCP servers**, use a **two-stage approach**:
 | workflows-ch | Flussi di lavoro personalizzati | `list_workflows` with `{"user_id": "default"}` |
 | swiss-caselaw | Giurisprudenza, catene citazioni, dottrina | `search_decisions` (minimal) |
 
-Then check the **optional local classifier** separately: if `ollama_check_status` is available, call it once. Record the result as `configured`, `not responding`, or `not configured`. Do not count this in the remote health score.
+Then check the **optional local classifier** separately: if `ollama_classify_privacy` is available, probe it with the fixed public sample `BGE 145 III 229`; a successful result means `classifier: ollama`. Use `ollama_check_status` only to report daemon health (`configured`, `not responding`, or `not configured`) — a stopped daemon does not make offline classification unavailable. Do not count this in the remote health score.
 
 ## Step 3: Agent Route Probe
 

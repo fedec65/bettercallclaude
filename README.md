@@ -27,7 +27,7 @@ BetterCallClaude provides a structured methodology for handling legal work with 
 
 ## What's New in v5.0.0
 
-**v5.0.0 — Remote-only canonical plugin, optional Ollama built from source.** The plugin now ships nine remote MCP servers only (eight HTTP on `mcp.bettercallclaude.ch` + `swiss-caselaw` SSE on `mcp.opencaselaw.ch`). The previously bundled local Ollama STDIO server is no longer included; users who need local privacy classification can build it manually from `mcp-servers-src/ollama`. The nine remote MCP servers require no local Node.js, local build, or Ollama daemon; `/legal-timeline` uses its bundled Node.js renderer. See [Optional local classification](#optional-local-classification) below for the manual build steps and the 4.x migration note.
+**v5.0.0 — Remote-only canonical plugin, optional Ollama built from source.** The plugin now ships nine remote MCP servers only (eight HTTP on `mcp.bettercallclaude.ch` + `swiss-caselaw` SSE on `mcp.opencaselaw.ch`). The previously bundled local Ollama STDIO server is no longer included; users who need local privacy classification can build it manually from `mcp-servers-src/ollama`. The nine remote MCP servers require no local build or Ollama daemon; the included privacy hook, `/legal-timeline`, packaging, and optional Ollama builds require Node.js >= 20. See [Optional local classification](#optional-local-classification) below for the manual build steps and the 4.x migration note.
 
 ## What's New in v4.12.0
 
@@ -296,8 +296,8 @@ BetterCallClaude includes built-in Anwaltsgeheimnis (attorney-client privilege, 
 ## Requirements
 
 - Claude Cowork Desktop (latest version)
-- No local Node.js or Ollama required for the nine remote MCP servers
-- Node.js >= 20 for `/legal-timeline` or for building the optional Ollama classifier
+- No local MCP server or Ollama required for the nine remote connectors
+- Node.js >= 20 for the included privacy hook, `/legal-timeline`, packaging, or building the optional Ollama classifier
 
 ---
 

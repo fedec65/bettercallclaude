@@ -113,12 +113,17 @@ cp "$PLUGIN_ROOT/templates/"bettercallclaude.local.md.example.* "$STAGING_DIR/te
 # Remove macOS/Windows metadata that may have been copied into staging
 find "$STAGING_DIR" -type f \( -name '.DS_Store' -o -name 'Thumbs.db' \) -delete
 
-# Create zip
+# Create zip in a temporary path, audit it, then publish it to the release path.
 mkdir -p "$OUTPUT_DIR"
-rm -f "$OUTPUT_DIR/$ZIP_NAME"
-(cd "$STAGING_DIR" && zip -r -q "$OUTPUT_DIR/$ZIP_NAME" .)
+TMP_ZIP="$OUTPUT_DIR/$ZIP_NAME.tmp.$$"
+rm -f "$OUTPUT_DIR/$ZIP_NAME" "$TMP_ZIP"
+(cd "$STAGING_DIR" && zip -r -q "$TMP_ZIP" .)
 
-node "$REPO_ROOT/scripts/check-directory-readiness.js" zip "$OUTPUT_DIR/$ZIP_NAME" "$REPO_ROOT"
+if ! node "$REPO_ROOT/scripts/check-directory-readiness.js" zip "$TMP_ZIP" "$REPO_ROOT"; then
+  rm -f "$TMP_ZIP"
+  exit 1
+fi
+mv "$TMP_ZIP" "$OUTPUT_DIR/$ZIP_NAME"
 
 # Clean up staging
 rm -rf "$STAGING_DIR"

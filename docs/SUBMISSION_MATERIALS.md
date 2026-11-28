@@ -135,7 +135,7 @@ When filling out the submission form, use these prepared answers:
 ## Reviewer Notes
 
 - **v5.0.0 is remote-only by default.** The canonical plugin ships nine remote MCP servers (eight HTTP on `mcp.bettercallclaude.ch`, one SSE on `mcp.opencaselaw.ch`). No local Node.js runtime, no compiled-in MCP server, and no Ollama daemon are required for installation or normal use.
-- **Optional local Ollama is built from source.** Users who want local privacy classification can run `npm run build:ollama` from `mcp-servers-src/ollama` and register the resulting `dist/index.js` in a separate manual MCP configuration.
+- **Optional local Ollama is built from source.** From the repository root, users who want local privacy classification can run `npm run build:ollama` and register the resulting `mcp-servers-src/ollama/dist/index.js` in a separate manual MCP configuration.
 - **The shipped plugin does not contain a local Ollama server directory.** The `.mcp.json` contains only remote URLs.
 - **Marketplace synchronization caveat:** manual MCP configurations kept inside the marketplace-managed plugin directory can be overwritten on sync; the documentation tells users to keep manual Ollama configuration outside that directory and back it up before upgrading.
 - **Component counts verified:** 22 agents, 31 commands, 18 skills, 9 remote MCP servers.
