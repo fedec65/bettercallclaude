@@ -105,7 +105,8 @@ The two plugins are complementary, not competing. BetterCallClaude targets a spe
 - **No hardcoded secrets**: All API keys via environment variables
 - **Icon**: `bettercallclaude/.claude-plugin/icon.png`
 - **Privacy URL**: `https://bettercallclaude.ch/privacy`
-- **Implementation baseline**: `1e30ec0` (v5.0.0 remote-only refactor + optional Ollama dependency refresh); the release task will record the final submission commit
+- **Implementation baseline**: `1e30ec0` (v5.0.0 remote-only refactor + optional Ollama dependency refresh used for acceptance)
+- **Final implementation commit**: `e322bf7` (final release-review fixes); subsequent acceptance-evidence edits are documentation-only. The merged submission SHA is recorded in the release/PR evidence after merge.
 
 ---
 
