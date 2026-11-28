@@ -110,6 +110,9 @@ done
 mkdir -p "$STAGING_DIR/templates"
 cp "$PLUGIN_ROOT/templates/"bettercallclaude.local.md.example.* "$STAGING_DIR/templates/"
 
+# Remove macOS/Windows metadata that may have been copied into staging
+find "$STAGING_DIR" -type f \( -name '.DS_Store' -o -name 'Thumbs.db' \) -delete
+
 # Create zip
 mkdir -p "$OUTPUT_DIR"
 (cd "$STAGING_DIR" && zip -r -q "$OUTPUT_DIR/$ZIP_NAME" .)

@@ -67,7 +67,6 @@ claudedocs/
 # Generated installation metadata
 manifest.json
 version.txt
-AGENTS.md
 
 # Skill development & evaluation artifacts (not part of the shipped plugin)
 legal-briefing-review-*.html

@@ -58,6 +58,9 @@ jobs:
           fi
           echo "OK: bettercallclaude/.mcp.json"
 
+      - name: Check directory readiness (unit tests)
+        run: node scripts/check-directory-readiness.test.js
+
       - name: Check directory readiness (source)
         run: node scripts/check-directory-readiness.js source
 

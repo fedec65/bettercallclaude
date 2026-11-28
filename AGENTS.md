@@ -297,7 +297,7 @@ claude plugin install bettercallclaude@bettercallclaude-marketplace
 
 ## Useful Resources
 
-- **MCP SDK**: `@modelcontextprotocol/sdk` v1.26.0
+- **MCP SDK**: `@modelcontextprotocol/sdk` v1.32.2
 - **Documentation**: See `docs/AGENT_ARCHITECTURE.md` for agent system design
 - **API Reference**: See `CONNECTORS.md` for MCP server API details
 - **Website**: https://bettercallclaude.ch

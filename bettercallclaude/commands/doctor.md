@@ -127,6 +127,7 @@ For each unavailable server, explain in plain language:
 | tas-jurisprudence | La ricerca di lodi CAS/TAS non è disponibile. |
 | workflows-ch | I flussi di lavoro personalizzati non possono essere salvati o eseguiti. |
 | swiss-caselaw | Ricerca giurisprudenziale, catene di citazioni e analisi dottrinale non disponibili. |
+
 ### Optional local classifier
 
 | Stato | Meaning | Impact |
