@@ -74,7 +74,7 @@ ticket list by name with types, fog count). See `skills/shared/SKILL.md`.
    /bettercallclaude:legal-5step (end-to-end pipeline).
    ```
 
-3. **Probe the classifier** with `ollama_check_status` and record the result.
+3. **Record classifier availability.** If `ollama_check_status` is available, call it and record `classifier: ollama` only when the local service responds. Otherwise record `classifier: none` without treating it as an error. Apply the map's privacy mode and the legal-wayfinder degradation matrix to every research ticket.
 4. **Create the map** (`status: charting`) with the fog sketched into *Not yet
    specified*.
 5. **Create the tickets that are sharp now** as ticket files — then wire `blocked-by`

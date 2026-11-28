@@ -10,28 +10,32 @@ been split out into a separate repo:
 
 - **This repo (`fedec65/bettercallclaude`)** — the Cowork Desktop / Claude
   Code plugin: agents, commands, skills, hooks, and `.mcp.json`. Pointers
-  only — the remote MCPs it talks to are HTTPS URLs on
-  `mcp.bettercallclaude.ch`. One server (`ollama`) is bundled locally as a
-  STDIO subprocess because it talks to the user's own Ollama daemon.
+  only — the nine remote MCPs it talks to are HTTPS URLs on
+  `mcp.bettercallclaude.ch` / `mcp.opencaselaw.ch`. The optional `ollama`
+  classifier source remains in `mcp-servers-src/ollama` for users who build it
+  manually.
 - **[`fedec65/BetterCallClaudeMCP`](https://github.com/fedec65/BetterCallClaudeMCP)** —
-  source code for every MCP server (bge-search, entscheidsuche, fedlex-sparql,
-  legal-citations, onlinekommentar, legal-persona, tas-jurisprudence, shared
-  lib, integration tests) and the Express aggregator at `mcp-servers-http/`
-  that Railway deploys to `mcp.bettercallclaude.ch`. To change what an MCP
-  **does**, open a PR there.
+  source code for every remote MCP server (bge-search, entscheidsuche,
+  fedlex-sparql, legal-citations, onlinekommentar, legal-persona,
+  tas-jurisprudence, workflows-ch, shared lib, integration tests) and the
+  Express aggregator at `mcp-servers-http/` that Railway deploys to
+  `mcp.bettercallclaude.ch`. To change what a remote MCP **does**, open a PR
+  there.
 
 ## What lives where (this repo)
 
 ```
 bettercallclaude/           The Cowork Desktop / Claude Code plugin itself.
 ├── .claude-plugin/         plugin.json + marketplace.json. Schema-validated in CI.
-├── .mcp.json               MCP server declarations. Remote URLs + ollama stdio.
-├── agents/                 20 subagent prompts. YAML frontmatter: name, description, model, tools.
-├── commands/               26 slash commands.
-├── skills/                 13 skills (SKILL.md per directory).
+├── .mcp.json               MCP server declarations. Remote URLs only.
+├── agents/                 22 subagent prompts. YAML frontmatter: name, description, model, tools.
+├── commands/               31 slash commands.
+├── skills/                 18 skills (SKILL.md per directory).
 ├── hooks/                  Cowork Desktop hooks. Entrypoint for privacy protection.
-├── scripts/                privacy-check.js and its test file.
-└── mcp-servers/ollama/     Bundled local STDIO MCP server (dist/ committed).
+└── scripts/                privacy-check.js + test file; timeline-render.mjs (legal-timeline output).
+
+mcp-servers-src/            Optional source code for local-only servers.
+└── ollama/                 Optional local STDIO MCP server (not shipped).
 
 packages/                   Supplementary agents shared across the plugin.
 scripts/                    Repo-level scripts: fetch-onlinekommentar-data.js,
@@ -42,12 +46,13 @@ docs/                       Design docs, reviews, specs.
 
 ## Prerequisites
 
-- Node.js 20 or 22.
+- Node.js 20 or 22 (only required to build the optional Ollama classifier
+  from source; the standard plugin needs no local Node.js).
 - For privacy-hook work: nothing extra — `privacy-check.js` uses only the
   Node standard library.
-- For Ollama server work: a local Ollama daemon if you want to run the STDIO
-  server end-to-end.
-- For MCP **behaviour** changes: clone
+- For Ollama classifier work: a local Ollama daemon if you want to run the
+  STDIO server end-to-end. Source is in `mcp-servers-src/ollama`.
+- For remote MCP **behaviour** changes: clone
   [`fedec65/BetterCallClaudeMCP`](https://github.com/fedec65/BetterCallClaudeMCP)
   and work there instead of this repo.
 
@@ -60,11 +65,16 @@ cd bettercallclaude
 # Package the plugin into a distributable zip (exercises the same path CI
 # and Release take).
 npm run package
+
+# Build the optional Ollama classifier from source (advanced users only).
+npm run build:ollama
 ```
 
-There is no TypeScript to compile in this repo anymore — the only runtime
-code is `scripts/privacy-check.js` (vanilla Node) and the pre-built
-`bettercallclaude/mcp-servers/ollama/dist/`.
+There is no TypeScript to compile for the standard plugin — runtime code is
+`bettercallclaude/scripts/privacy-check.js` (vanilla Node) and
+`bettercallclaude/scripts/timeline-render.mjs` (ES module used by
+`/legal-timeline`). The optional Ollama classifier is built from
+`mcp-servers-src/ollama` only when needed.
 
 ## Branching
 
@@ -123,7 +133,7 @@ of these places, or they drift (4.11.1–4.11.3 forgot the plugin README and
 - [ ] `README.md` — version badge line 1 (and refresh "What's New" on
       minor releases)
 - [ ] `CHANGELOG.md` — new entry at the top
-- [ ] `AGENTS.md` (local-only, git-ignored) — `> **Version**: X.Y.Z` header
+- [ ] `AGENTS.md` (tracked and maintained) — `> **Version**: X.Y.Z` header and current-state architecture notes
 
 Verify with:
 

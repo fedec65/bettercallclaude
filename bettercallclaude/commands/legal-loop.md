@@ -93,18 +93,15 @@ Before starting the loop, verify:
 
 ### Step 1: Privacy Pre-Check
 
-Run the local Ollama privacy classifier on any content that would be sent to cloud MCP tools in this iteration.
+Determine the active `privacy_mode` and whether `ollama_check_status` / `ollama_classify_privacy` are available. Never call an unavailable optional tool and never fail with a generic “tool not found” error.
 
-- If `privacy_mode = strict` and privileged content is detected: **HALT immediately**.
-  ```
-  HALTED: Privacy violation detected. Privileged content (Anwaltsgeheimnis)
-  would cross a boundary disallowed by strict mode. Loop stopped.
-  Manual review required before proceeding.
-  ```
-- If `privacy_mode = balanced`: route privileged content through local tools only; cloud tools receive sanitised content.
-- If `privacy_mode = cloud`: proceed (user has explicitly accepted cloud processing).
+- If local classification is available, run it on content that would be sent to cloud MCP tools in this iteration.
+- If it is unavailable, set `classifier: none` for the iteration and apply the existing pattern-based PreToolUse hook plus this mode matrix.
+- `strict`: public operations may continue, including remote calls that carry only public content. Privileged or indeterminate content MUST NOT be sent to cloud tools. If a required call cannot proceed without sending that content, or when the required local classification is unavailable, stop with `HALTED (privacy)` and explain that the user may configure optional Ollama, provide an anonymized input, or explicitly choose another privacy mode. Never change the mode automatically.
+- `balanced`: non-privileged content may use cloud tools. Withhold privileged passages; without a local classifier, ask for or use a user-approved anonymized formulation before any cloud call.
+- `cloud`: proceed under the existing PreToolUse ask/allow behavior.
 
-The privacy check runs EVERY iteration, not just the first.
+Repeat this check EVERY iteration. Cloud MCP failures never trigger an automatic Ollama fallback.
 
 ### Step 2: Work Step
 

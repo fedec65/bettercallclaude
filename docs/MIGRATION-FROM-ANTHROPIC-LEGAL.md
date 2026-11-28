@@ -51,9 +51,9 @@ This compatibility is **permanent** — there is no deprecation planned.
 
 ### How to Convert
 
-1. Copy the template for your preferred language from `templates/`:
+1. Copy the template for your preferred language from `bettercallclaude/templates/`:
    ```
-   cp templates/bettercallclaude.local.md.example.de .claude/bettercallclaude.local.md
+   cp bettercallclaude/templates/bettercallclaude.local.md.example.de .claude/bettercallclaude.local.md
    ```
 2. Transfer any applicable values from your `legal.local.md` (firm name, risk thresholds, escalation roles)
 3. Fill in the Swiss-specific sections (governing law, Gerichtsstand, Konventionalstrafe, citation format)

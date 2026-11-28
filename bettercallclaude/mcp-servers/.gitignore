@@ -1,9 +1,0 @@
-# sql.js is bundled inline - no node_modules needed
-node_modules/
-
-# HTTP servers: dist files not needed in plugin (servers run on mcp.bettercallclaude.ch)
-bge-search/dist/
-entscheidsuche/dist/
-fedlex-sparql/dist/
-legal-citations/dist/
-onlinekommentar/dist/

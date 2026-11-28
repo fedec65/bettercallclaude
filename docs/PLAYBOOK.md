@@ -67,14 +67,14 @@ Citation format (BGE/ATF/DTF), output format (memo/redline/table), citation lang
 
 ## Templates
 
-Four example templates are provided in `templates/`:
+Four example templates are provided in `bettercallclaude/templates/` in the source repository. Marketplace and ZIP installations ship the same files in the plugin's `templates/` directory:
 
 - `bettercallclaude.local.md.example.de` — German
 - `bettercallclaude.local.md.example.fr` — French
 - `bettercallclaude.local.md.example.it` — Italian
 - `bettercallclaude.local.md.example.en` — English
 
-Copy the one in your preferred language to `.claude/bettercallclaude.local.md` and fill in the values.
+From a source checkout, copy the preferred language template from `bettercallclaude/templates/` to `.claude/bettercallclaude.local.md` and fill in the values. From an installed plugin, use the corresponding file in its `templates/` directory.
 
 ---
 

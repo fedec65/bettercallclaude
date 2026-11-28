@@ -4,13 +4,8 @@ node_modules/
 # TypeScript build intermediates
 *.tsbuildinfo
 
-# NOTE: bettercallclaude/mcp-servers/*/dist/ is NOT ignored — compiled bundles
-# for the bundled local STDIO server (ollama) are checked into git so end
-# users don't need a build step. All HTTP MCPs now live in the separate
-# BetterCallClaudeMCP repo and are reached via URLs in .mcp.json.
-
-# Runtime data (SQLite databases created at runtime)
-bettercallclaude/mcp-servers/*/data/
+# Optional local Ollama build output; never shipped in the plugin
+mcp-servers-src/ollama/dist/
 
 # Package outputs
 dist/mcpb/
@@ -64,6 +59,7 @@ coverage/
 # Development artifacts
 claudedocs/
 .serena/
+.worktrees/
 
 # Python linter cache
 .ruff_cache/
@@ -71,7 +67,6 @@ claudedocs/
 # Generated installation metadata
 manifest.json
 version.txt
-AGENTS.md
 
 # Skill development & evaluation artifacts (not part of the shipped plugin)
 legal-briefing-review-*.html

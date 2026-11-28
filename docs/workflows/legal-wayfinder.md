@@ -74,7 +74,7 @@ bcc-output/YYYY-MM-DD-<slug>/wayfinder/
 
 ## Privacy
 
-No separate privacy rules: the map inherits the matter's privacy mode (`strict`/`balanced`/`cloud`), and privileged content follows the existing `privacy-routing` matrix — including the fail-closed degradation when ollama is not installed.
+No separate privacy rules: the map inherits the matter's privacy mode (`strict`/`balanced`/`cloud`), and privileged content follows the existing `privacy-routing` matrix. The optional local Ollama classifier is not shipped; if it is not built and registered manually, the plugin falls back to the PreToolUse hook and user confirmation.
 
 ## Honest Termination
 

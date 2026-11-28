@@ -6,7 +6,7 @@ BetterCallClaude is a plugin for legal professionals working in Cowork or Claude
 
 The plugin covers the full spectrum of Swiss legal work: BGE/ATF/DTF precedent research, case strategy development with risk assessment, adversarial legal analysis, compliance and data protection advisory, fiscal and corporate law expertise, real estate law, legal drafting with jurisdiction-aware templates, legal translation, and citation verification across all 26 Swiss cantons. Privacy compliance with Anwaltsgeheimnis (Art. 321 StGB) is enforced automatically through a pre-tool-use hook that detects privileged content before it leaves the local environment.
 
-**Version**: 4.11.9 -- 21 agents, 30 commands, 17 skills, 10 MCP servers.
+**Version**: 5.0.0 -- 22 agents, 31 commands, 18 skills, 9 remote MCP servers.
 
 > Love BetterCallClaude? Support the project — [**Buy me a coffee**](https://buymeacoffee.com/federicocesconi) ☕
 
@@ -32,12 +32,6 @@ claude plugin add fedec65/bettercallclaude
 
 Claude Code on Windows requires [Git for Windows](https://git-scm.com/downloads/win). Install it first, then install Claude Code using one of these methods:
 
-**PowerShell:**
-
-```powershell
-irm https://claude.ai/install.ps1 | iex
-```
-
 **CMD:**
 
 ```batch
@@ -50,6 +44,8 @@ curl -fsSL https://claude.ai/install.cmd -o install.cmd && install.cmd && del in
 winget install Anthropic.ClaudeCode
 ```
 
+See the official **[Claude Code installation guide](https://code.claude.com/docs/en/installation)** for the recommended current method, including WSL and PowerShell instructions.
+
 After installation, install the plugin:
 
 ```
@@ -57,8 +53,6 @@ claude plugin add fedec65/bettercallclaude
 ```
 
 You can launch `claude` from PowerShell, CMD, or Git Bash. You do not need to run PowerShell as Administrator.
-
-> **WSL users**: Both WSL 1 and WSL 2 are supported. Use `curl -fsSL https://claude.ai/install.sh | bash` inside your WSL terminal, then install the plugin as above.
 
 > **Git Bash not found?** If Claude Code cannot locate your Git Bash installation, add this to your `settings.json`:
 > ```json
@@ -108,7 +102,7 @@ claude --plugin-dir bettercallclaude/
 | `/bettercallclaude:refine` | Refine vague legal queries into structured prompts through Socratic dialogue, with workflow recommendations and multi-lingual terminology guidance. |
 | `/bettercallclaude:summarize` | Consolidate multi-agent pipeline output -- deduplicate disclaimers, terminology, and citations with length control (`--short`/`--medium`/`--long`). |
 | `/bettercallclaude:start` | Welcome and first-use onboarding -- checks MCP connectivity, guides playbook creation, shows usage examples tailored to your profile. |
-| `/bettercallclaude:setup` | Check MCP server status and auto-install servers to Claude Desktop if needed. |
+| `/bettercallclaude:setup` | Check status for all 9 remote MCP servers. |
 | `/bettercallclaude:doctor` | Diagnose MCP server connectivity -- tests each server, reports status and impact in plain language, suggests fixes. |
 | `/bettercallclaude:privacy` | View or change the BetterCallClaude privacy mode (strict/balanced/cloud). |
 
@@ -174,7 +168,7 @@ Skills are activated automatically when Claude detects relevant legal context in
 
 ## Agents
 
-The plugin includes 21 specialized subagents that handle complex multi-step legal workflows.
+The plugin includes 22 specialized subagents that handle complex multi-step legal workflows.
 
 ### Core Agents
 
@@ -424,7 +418,7 @@ Jurisdiction routing is automatic. Mentioning a canton code, canton name, or can
 
 ## MCP Servers
 
-The plugin ships pre-configured MCP servers that provide direct integration with Swiss legal databases and services. See [CONNECTORS.md](CONNECTORS.md) for detailed API documentation.
+The plugin ships nine pre-configured remote MCP servers that provide direct integration with Swiss legal databases and services. See [CONNECTORS.md](CONNECTORS.md) for detailed API documentation.
 
 | Server | Purpose |
 |--------|---------|
@@ -435,17 +429,22 @@ The plugin ships pre-configured MCP servers that provide direct integration with
 | `onlinekommentar` | Search and retrieve Swiss legal commentaries (Kommentare). Find scholarly analysis by article reference, keyword, or legislative act. |
 | `legal-persona` | Swiss judicial personas, legal analysis/drafting/strategy, and deadline computation. |
 | `tas-jurisprudence` | Search CAS/TAS sports arbitration awards, filter by sport, recent awards. |
-| `swiss-caselaw` | Case-law search, citation graphs, and doctrine via opencaselaw.ch (SSE transport). |
-| `ollama` | Local privacy classification (Anwaltsgeheimnis, Art. 321 StGB) via a local Ollama daemon. |
 | `workflows-ch` | Custom workflow definitions -- validate agent chains against the Swiss agents manifest, save and list user workflows, log runs. |
+| `swiss-caselaw` | Case-law search, citation graphs, and doctrine via opencaselaw.ch (SSE transport). |
 
 ### Requirements
 
-- Node.js >= 20 (only required for local Ollama invocation; the other nine MCP servers are reached over HTTPS / SSE and run no code on your machine).
+No local Node.js or Ollama is required to use the nine remote MCP servers, which are reached over HTTPS / SSE and run no code on your machine. `/legal-timeline` uses the bundled Node.js renderer and therefore requires Node.js >= 20 locally.
 
-Nine of the ten MCP servers are hosted remotely (eight HTTP servers at `mcp.bettercallclaude.ch`, one SSE server at `mcp.opencaselaw.ch`) and are reached by Cowork Desktop without any local build step. Only the local `ollama` server runs from a committed compiled bundle at `bettercallclaude/mcp-servers/ollama/dist/index.js`; to use it you need a running Ollama daemon (default `http://localhost:11434`, configured in `.mcp.json` — self-hosters edit `bettercallclaude/.mcp.json` to point at a different host).
+The nine remote servers are hosted (eight HTTP servers at `mcp.bettercallclaude.ch`, one SSE server at `mcp.opencaselaw.ch`) and are reached by Cowork Desktop without any local build step. No API keys are required.
 
-All server paths and URLs are configured in `.mcp.json` using the `${CLAUDE_PLUGIN_ROOT}` interpolation for portability and self-hosting (see [`docs/PRIVACY.md`](../docs/PRIVACY.md)).
+### Optional manual server (not shipped)
+
+| Server | Purpose |
+|--------|---------|
+| `ollama` | Local privacy classification (Anwaltsgeheimnis, Art. 321 StGB) via a local Ollama daemon. Build from `mcp-servers-src/ollama` and register in a separate manual MCP configuration. |
+
+See [Optional local classification](#optional-local-classification) for build and registration instructions.
 
 ---
 
@@ -461,16 +460,50 @@ The privacy system supports three modes:
 
 | Mode | Behavior |
 |------|----------|
-| `strict` | All external calls require confirmation. Local processing preferred via Ollama. |
+| `strict` | Privileged or indeterminate content is denied before remote use; public operations may continue. Optional local Ollama processing preferred if built and registered manually. |
 | `balanced` | Privileged content triggers confirmation. Non-privileged content processed normally. |
 | `cloud` | Standard cloud processing with privacy hook active for explicit privilege markers only. |
+
+---
+
+## Optional local classification
+
+The standard plugin does not install Ollama. The PreToolUse hook remains active. Prompts, tool arguments/results, and model responses still pass through Anthropic.
+
+Advanced users can build the readable source manually:
+
+```bash
+git clone https://github.com/fedec65/bettercallclaude.git
+cd bettercallclaude
+npm run build:ollama
+```
+
+The output is `mcp-servers-src/ollama/dist/index.js`. Register it only in a separate manual MCP configuration, using an absolute path:
+
+```json
+{
+  "mcpServers": {
+    "ollama": {
+      "command": "node",
+      "args": ["/absolute/path/to/bettercallclaude/mcp-servers-src/ollama/dist/index.js"]
+    }
+  }
+}
+```
+
+Start your own Ollama daemon at `http://localhost:11434`, then run `/bettercallclaude:doctor`. Optional local classification does not make Anthropic processing local.
+
+**Migrating from 4.x:** upgrading removes the automatically configured Ollama connector. Normal cloud-backed commands continue; strict-mode users should review the no-classifier behavior and back up any previous manual Ollama configuration before marketplace synchronization.
+
+Marketplace synchronization can overwrite plugin files or manual changes made inside the installed plugin. Keep this configuration outside the marketplace-managed directory and back it up before upgrading.
 
 ---
 
 ## Requirements
 
 - Cowork or Claude Code (latest version)
-- Node.js >= 18 (for MCP servers)
+- No local Node.js or Ollama required for the nine remote MCP servers
+- Node.js >= 20 for `/legal-timeline` or for building the optional Ollama classifier
 
 ---
 
@@ -492,27 +525,30 @@ Built with love for the Swiss legal community. [Support the project ☕](https:/
 
 ## For Developers
 
-Plugin resources (agents, commands, skills, hooks, `.mcp.json`) live in this repo. MCP server source code lives in the separate [`fedec65/BetterCallClaudeMCP`](https://github.com/fedec65/BetterCallClaudeMCP) repo; the HTTP aggregator there is deployed to Railway at `mcp.bettercallclaude.ch`, and this plugin's `.mcp.json` points at those remote URLs.
+Plugin resources (agents, commands, skills, hooks, `.mcp.json`) live in this repo. MCP server source code for the remote connectors lives in the separate [`fedec65/BetterCallClaudeMCP`](https://github.com/fedec65/BetterCallClaudeMCP) repo; the HTTP aggregator there is deployed to Railway at `mcp.bettercallclaude.ch`, and this plugin's `.mcp.json` points at those remote URLs. The optional Ollama classifier source remains in this repo under `mcp-servers-src/ollama`.
 
 ```bash
 # Build the distributable plugin zip
 npm run package
+
+# Build the optional local Ollama classifier from source
+npm run build:ollama
 ```
 
 ### Repository Structure (this repo)
 
 ```
 .claude-plugin/plugin.json   Plugin manifest
-.mcp.json                    MCP server configuration (remote URLs + local ollama)
+.mcp.json                    MCP server configuration (remote URLs only)
 agents/                      Agent definitions (markdown)
 commands/                    Slash commands (markdown)
 skills/                      Auto-activated skills (markdown)
 hooks/                       Privacy detection hook
-mcp-servers/ollama/          Bundled local STDIO MCP server (dist/ checked in)
 scripts/                     Privacy hook runtime scripts
+mcp-servers-src/ollama/      Optional local STDIO MCP server source (not shipped)
 ```
 
-The `ollama` STDIO bundle in `mcp-servers/ollama/dist/` is checked into git so end users don't need Node.js build tooling. To change the remote MCP servers (BGE search, entscheidsuche, fedlex-sparql, legal-citations, onlinekommentar, legal-persona, tas-jurisprudence), open a PR in [`fedec65/BetterCallClaudeMCP`](https://github.com/fedec65/BetterCallClaudeMCP).
+To change the remote MCP servers (BGE search, entscheidsuche, fedlex-sparql, legal-citations, onlinekommentar, legal-persona, tas-jurisprudence, workflows-ch), open a PR in [`fedec65/BetterCallClaudeMCP`](https://github.com/fedec65/BetterCallClaudeMCP). To change the optional Ollama classifier, edit `mcp-servers-src/ollama` and run `npm run build:ollama`.
 
 ---
 

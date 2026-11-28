@@ -27,7 +27,7 @@ BetterCallClaude provides Swiss legal intelligence through three interfaces:
 
 ---
 
-## Commands (30)
+## Commands (31)
 
 ### Core Commands
 
@@ -56,6 +56,7 @@ BetterCallClaude provides Swiss legal intelligence through three interfaces:
 | `/bettercallclaude:nda-triage` | Triage NDAs against Swiss law: GREEN / YELLOW / RED (single or batch) |
 | `/bettercallclaude:validate` | Batch validate Swiss legal citations for format and existence |
 | `/bettercallclaude:adversarial` | Three-agent adversarial analysis: advocate, adversary, judge |
+| `/bettercallclaude:web-research <site> <question>` | Research login-protected legal websites via the Claude Desktop browser |
 
 ### Workflow Commands
 
@@ -87,7 +88,7 @@ BetterCallClaude provides Swiss legal intelligence through three interfaces:
 
 ---
 
-## Agents (21)
+## Agents (22)
 
 ### Core Pipeline Agents
 
@@ -99,6 +100,7 @@ BetterCallClaude provides Swiss legal intelligence through three interfaces:
 | citation | BGE citation verification and multi-lingual formatting |
 | compliance | FINMA, AML/KYC, regulatory compliance checks |
 | chronology-builder | Sourced timeline event extraction from case documents |
+| web-research-specialist | Synthesis of sourced material collected in the main session from login-protected legal websites |
 
 ### Specialized Domain Agents
 
@@ -122,7 +124,7 @@ BetterCallClaude provides Swiss legal intelligence through three interfaces:
 
 ---
 
-## Skills (17)
+## Skills (18)
 
 Skills activate automatically when Claude detects relevant context.
 
@@ -144,11 +146,12 @@ Skills activate automatically when Claude detects relevant context.
 | legal-5step-framework | End-to-end 5-step legal analysis pipeline |
 | legal-evaluator | Verdict engine for /legal-loop worker-evaluator cycles |
 | legal-wayfinder | Decision-map decomposition for matters too big or foggy for one session |
+| legal-web-research | Read-only web research on login-protected legal sources via the Claude Desktop browser |
 | shared (output-conventions) | Deliverable-as-file output conventions for all commands |
 
 ---
 
-## MCP Servers (10)
+## MCP Servers (9 remote)
 
 | Server | Purpose | Transport |
 |--------|---------|-----------|
@@ -161,7 +164,8 @@ Skills activate automatically when Claude detects relevant context.
 | tas-jurisprudence | CAS/TAS sports arbitration awards and jurisprudence | HTTP |
 | workflows-ch | Custom workflow definitions: validation, persistence, run logging | HTTP |
 | swiss-caselaw | Case law search, citation graphs, appeal chains, doctrine (opencaselaw.ch) | SSE |
-| ollama | Local privacy classification for privileged content | Local |
+
+> Optional manual local classification is available from `mcp-servers-src/ollama`; it is not installed by the plugin.
 
 ---
 
@@ -225,7 +229,7 @@ Skills activate automatically when Claude detects relevant context.
 
 ---
 
-**BetterCallClaude v4.11.9 -- Swiss Legal Intelligence for Cowork Desktop**
+**BetterCallClaude v5.0.0 -- Swiss Legal Intelligence for Cowork Desktop**
 
 If the user provided additional input, respond to it in the context of this help reference.
 

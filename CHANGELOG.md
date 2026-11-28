@@ -4,6 +4,25 @@ All notable changes to BetterCallClaude will be documented in this file.
 
 ---
 
+## [5.0.0] - 2026-11-26
+
+### Changed
+- The canonical marketplace plugin and release ZIP now contain nine remote MCP connectors and no bundled local MCP server. Standard `balanced` and `cloud` workflows no longer require Ollama; strict mode continues to fail closed for privileged or indeterminate content.
+- Diagnostics, wayfinder maps, and worker-evaluator loops treat local classification as optional and report `classifier: none` when unavailable.
+- Added the directory icon and `https://bettercallclaude.ch/privacy` metadata; updated the public privacy documentation and submission materials.
+
+### Removed
+- The automatically configured Ollama STDIO server and its compiled bundle. Readable TypeScript source remains available under `mcp-servers-src/ollama/` for optional manual installation. Marketplace synchronization may overwrite manual MCP configuration; back up any custom setup before upgrading.
+
+## [4.12.0] - 2026-11-24
+
+### Added
+- **Web research on login-protected legal sources** — new `legal-web-research` skill, `web-research-specialist` agent, and `/bettercallclaude:web-research <site> <question>` command. Uses the Claude Desktop browser with manual login hand-off, read-only research, source recording, and bcc-output delivery. Targets doctrine databases and paid legal services (e.g. legalis.ch, italgiure.it).
+- **Playbook allow-list for web research** — new "Siti consentiti per la ricerca web" section in all four language templates and an optional `/start` question.
+
+### Changed
+- **Playbook templates moved under the plugin root** — canonical language templates now live in `bettercallclaude/templates/` so both marketplace installs and the release zip ship them; `/start` loads them by plugin-relative path.
+
 ## [4.11.9] - 2026-09-20
 
 ### Changed

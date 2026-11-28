@@ -1,8 +1,8 @@
-[![Version](https://img.shields.io/badge/version-4.11.9-blue)](https://github.com/fedec65/bettercallclaude/releases)
+[![Version](https://img.shields.io/badge/version-5.0.0-blue)](https://github.com/fedec65/bettercallclaude/releases)
 [![License: AGPL-3.0](https://img.shields.io/badge/license-AGPL--3.0-green)](LICENSE)
 [![Platform](https://img.shields.io/badge/platform-Cowork%20Desktop-orange)](https://claude.ai)
 [![Website](https://img.shields.io/badge/web-bettercallclaude.ch-brightgreen)](https://bettercallclaude.ch)
-[![MCP Servers](https://img.shields.io/badge/MCP%20servers-10-purple)](https://mcp.bettercallclaude.ch/health)
+[![MCP Servers](https://img.shields.io/badge/MCP%20servers-9-purple)](https://mcp.bettercallclaude.ch/health)
 [![Buy Me a Coffee](https://img.shields.io/badge/support-Buy%20Me%20a%20Coffee-yellow)](https://buymeacoffee.com/federicocesconi)
 
 <p align="center">
@@ -11,7 +11,7 @@
 
 <p align="center"><strong>Swiss Legal Intelligence Plugin for Cowork Desktop</strong></p>
 
-BetterCallClaude transforms legal research, case strategy, and document drafting for Swiss lawyers. It provides deep integration with Swiss legal databases, multi-lingual analysis (DE/FR/IT/EN), and built-in Anwaltsgeheimnis (attorney-client privilege) protection -- 21 agents, 30 commands, 17 skills, and 10 MCP servers covering BGE/ATF/DTF precedent research, litigation strategy, adversarial analysis, legal drafting, citation verification, document intelligence, and CAS/TAS sports arbitration across all 26 Swiss cantons.
+BetterCallClaude transforms legal research, case strategy, and document drafting for Swiss lawyers. It provides deep integration with Swiss legal databases, multi-lingual analysis (DE/FR/IT/EN), and built-in Anwaltsgeheimnis (attorney-client privilege) protection -- 22 agents, 31 commands, 18 skills, and 9 remote MCP servers covering BGE/ATF/DTF precedent research, litigation strategy, adversarial analysis, legal drafting, citation verification, document intelligence, CAS/TAS sports arbitration, and browser-based research on login-protected legal sources across all 26 Swiss cantons. An optional local Ollama classifier can be built from source for offline privacy classification.
 
 > **Claude Code CLI users**: this repository is Cowork Desktop only. The CLI version is at [fedec65/bettercallclaude-cli](https://github.com/fedec65/bettercallclaude-cli).
 
@@ -24,6 +24,14 @@ BetterCallClaude provides a structured methodology for handling legal work with 
 ![BetterCallClaude Framework](docs/images/bettercallclaude_framework.png)
 
 ---
+
+## What's New in v5.0.0
+
+**v5.0.0 — Remote-only canonical plugin, optional Ollama built from source.** The plugin now ships nine remote MCP servers only (eight HTTP on `mcp.bettercallclaude.ch` + `swiss-caselaw` SSE on `mcp.opencaselaw.ch`). The previously bundled local Ollama STDIO server is no longer included; users who need local privacy classification can build it manually from `mcp-servers-src/ollama`. The nine remote MCP servers require no local Node.js, local build, or Ollama daemon; `/legal-timeline` uses its bundled Node.js renderer. See [Optional local classification](#optional-local-classification) below for the manual build steps and the 4.x migration note.
+
+## What's New in v4.12.0
+
+**v4.12.0 — Web research on login-protected legal sources.** New `legal-web-research` skill, `web-research-specialist` agent, and `/bettercallclaude:web-research <site> <question>` command let you research doctrine databases and paid legal services through the Claude Desktop browser. The lawyer always performs the login manually; afterwards, the main session autonomously continues the approved read-only research on instructions from the user or another agent. The specialist is used only for optional delegated synthesis, not browser navigation. Form submissions, downloads, account changes, and confidential search terms require confirmation; expired logins return to the lawyer and CAPTCHA or anti-bot blocks stop the research. Sources are dated and recorded, and results land in `bcc-output/`.
 
 ## What's New in v4.11.9
 **v4.11.9 — Every agent runs on the model you chose.** All 21 agents previously pinned to fixed tiers (`opus` for the orchestrator and judicial analyst, `haiku` for the citation specialist and summarizer, `sonnet` for the rest) now declare `model: inherit` and follow the model selected in your main conversation — cost, quality, and latency track your explicit choice end-to-end.
@@ -51,14 +59,14 @@ BetterCallClaude provides a structured methodology for handling legal work with 
 
 **Also in recent releases — v4.9.5 `/legal-timeline`**: build a sourced case chronology from your case documents: every event carries its document and locus, contested facts and date conflicts are made visible (never silently resolved), evidentiary gaps of 30+ days are flagged, and procedural deadlines are computed via MCP with cantonal holiday calendars. Three outputs (Markdown table, interactive HTML, Word export) under `bcc-output/timeline/`.
 
-**Content counts**: 21 agents, 30 commands, 17 skills, 10 MCP servers in `.mcp.json` (8 remote HTTP on `mcp.bettercallclaude.ch` + `swiss-caselaw` SSE on `mcp.opencaselaw.ch` + `ollama` local STDIO).
+**Content counts**: 22 agents, 31 commands, 18 skills, 9 remote MCP servers in `.mcp.json` (8 remote HTTP on `mcp.bettercallclaude.ch` + `swiss-caselaw` SSE on `mcp.opencaselaw.ch`). Optional local Ollama classification is not shipped.
 
 [Full changelog →](CHANGELOG.md)
 
 **Cowork Desktop dedicated release** -- This repository is exclusively for Claude Cowork Desktop. The Claude Code CLI version is at [fedec65/bettercallclaude-cli](https://github.com/fedec65/bettercallclaude-cli).
 
-- **HTTP-only transport**: 9 of 10 MCP servers connect via `mcp.bettercallclaude.ch` / `mcp.opencaselaw.ch` -- no local Node.js build required for those
-- **Local STDIO server** (`ollama`): bundled and only touches `http://localhost:11434` for privacy-routed translation/summarisation
+- **HTTP-only transport**: all 9 MCP servers connect via `mcp.bettercallclaude.ch` / `mcp.opencaselaw.ch` -- no local Node.js build required
+- **Optional local classification** (`ollama`): can be built from `mcp-servers-src/ollama` and registered in a separate manual MCP configuration; only touches `http://localhost:11434`
 - **Simplified setup**: `/setup` checks connectivity only -- no transport switching needed in Cowork
 
 ---
@@ -82,6 +90,7 @@ MCP servers connect automatically via HTTP. No Node.js, no local setup, no API k
 | `/bettercallclaude:legal` | Intelligent gateway -- analyzes intent, routes to the appropriate specialist agent, and manages multi-step legal workflows. Use `--refine` to transform vague queries first. |
 | `/bettercallclaude:refine` | Transform vague legal queries into structured prompts through Socratic dialogue. Recommends optimal workflows and introduces Swiss legal terminology. |
 | `/bettercallclaude:research` | Search Swiss legal precedents and compile research memoranda. Supports BGE/ATF/DTF databases, doctrine references, and cross-jurisdictional analysis. |
+| `/bettercallclaude:web-research` | Research login-protected legal websites (doctrine, paid services) through the Claude Desktop browser with manual login hand-off. |
 | `/bettercallclaude:strategy` | Develop litigation strategy with risk assessment, cost-benefit analysis, and procedural pathway evaluation. |
 | `/bettercallclaude:draft` | Draft Swiss legal documents including contracts, court briefs, legal opinions, and memoranda with proper citation formatting. |
 | `/bettercallclaude:cite` | Verify and format Swiss legal citations across all four national languages (BGE/ATF/DTF formats). |
@@ -104,7 +113,7 @@ MCP servers connect automatically via HTTP. No Node.js, no local setup, no API k
 | `/bettercallclaude:nda-triage` | Triage NDAs against Swiss law -- GREEN / YELLOW / RED using playbook thresholds; single file or batch mode. |
 | `/bettercallclaude:summarize` | Consolidate multi-agent pipeline output -- deduplicate disclaimers, terminology, and citations with length control (`--short`/`--medium`/`--long`). |
 | `/bettercallclaude:start` | First-use onboarding -- checks MCP connectivity, guides playbook creation, shows tailored usage examples. |
-| `/bettercallclaude:setup` | Check MCP server connectivity and display status for all 10 servers. |
+| `/bettercallclaude:setup` | Check MCP server connectivity and display status for all 9 remote servers. |
 | `/bettercallclaude:doctor` | Diagnose MCP server connectivity per server, with plain-language status, impact, and suggested fixes. |
 | `/bettercallclaude:privacy` | View or change the privacy mode (strict / balanced / cloud) for Anwaltsgeheimnis handling. |
 | `/bettercallclaude:version` | Display plugin version, installed components, and system status. |
@@ -133,6 +142,46 @@ MCP servers connect automatically via HTTP. No Node.js, no local setup, no API k
 
 /bettercallclaude:doc-analyze @contract.pdf Review this commercial lease agreement
 ```
+
+### Approved Research Sites
+
+You can add a site to the web-research allow-list in three ways:
+
+1. **During setup**: run `/bettercallclaude:start` and answer the optional question about frequently used legal research websites. The command writes the supplied domains to your local playbook.
+2. **During research**: Claude asks before opening an unlisted domain. After you approve it, Claude offers to add it to the playbook and writes only after your explicit yes.
+3. **Manually**: edit `bettercallclaude.local.md` in the Cowork shared folder (or `.claude/bettercallclaude.local.md` in Claude Code):
+
+```markdown
+## Allowed Sites for Web Research
+
+- **List**:
+  - www.bger.ch
+  - entscheidsuche.ch
+  - legalis.ch
+- **Domains not listed**: ask for confirmation
+```
+
+Use the heading supplied by your playbook's language template. Enter domains only, never usernames, passwords, or tokens. A destination domain reached through a redirect must also be listed or approved.
+
+### Smoke Test: Browser Login and Delegated Synthesis
+
+You do not need a legal subscription to test the browser workflow. Use the public demo page at [the-internet.herokuapp.com/login](https://the-internet.herokuapp.com/login); its demo credentials are shown on the page. The demo account is shared: never enter personal, client, or confidential information.
+
+**Direct browser test** — run:
+
+```text
+/bettercallclaude:web-research https://the-internet.herokuapp.com/login "Describe the area accessible after login without changing anything"
+```
+
+Approving the unlisted domain is expected. When the login form appears, enter the demo credentials yourself in the browser, then tell Claude that login is complete. The main session should resume reading in the same browser session and produce `02-research-memo.md` and `sources.md`.
+
+**Delegated synthesis test** — run:
+
+```text
+/bettercallclaude:web-research https://the-internet.herokuapp.com/login "Describe the area accessible after login without changing anything" with synthesis delegated to web-research-specialist
+```
+
+After your manual login, the main session should dispatch `bettercallclaude:web-research-specialist` via `Task`. The specialist alone writes the final files. From the main session, open both returned paths and verify that the memo answers the question and the source list contains URL, title, and consultation date/time.
 
 ---
 
@@ -212,10 +261,10 @@ All servers connect automatically after installation. No configuration required.
 | `onlinekommentar` | Swiss legal commentaries | HTTP |
 | `legal-persona` | Swiss-law document intelligence (strategy, drafting, analysis) | HTTP |
 | `tas-jurisprudence` | CAS/TAS sports arbitration decisions | HTTP |
+| `workflows-ch` | Custom workflow definitions: validation, persistence, run logging | HTTP |
 | `swiss-caselaw` | Case law, citation graphs, appeal chains (opencaselaw.ch) | SSE |
-| `ollama` | Local privacy classification for Anwaltsgeheimnis | Local |
 
-The seven HTTP servers connect to `https://mcp.bettercallclaude.ch` (rate limit: 60 req/min per IP). The `swiss-caselaw` server connects to `https://mcp.opencaselaw.ch`. No API keys required for any server.
+The eight HTTP servers connect to `https://mcp.bettercallclaude.ch` (rate limit: 60 req/min per IP). The `swiss-caselaw` server connects to `https://mcp.opencaselaw.ch`. No API keys required for any server. Optional local Ollama classification is not part of the shipped `.mcp.json`; see [Optional local classification](#optional-local-classification).
 
 See [CONNECTORS.md](bettercallclaude/CONNECTORS.md) for detailed API documentation.
 
@@ -227,7 +276,7 @@ BetterCallClaude includes built-in Anwaltsgeheimnis (attorney-client privilege, 
 
 | Mode | Behavior |
 |------|----------|
-| `strict` | All external calls require confirmation. Local processing preferred via Ollama. |
+| `strict` | Privileged or indeterminate content is denied before remote use; public operations may continue. Optional local Ollama processing preferred if built and registered manually. |
 | `balanced` | Privileged content triggers confirmation. Non-privileged content processed normally. |
 | `cloud` | Standard cloud processing with privacy hook active for explicit privilege markers only. |
 
@@ -247,13 +296,47 @@ BetterCallClaude includes built-in Anwaltsgeheimnis (attorney-client privilege, 
 ## Requirements
 
 - Claude Cowork Desktop (latest version)
-- Node.js >= 18 (for the ollama privacy classifier only -- all other servers connect via HTTP)
+- No local Node.js or Ollama required for the nine remote MCP servers
+- Node.js >= 20 for `/legal-timeline` or for building the optional Ollama classifier
+
+---
+
+## Optional Local Classification
+
+The standard plugin does not install Ollama. The PreToolUse hook remains active. Prompts, tool arguments/results, and model responses still pass through Anthropic.
+
+Advanced users can build the readable source manually:
+
+```bash
+git clone https://github.com/fedec65/bettercallclaude.git
+cd bettercallclaude
+npm run build:ollama
+```
+
+The output is `mcp-servers-src/ollama/dist/index.js`. Register it only in a separate manual MCP configuration, using an absolute path:
+
+```json
+{
+  "mcpServers": {
+    "ollama": {
+      "command": "node",
+      "args": ["/absolute/path/to/bettercallclaude/mcp-servers-src/ollama/dist/index.js"]
+    }
+  }
+}
+```
+
+Start your own Ollama daemon at `http://localhost:11434`, then run `/bettercallclaude:doctor`. Optional local classification does not make Anthropic processing local.
+
+**Migrating from 4.x:** upgrading removes the automatically configured Ollama connector. Normal cloud-backed commands continue; strict-mode users should review the no-classifier behavior and back up any previous manual Ollama configuration before marketplace synchronization.
+
+Marketplace synchronization can overwrite plugin files or manual changes made inside the installed plugin. Keep this configuration outside the marketplace-managed directory and back it up before upgrading.
 
 ---
 
 ## CLI Version
 
-Prefer working from the terminal? **[BetterCallClaude CLI](https://github.com/fedec65/bettercallclaude-cli)** is the Claude Code CLI edition with local stdio MCP transport, configurable HTTP fallback, and the same 20 agents, 19 commands, and 14 skills.
+Prefer working from the terminal? **[BetterCallClaude CLI](https://github.com/fedec65/bettercallclaude-cli)** is the Claude Code CLI edition with local stdio MCP transport, configurable HTTP fallback, and the same 22 agents, 31 commands, and 18 skills.
 
 ---
 
@@ -271,13 +354,14 @@ AGPL-3.0 -- See [LICENSE](LICENSE) for full terms.
 
 ## For Developers
 
-This repo contains the plugin only (agents, commands, skills, hooks, `.mcp.json`, and the bundled `ollama` local STDIO server). MCP server source code and the HTTP aggregator deployed to Railway at `mcp.bettercallclaude.ch` live in the separate [`fedec65/BetterCallClaudeMCP`](https://github.com/fedec65/BetterCallClaudeMCP) repo.
+This repo contains the plugin only (agents, commands, skills, hooks, and `.mcp.json`). MCP server source code and the HTTP aggregator deployed to Railway at `mcp.bettercallclaude.ch` live in the separate [`fedec65/BetterCallClaudeMCP`](https://github.com/fedec65/BetterCallClaudeMCP) repo. The optional Ollama classifier source remains in this repo under `mcp-servers-src/ollama` for users who want to build it manually.
 
 ```bash
 npm run package        # Create distributable plugin zip
+npm run build:ollama   # Build optional local Ollama classifier from source
 ```
 
-To change an MCP server's behaviour, open a PR in
+To change a remote MCP server's behaviour, open a PR in
 [`fedec65/BetterCallClaudeMCP`](https://github.com/fedec65/BetterCallClaudeMCP).
 Railway auto-redeploys on merge to `main`.
 

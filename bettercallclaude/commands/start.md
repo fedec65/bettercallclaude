@@ -46,10 +46,12 @@ Stato dei servizi:
   Commentari online                         ✓ attivo
   Profili giudiziari                        ✓ attivo
   Arbitrato sportivo (TAS/CAS)             ✓ attivo
+  Flussi personalizzati                     ✓ attivo
   Giurisprudenza svizzera                   ✓ attivo
-  Classificatore privacy (locale)           ✗ non disponibile
 
-  8/9 servizi attivi. BetterCallClaude è operativo.
+  Classificatore privacy (locale, opzionale)  ✗ non configurato
+
+  9/9 servizi remoti attivi. BetterCallClaude è operativo.
 ```
 
 If any server is down, explain in plain language what the user will miss (e.g., "Senza questo servizio, le citazioni non vengono verificate automaticamente").
@@ -74,7 +76,7 @@ Report its location and key settings (language, governing law, jurisdiction, fir
 ### If no playbook found:
 Offer to create one through a guided interview:
 
-> Non ho trovato un playbook locale. Posso crearne uno con 5-6 domande per personalizzare BetterCallClaude per il suo studio o reparto legale. Procediamo?
+> Non ho trovato un playbook locale. Posso crearne uno con 6-7 domande per personalizzare BetterCallClaude per il suo studio o reparto legale. Procediamo?
 
 If the user agrees, ask these questions one by one (adapt to their language):
 
@@ -84,8 +86,9 @@ If the user agrees, ask these questions one by one (adapt to their language):
 4. **Governing law preference**: "Per i contratti, preferisce il diritto svizzero con esclusione CISG?"
 5. **Jurisdiction preference**: "Quale foro preferisce come default? (es. Zurigo, Ginevra, sede dello studio)"
 6. **NDA thresholds**: "Qual è la durata massima accettabile per un NDA? (es. 3 anni, 5 anni)"
+7. **Frequently used websites** (optional): "Ci sono siti web che usa abitualmente per la ricerca giuridica, soprattutto se richiedono un login? (es. legalis.ch, italgiure.it)"
 
-After collecting answers, generate a `bettercallclaude.local.md` file in the shared folder (Cowork) or `.claude/` (Claude Code) based on the appropriate language template.
+After collecting answers, generate a `bettercallclaude.local.md` file in the shared folder (Cowork) or `.claude/` (Claude Code) based on the appropriate language template shipped in the plugin's `templates/` directory (`templates/bettercallclaude.local.md.example.<lang>`). Write any user-supplied research sites under the template's web-research allow-list heading for the chosen language.
 
 ## Step 5: Usage Examples
 

@@ -44,7 +44,7 @@ jobs:
 
       - name: Check plugin subdirectory contents
         run: |
-          for dir in agents commands skills hooks mcp-servers scripts; do
+          for dir in agents commands skills hooks scripts; do
             target="bettercallclaude/$dir"
             if [ ! -d "$target" ]; then
               echo "FAIL: $target directory missing"
@@ -58,18 +58,11 @@ jobs:
           fi
           echo "OK: bettercallclaude/.mcp.json"
 
-      - name: Check compiled bundles exist
-        run: |
-          # Only ollama runs locally via STDIO and needs a dist file.
-          # HTTP servers (entscheidsuche, bge-search, fedlex-sparql, legal-citations,
-          # onlinekommentar, legal-persona, tas-jurisprudence) run remotely at
-          # mcp.bettercallclaude.ch -- their source lives in the BetterCallClaudeMCP
-          # repo and no dist files are committed here.
-          if [ ! -f "bettercallclaude/mcp-servers/ollama/dist/index.js" ]; then
-            echo "FAIL: Missing bettercallclaude/mcp-servers/ollama/dist/index.js"
-            exit 1
-          fi
-          echo "OK: bettercallclaude/mcp-servers/ollama/dist/index.js"
+      - name: Check directory readiness (unit tests)
+        run: node scripts/check-directory-readiness.test.js
+
+      - name: Check directory readiness (source)
+        run: node scripts/check-directory-readiness.js source
 
       - name: Check .mcp.json
         run: |
@@ -114,6 +107,9 @@ jobs:
 
       - name: Check MCP tool-name parity
         run: node scripts/check-tool-names.js
+
+      - name: Run privacy tests
+        run: node bettercallclaude/scripts/privacy-check.test.js
 
       - name: Package plugin (dry check)
         run: bash scripts/package-plugin.sh
